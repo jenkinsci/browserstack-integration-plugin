@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+  This plugin allows you to integrate with <a href='browserstack.com/automate'>BrowserStack Automate</a>.
+</div>

@@ -1,0 +1,32 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+    <j:set var="sessions" value="${it.sessions}"/>
+    <j:set var="error" value="${it.lastError}"/>
+
+    <j:forEach var="session" items="${sessions}" varStatus="theCount">
+        <div id="browserstack-session-${session.id}" class="browserstack-session">
+            <j:if test="${session.publicUrl == null}">
+                <h2>${session.name}</h2>
+                <h3>${h.capitalize(session.browser)} ${session.browserVersion}, ${h.capitalize(session.os)} ${session.osVersion}</h3>
+                <h4>Session: <a href="${session.browserUrl}" target="_blank">${session.id}</a><st:nbsp/><st:nbsp/><a href="${session.logUrl}" target="_blank">View Logs</a></h4>
+
+                <video id="browserstack-session-video" preload="auto" width="480" height="360" controls="true">
+                    <source src="${session.videoUrl}" type="video/mp4"/>
+                </video>
+                <br/><br/>
+                <pre>${it.logs(session)}</pre>
+            </j:if>
+
+            <j:if test="${error != null}">
+                <h2>BrowserStack Automate</h2>
+                <h4>Error: ${error}</h4>
+            </j:if>
+            <j:if test="${error == null}">
+                <j:if test="${session.publicUrl != null}">
+                    <iframe src="${session.publicUrl}" style="width: 100%; height: 900px; border: none"/>
+                </j:if>
+            </j:if>
+        </div>
+    </j:forEach>
+</j:jelly>
