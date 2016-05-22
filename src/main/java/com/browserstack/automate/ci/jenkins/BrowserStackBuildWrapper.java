@@ -27,6 +27,7 @@ import java.util.Map;
 public class BrowserStackBuildWrapper extends BuildWrapper {
     private static final boolean ENABLE_BROWSER_LISTING = false;
 
+
     private final BrowserConfig[] browserConfigs;
     private final LocalConfig localConfig;
 
@@ -35,7 +36,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     private String accesskey;
     private boolean hasLoadedBrowsers;
     private BrowserListingInfo browserListingInfo;
-    private transient JenkinsBrowserStackLocal browserstackLocal;
 
     @DataBoundConstructor
     public BrowserStackBuildWrapper(String credentialsId, BrowserConfig[] browserConfig, LocalConfig localConfig) {
@@ -56,6 +56,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             this.accesskey = credentials.getDecryptedAccesskey();
         }
 
+        JenkinsBrowserStackLocal browserstackLocal = null;
         boolean isMaster = (Computer.currentComputer() instanceof Hudson.MasterComputer);
         if (isMaster && accesskey != null && this.localConfig != null) {
             String binaryPath = Util.fixEmptyAndTrim(this.localConfig.getLocalPath());
@@ -69,9 +70,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             }
 
             String argString = this.localConfig.getLocalOptions();
-            argString = (argString != null) ? argString.trim() : "";
-            String[] args = argString.split("\\s+");
-            browserstackLocal = new JenkinsBrowserStackLocal(launcher, accesskey, binaryPath, args);
+            browserstackLocal = new JenkinsBrowserStackLocal(launcher, accesskey, binaryPath, argString);
 
             try {
                 browserstackLocal.start();
@@ -81,7 +80,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         }
 
         loadBrowsers(logger);
-        return new AutomateBuildEnvironment(credentials, logger);
+        return new AutomateBuildEnvironment(credentials, browserstackLocal, logger);
     }
 
     @Override
@@ -127,7 +126,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         }
     }
 
-
     public String getCredentialsId() {
         return credentialsId;
     }
@@ -139,10 +137,12 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     private class AutomateBuildEnvironment extends BuildWrapper.Environment {
         private final BrowserStackCredentials credentials;
+        private final JenkinsBrowserStackLocal browserstackLocal;
         private final PrintStream logger;
 
-        AutomateBuildEnvironment(BrowserStackCredentials credentials, PrintStream logger) {
+        AutomateBuildEnvironment(BrowserStackCredentials credentials, JenkinsBrowserStackLocal browserstackLocal, PrintStream logger) {
             this.credentials = credentials;
+            this.browserstackLocal = browserstackLocal;
             this.logger = logger;
         }
 
@@ -168,6 +168,13 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             String isLocalEnabled = BrowserStackBuildWrapper.this.localConfig != null ? "true" : "false";
             env.put("BROWSERSTACK_LOCAL", "" + isLocalEnabled);
             TestCaseTracker.log(logger, "BROWSERSTACK_LOCAL=" + isLocalEnabled);
+
+            String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
+            if (StringUtils.isNotBlank(localIdentifier)) {
+                TestCaseTracker.log(logger, "BROWSERSTACK_LOCAL_IDENTIFIER=" + localIdentifier);
+                TestCaseTracker.log(System.out, "BROWSERSTACK_LOCAL_IDENTIFIER=" + localIdentifier);
+            }
+
             super.buildEnvVars(env);
         }
 

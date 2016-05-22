@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.common;
 
 import com.browserstack.automate.AutomateClient;
+import com.browserstack.automate.ci.jenkins.util.Utils;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.xml.bind.DatatypeConverter;
@@ -24,16 +25,7 @@ public class TestCaseTracker {
     }
 
     public static String getTestCaseHash(String testCaseName) {
-        // [JENKINS-18178] Older versions of Jenkins produce a package conflict for commons-codec
-        // We try to generate a SHA1-HEX hash using java.security libs, fallback to commons-codec
-
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            digest.update(testCaseName.getBytes("utf8"));
-            return DatatypeConverter.printHexBinary(digest.digest()).toLowerCase();
-        } catch (Exception e) {
-            return DigestUtils.sha1Hex(testCaseName);
-        }
+        return Utils.generateHash(testCaseName);
     }
 
     public static String[] findTestCaseSession(List<AutomateTestCase> testCaseList, String testCaseName, String testCaseHash, long testIndex) {
