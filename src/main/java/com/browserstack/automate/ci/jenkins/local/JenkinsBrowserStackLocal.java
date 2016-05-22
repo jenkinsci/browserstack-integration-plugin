@@ -4,19 +4,26 @@ import com.browserstack.local.Local;
 import hudson.Launcher;
 import hudson.Proc;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JenkinsBrowserStackLocal extends Local {
     private static final String OPTION_LOCAL_IDENTIFIER = "localIdentifier";
+    private static final Pattern PATTERN_PID = Pattern.compile("\"pid\":(\\d+)");
 
     private final Launcher launcher;
     private final String accesskey;
     private final String binaryHome;
     private final String[] arguments;
     private String localIdentifier;
+    private int pid;
 
     public JenkinsBrowserStackLocal(Launcher launcher, String accesskey, String binaryHome, String argString) {
         this.launcher = launcher;
@@ -25,7 +32,7 @@ public class JenkinsBrowserStackLocal extends Local {
         this.arguments = processLocalArguments((argString != null) ? argString.trim() : "");
     }
 
-    public String[] processLocalArguments(final String argString) {
+    private String[] processLocalArguments(final String argString) {
         String[] args = argString.split("\\s+");
         int localIdPos = 0;
         List<String> arguments = new ArrayList<String>();
@@ -67,7 +74,15 @@ public class JenkinsBrowserStackLocal extends Local {
 
     @Override
     protected LocalProcess runCommand(List<String> command) throws IOException {
-        if (isStartOrStop(command)) {
+        DaemonAction daemonAction = detectDaemonAction(command);
+        if (pid > 0 && SystemUtils.IS_OS_WINDOWS && daemonAction == DaemonAction.STOP) {
+            // temporary fix for daemon mode stop on Windows
+            command = new ArrayList<String>();
+            command.add("taskkill");
+            command.add("/PID");
+            command.add("" + pid);
+            command.add("/F");
+        } else if (daemonAction != null) {
             for (String arg : arguments) {
                 if (StringUtils.isNotBlank(arg)) {
                     command.add(arg.trim());
@@ -83,6 +98,10 @@ public class JenkinsBrowserStackLocal extends Local {
 
         return new LocalProcess() {
             public InputStream getInputStream() {
+                if (SystemUtils.IS_OS_WINDOWS) {
+                    return processStdout(process.getStdout());
+                }
+
                 return process.getStdout();
             }
 
@@ -100,7 +119,44 @@ public class JenkinsBrowserStackLocal extends Local {
         return localIdentifier;
     }
 
-    private static boolean isStartOrStop(List<String> command) {
-        return (command.size() > 2 && command.get(2).toLowerCase().matches("start|stop"));
+    private InputStream processStdout(InputStream inputStream) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len;
+        try {
+            while ((len = inputStream.read(buffer)) > -1) {
+                baos.write(buffer, 0, len);
+            }
+            baos.flush();
+            Matcher matcher = PATTERN_PID.matcher(new String(baos.toByteArray()));
+            if (matcher.find()) {
+                pid = Integer.parseInt(matcher.group(1));
+            }
+
+            return new ByteArrayInputStream(baos.toByteArray());
+        } catch (NumberFormatException e) {
+            // invalid pid
+        } catch (IOException e) {
+            // ignore
+        }
+
+        return inputStream;
+    }
+
+    private static DaemonAction detectDaemonAction(List<String> command) {
+        if (command.size() > 2) {
+            String action = command.get(2).toLowerCase();
+            if (action.equals("start")) {
+                return DaemonAction.START;
+            } else if (action.equals("stop")) {
+                return DaemonAction.STOP;
+            }
+        }
+
+        return null;
+    }
+
+    private enum DaemonAction {
+        START, STOP
     }
 }
