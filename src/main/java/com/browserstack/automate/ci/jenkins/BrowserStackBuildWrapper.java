@@ -171,8 +171,8 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
             String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
             if (StringUtils.isNotBlank(localIdentifier)) {
+                env.put("BROWSERSTACK_LOCAL_IDENTIFIER", localIdentifier);
                 TestCaseTracker.log(logger, "BROWSERSTACK_LOCAL_IDENTIFIER=" + localIdentifier);
-                TestCaseTracker.log(System.out, "BROWSERSTACK_LOCAL_IDENTIFIER=" + localIdentifier);
             }
 
             super.buildEnvVars(env);
