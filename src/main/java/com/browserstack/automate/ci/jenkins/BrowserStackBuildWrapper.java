@@ -79,7 +79,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             }
         }
 
-        loadBrowsers(logger);
+        // loadBrowsers(logger);
         return new AutomateBuildEnvironment(credentials, browserstackLocal, logger);
     }
 
