@@ -24,7 +24,7 @@
             </j:if>
             <j:if test="${error == null}">
                 <j:if test="${session.publicUrl != null}">
-                    <iframe src="${session.publicUrl}" style="width: 100%; height: 900px; border: none"/>
+                    <iframe src="${session.publicUrl}" style="width: 100%; height: 900px; border: none" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
                 </j:if>
             </j:if>
         </div>
