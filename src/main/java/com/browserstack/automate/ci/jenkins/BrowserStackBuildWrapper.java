@@ -138,6 +138,14 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     }
 
 
+    private interface EnvVars {
+        String BROWSERSTACK_USER = "BROWSERSTACK_USER";
+        String BROWSERSTACK_ACCESSKEY = "BROWSERSTACK_ACCESSKEY";
+        String BROWSERSTACK_BROWSERS = "BROWSERSTACK_BROWSERS";
+        String BROWSERSTACK_LOCAL = "BROWSERSTACK_LOCAL";
+        String BROWSERSTACK_LOCAL_IDENTIFIER = "BROWSERSTACK_LOCAL_IDENTIFIER";
+    }
+
     private class AutomateBuildEnvironment extends BuildWrapper.Environment {
         private final BrowserStackCredentials credentials;
         private final JenkinsBrowserStackLocal browserstackLocal;
@@ -150,32 +158,38 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         }
 
         public void buildEnvVars(Map<String, String> env) {
-            if (credentials != null && credentials.hasUsername()) {
-                env.put("BROWSERSTACK_USER", credentials.getUsername());
-            }
+            if (credentials != null) {
+                if (credentials.hasUsername()) {
+                    String username = credentials.getUsername();
+                    env.put(EnvVars.BROWSERSTACK_USER, username);
+                    TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_USER + "=" + username);
+                }
 
-            if (credentials != null && credentials.hasAccesskey()) {
-                env.put("BROWSERSTACK_ACCESSKEY", credentials.getDecryptedAccesskey());
+                if (credentials.hasAccesskey()) {
+                    String accesskey = credentials.getDecryptedAccesskey();
+                    env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
+                    TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_ACCESSKEY + "=" + accesskey);
+                }
             }
 
             if (ENABLE_BROWSER_LISTING) {
                 try {
                     String browsersJson = new ObjectMapper().writeValueAsString(generateBrowserList());
-                    env.put("BROWSERSTACK_BROWSERS", browsersJson);
-                    TestCaseTracker.log(logger, "BROWSERSTACK_BROWSERS=" + browsersJson);
+                    env.put(EnvVars.BROWSERSTACK_BROWSERS, browsersJson);
+                    TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_BROWSERS + "=" + browsersJson);
                 } catch (JsonProcessingException e) {
                     // ignore
                 }
             }
 
             String isLocalEnabled = BrowserStackBuildWrapper.this.localConfig != null ? "true" : "false";
-            env.put("BROWSERSTACK_LOCAL", "" + isLocalEnabled);
-            TestCaseTracker.log(logger, "BROWSERSTACK_LOCAL=" + isLocalEnabled);
+            env.put(EnvVars.BROWSERSTACK_LOCAL, "" + isLocalEnabled);
+            TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_LOCAL + "=" + isLocalEnabled);
 
             String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
             if (StringUtils.isNotBlank(localIdentifier)) {
-                env.put("BROWSERSTACK_LOCAL_IDENTIFIER", localIdentifier);
-                TestCaseTracker.log(logger, "BROWSERSTACK_LOCAL_IDENTIFIER=" + localIdentifier);
+                env.put(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
+                TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER + "=" + localIdentifier);
             }
 
             super.buildEnvVars(env);

@@ -59,7 +59,7 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
     public TestResultAction.Data contributeTestData(Run<?, ?> run, @Nonnull FilePath workspace,
                                                     Launcher launcher, TaskListener listener,
                                                     TestResult testResult) throws IOException, InterruptedException {
-        log(listener.getLogger(), "Publishing test results.");
+        log(listener.getLogger(), "Publishing test results");
 
         AutomateBuildAction action = run.getAction(AutomateBuildAction.class);
         if (action != null) {
@@ -125,8 +125,8 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
             testCaseIndices.clear();
             sessionCache.clear();
 
-            log(listener.getLogger(), testCount + " tests recorded.");
-            log(listener.getLogger(), sessionCount + " sessions captured.");
+            log(listener.getLogger(), testCount + " tests recorded");
+            log(listener.getLogger(), sessionCount + " sessions captured");
             log(listener.getLogger(), "Publishing test results: SUCCESS");
             return automateActionData;
         }
