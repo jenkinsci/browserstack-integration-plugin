@@ -76,6 +76,9 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 browserstackLocal.start();
             } catch (Exception e) {
                 TestCaseTracker.log(logger, "Local: ERROR: " + e.getMessage());
+                listener.error("Local: ERROR: Failed to set up BrowserStack Local");
+                listener.fatalError("Local: ERROR: " + e.getMessage());
+                throw new IOException(e.getCause());
             }
         }
 
