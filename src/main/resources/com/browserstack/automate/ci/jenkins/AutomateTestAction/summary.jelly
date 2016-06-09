@@ -25,7 +25,10 @@
             <j:if test="${error == null}">
                 <j:if test="${session.publicUrl != null}">
                     <h2>${%title}</h2>
-                    <a href="${session.publicUrl}" target="_blank">${%linkText}</a>
+                    <j:if test="${session.browserUrl != null}">
+                        <a href="${session.browserUrl}" target="_blank">${%linkText}</a>
+                    </j:if>
+
                     <iframe src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
 
                     <style type="text/css">
