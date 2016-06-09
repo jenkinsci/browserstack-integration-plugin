@@ -21,7 +21,6 @@ import static com.browserstack.automate.ci.common.TestCaseTracker.*;
 
 public class AutomateTestDataPublisher extends TestDataPublisher {
     private static final String TAG = "[BrowserStack]";
-    private static final String PROPERTY_DEBUG = "browserstack.testassist.debug";
 
     @Extension(ordinal = 1000) // JENKINS-12161
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
@@ -147,7 +146,7 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
 
         @Override
         public String getDisplayName() {
-            return "Embed BrowserStack Automate Report";
+            return "Embed BrowserStack Report";
         }
     }
 }
