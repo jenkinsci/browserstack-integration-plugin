@@ -20,7 +20,7 @@ import java.util.Map;
 import static com.browserstack.automate.ci.common.TestCaseTracker.*;
 
 public class AutomateTestDataPublisher extends TestDataPublisher {
-    private static final String TAG = "[BrowserStackAutomate]";
+    private static final String TAG = "[BrowserStack]";
     private static final String PROPERTY_DEBUG = "browserstack.testassist.debug";
 
     @Extension(ordinal = 1000) // JENKINS-12161

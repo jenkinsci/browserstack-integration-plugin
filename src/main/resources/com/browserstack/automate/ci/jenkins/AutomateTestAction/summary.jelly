@@ -24,7 +24,23 @@
             </j:if>
             <j:if test="${error == null}">
                 <j:if test="${session.publicUrl != null}">
-                    <iframe src="${session.publicUrl}" style="width: 100%; height: 900px; border: none" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
+                    <h2>${%title}</h2>
+                    <a href="${session.publicUrl}" target="_blank">${%linkText}</a>
+                    <iframe src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
+
+                    <style type="text/css">
+                    .browserstack-session-frame {
+                        width: 100%;
+                        height: 900px;
+                        border: 1px solid #000000;
+                        margin-top: 10px;
+                        background: url('//www.browserstack.com/images/layout/ajax-loader-main.gif') 50% 15% no-repeat;
+                    }
+
+                    .browserstack-session a {
+                        text-decoration: none;
+                    }
+                    </style>
                 </j:if>
             </j:if>
         </div>

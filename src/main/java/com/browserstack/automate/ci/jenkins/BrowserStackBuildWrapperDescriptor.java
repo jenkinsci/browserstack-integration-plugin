@@ -33,7 +33,7 @@ import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBr
 
 @Extension
 public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescriptor {
-    private static final String NAMESPACE = "browserStackAutomate";
+    private static final String NAMESPACE = "browserStack";
 
     private String credentialsId;
     private LocalConfig localConfig;
@@ -45,7 +45,7 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
 
     @Override
     public String getDisplayName() {
-        return "BrowserStack Automate";
+        return "BrowserStack";
     }
 
     @Override
