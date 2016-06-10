@@ -17,16 +17,22 @@ import hudson.security.ACL;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.FileScanner;
+import org.apache.tools.ant.types.FileSet;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserMacOrderIndex;
 import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserWinOrderIndex;
@@ -187,18 +193,26 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
             return null;
         }
 
+        // For absolute paths
         FormValidation validateExec = FormValidation.validateExecutable(path);
         if (validateExec.kind == FormValidation.Kind.OK) {
             return f;
         }
 
+        // Ant style path definitions
         FilePath workspace = project.getSomeWorkspace();
         if (workspace != null) {
-            FilePath childPath = workspace.child(path);
-            if (!childPath.isRemote() && childPath.exists() && !childPath.isDirectory()) {
-                f = new File(childPath.toURI());
-                if (f.canExecute()) {
-                    return f;
+            File workspaceRoot = new File(workspace.toURI());
+            FileSet fileSet = Util.createFileSet(workspaceRoot, path);
+            FileScanner fs = fileSet.getDirectoryScanner();
+            fs.setIncludes(new String[]{path});
+            fs.scan();
+
+            String[] includedFiles = fs.getIncludedFiles();
+            if (includedFiles.length > 0) {
+                File includedFile = new File(workspaceRoot, includedFiles[0]);
+                if (includedFile.exists() && includedFile.isFile() && includedFile.canExecute()) {
+                    return includedFile;
                 }
             }
         }
