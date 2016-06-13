@@ -60,7 +60,7 @@ public class TestCaseTracker {
     }
 
     public static void log(PrintStream printStream, String message) {
-        printStream.println(TAG + ": " + message);
+        printStream.println(TAG + " " + message);
     }
 
     public static void logDebug(PrintStream printStream, String message) {
