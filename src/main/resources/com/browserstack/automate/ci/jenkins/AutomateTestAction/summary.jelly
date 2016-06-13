@@ -4,25 +4,9 @@
     <j:set var="sessions" value="${it.sessions}"/>
     <j:set var="error" value="${it.lastError}"/>
 
-    <j:forEach var="session" items="${sessions}" varStatus="theCount">
-        <div id="browserstack-session-${session.id}" class="browserstack-session">
-            <j:if test="${session.publicUrl == null}">
-                <h2>${session.name}</h2>
-                <h3>${h.capitalize(session.browser)} ${session.browserVersion}, ${h.capitalize(session.os)} ${session.osVersion}</h3>
-                <h4>Session: <a href="${session.browserUrl}" target="_blank">${session.id}</a><st:nbsp/><st:nbsp/><a href="${session.logUrl}" target="_blank">View Logs</a></h4>
-
-                <video id="browserstack-session-video" preload="auto" width="480" height="360" controls="true">
-                    <source src="${session.videoUrl}" type="video/mp4"/>
-                </video>
-                <br/><br/>
-                <pre>${it.logs(session)}</pre>
-            </j:if>
-
-            <j:if test="${error != null}">
-                <h2>BrowserStack Automate</h2>
-                <h4>Error: ${error}</h4>
-            </j:if>
-            <j:if test="${error == null}">
+    <j:if test="${sessions != null}">
+        <j:forEach var="session" items="${sessions}">
+            <div id="browserstack-session-${session.id}" class="browserstack-session">
                 <j:if test="${session.publicUrl != null}">
                     <h2>${%title}</h2>
                     <j:if test="${session.browserUrl != null}">
@@ -37,7 +21,7 @@
                         height: 900px;
                         border: 1px solid #000000;
                         margin-top: 10px;
-                        background: url('//www.browserstack.com/images/layout/ajax-loader-main.gif') 50% 15% no-repeat;
+                        background: url('${resURL}/plugin/automate-jenkins/images/ajax-loader-main.gif') 50% 15% no-repeat;
                     }
 
                     .browserstack-session a {
@@ -45,7 +29,23 @@
                     }
                     </style>
                 </j:if>
-            </j:if>
-        </div>
-    </j:forEach>
+                <j:if test="${session.publicUrl == null}">
+                    <h2>${session.name}</h2>
+                    <h3>${h.capitalize(session.browser)} ${session.browserVersion}, ${h.capitalize(session.os)} ${session.osVersion}</h3>
+                    <h4>Session: <a href="${session.browserUrl}" target="_blank">${session.id}</a><st:nbsp/><st:nbsp/><a href="${session.logUrl}" target="_blank">View Logs</a></h4>
+
+                    <video id="browserstack-session-video" preload="auto" width="480" height="360" controls="true">
+                        <source src="${session.videoUrl}" type="video/mp4"/>
+                    </video>
+                    <br/><br/>
+                    <pre>${it.logs(session)}</pre>
+                </j:if>
+            </div>
+        </j:forEach>
+    </j:if>
+
+    <j:if test="${error != null}">
+        <h2>BrowserStack Automate</h2>
+        <h4>Error: ${error}</h4>
+    </j:if>
 </j:jelly>
