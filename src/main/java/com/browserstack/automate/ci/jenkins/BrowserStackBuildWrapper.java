@@ -9,7 +9,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Launcher;
 import hudson.Util;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractItem;
+import hudson.model.BuildListener;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Computer;
+import hudson.model.Descriptor;
+import hudson.model.Hudson;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
 import hudson.util.DescribableList;
 import org.apache.commons.lang.StringUtils;
@@ -82,7 +90,10 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             }
         }
 
-        // loadBrowsers(logger);
+        if (ENABLE_BROWSER_LISTING) {
+            loadBrowsers(logger);
+        }
+
         return new AutomateBuildEnvironment(credentials, browserstackLocal, logger);
     }
 
@@ -93,7 +104,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     @Override
     public OutputStream decorateLogger(AbstractBuild build, OutputStream logger) throws IOException, InterruptedException, Run.RunnerAbortedException {
-        return new BuildOutputStream(build, logger, accesskey);
+        return new BuildOutputStream(logger, accesskey);
     }
 
     public BrowserConfig[] getBrowserConfigs() {
