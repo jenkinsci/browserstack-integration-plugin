@@ -158,9 +158,7 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
             if (f != null) {
                 return FormValidation.ok();
             }
-        } catch (IOException e) {
-            // ignore
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             return FormValidation.error(e.getMessage());
         }
 

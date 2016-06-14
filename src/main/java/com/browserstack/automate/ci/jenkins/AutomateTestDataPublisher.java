@@ -47,7 +47,7 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
                                                     Launcher launcher, TaskListener listener,
                                                     TestResult testResult) throws IOException, InterruptedException {
         log(listener.getLogger(), "Publishing test results");
-        Map<String, String> testSessionMap = workspace.act(new BrowserStackReportFileCallable(REPORT_FILE_PATTERN));
+        Map<String, String> testSessionMap = workspace.act(new BrowserStackReportFileCallable(REPORT_FILE_PATTERN, run.getTimeInMillis()));
         AutomateActionData automateActionData = new AutomateActionData();
         Map<String, Long> testCaseIndices = new HashMap<String, Long>();
 
