@@ -135,13 +135,17 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         String BROWSERSTACK_BROWSERS = "BROWSERSTACK_BROWSERS";
         String BROWSERSTACK_LOCAL = "BROWSERSTACK_LOCAL";
         String BROWSERSTACK_LOCAL_IDENTIFIER = "BROWSERSTACK_LOCAL_IDENTIFIER";
+        String BROWSERSTACK_BUILD = "BROWSERSTACK_BUILD";
     }
 
     private class AutomateBuildEnvironment extends BuildWrapper.Environment {
+        private static final String ENV_JENKINS_BUILD_TAG = "BUILD_TAG";
+
         private final BrowserStackCredentials credentials;
         private final Launcher launcher;
         private final PrintStream logger;
         private JenkinsBrowserStackLocal browserstackLocal;
+        private boolean isTearDownPhase;
 
         AutomateBuildEnvironment(BrowserStackCredentials credentials, Launcher launcher, PrintStream logger) {
             this.credentials = credentials;
@@ -154,13 +158,13 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 if (credentials.hasUsername()) {
                     String username = credentials.getUsername();
                     env.put(EnvVars.BROWSERSTACK_USER, username);
-                    log(logger, EnvVars.BROWSERSTACK_USER + "=" + username);
+                    logEnvVar(EnvVars.BROWSERSTACK_USER, username);
                 }
 
                 if (credentials.hasAccesskey()) {
                     String accesskey = credentials.getDecryptedAccesskey();
                     env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
-                    log(logger, EnvVars.BROWSERSTACK_ACCESSKEY + "=" + accesskey);
+                    logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
                 }
             }
 
@@ -168,7 +172,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 try {
                     String browsersJson = new ObjectMapper().writeValueAsString(generateBrowserList());
                     env.put(EnvVars.BROWSERSTACK_BROWSERS, browsersJson);
-                    log(logger, EnvVars.BROWSERSTACK_BROWSERS + "=" + browsersJson);
+                    logEnvVar(EnvVars.BROWSERSTACK_BROWSERS, browsersJson);
                 } catch (JsonProcessingException e) {
                     // ignore
                 }
@@ -176,15 +180,27 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
             String isLocalEnabled = BrowserStackBuildWrapper.this.localConfig != null ? "true" : "false";
             env.put(EnvVars.BROWSERSTACK_LOCAL, "" + isLocalEnabled);
-            log(logger, EnvVars.BROWSERSTACK_LOCAL + "=" + isLocalEnabled);
+            logEnvVar(EnvVars.BROWSERSTACK_LOCAL, isLocalEnabled);
 
             String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
             if (StringUtils.isNotBlank(localIdentifier)) {
                 env.put(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
-                log(logger, EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER + "=" + localIdentifier);
+                logEnvVar(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
+            }
+
+            String buildTag = env.get(ENV_JENKINS_BUILD_TAG);
+            if (buildTag != null) {
+                env.put(EnvVars.BROWSERSTACK_BUILD, buildTag);
+                logEnvVar(EnvVars.BROWSERSTACK_BUILD, buildTag);
             }
 
             super.buildEnvVars(env);
+        }
+
+        private void logEnvVar(String key, String value) {
+            if (!isTearDownPhase) {
+                log(logger, key + "=" + value);
+            }
         }
 
         public void startBrowserStackLocal() throws Exception {
@@ -208,6 +224,8 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         }
 
         public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
+            isTearDownPhase = true;
+
             try {
                 stopBrowserStackLocal();
             } catch (Exception e) {
