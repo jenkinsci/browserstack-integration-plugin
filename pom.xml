@@ -21,9 +21,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <name>BrowserStack Automate</name>
-    <description>Simplifies Selenium testing with BrowserStack Automate with secure local tunnel configuration and advanced reporting features.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Automate+Plugin</url>
+    <name>BrowserStack</name>
+    <description>This plugin allows you to integrate with BrowserStack.</description>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
 
     <licenses>
         <license>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.browserstack</groupId>
             <artifactId>automate-client-java</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>

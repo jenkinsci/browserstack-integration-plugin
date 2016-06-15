@@ -7,7 +7,6 @@ import com.browserstack.automate.model.Session;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestAction;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.export.Exported;
 
 import java.util.ArrayList;
@@ -16,34 +15,30 @@ import java.util.List;
 
 public class AutomateTestAction extends TestAction {
     public final CaseResult caseResult;
-    private final List<Session> sessions;
+    private final List<String> sessionIds;
     private final Run<?, ?> run;
-    private String lastError;
+    private transient AutomateException lastException;
 
     public AutomateTestAction(Run<?, ?> run, CaseResult caseResult) {
         this.run = run;
         this.caseResult = caseResult;
-        this.sessions = new ArrayList<Session>();
+        this.sessionIds = new ArrayList<String>();
     }
 
-    public void addSession(final Session session) {
-        if (session != null) {
-            sessions.add(session);
+    public void addSession(final String sessionId) {
+        if (sessionId != null) {
+            sessionIds.add(sessionId);
         }
-    }
-
-    public boolean isEmpty() {
-        return sessions.isEmpty();
     }
 
     @Exported
     public String getLastError() {
-        return lastError;
+        return (lastException != null) ? lastException.getMessage() : null;
     }
 
     @Exported
     public List<Session> getSessions() {
-        if (!sessions.isEmpty() && run != null) {
+        if (!sessionIds.isEmpty() && run != null) {
             BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem = BrowserStackBuildWrapper.findBrowserStackBuildWrapper(run.getParent());
             if (wrapperItem != null && wrapperItem.buildWrapper != null) {
                 BrowserStackCredentials credentials = BrowserStackCredentials.getCredentials(wrapperItem.buildItem, wrapperItem.buildWrapper.getCredentialsId());
@@ -51,11 +46,12 @@ public class AutomateTestAction extends TestAction {
                     AutomateClient automateClient = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
                     List<Session> activeSessions = new ArrayList<Session>();
 
-                    for (Session session : sessions) {
+                    for (String sessionId : sessionIds) {
                         try {
-                            activeSessions.add(automateClient.getSession(session.getId()));
+                            activeSessions.add(automateClient.getSession(sessionId));
                         } catch (AutomateException e) {
-                            lastError = (StringUtils.isNotBlank(e.getMessage())) ? e.getMessage() : null;
+                            lastException = e;
+                            return null;
                         } catch (Exception e) {
                             // ignore
                         }
@@ -66,7 +62,7 @@ public class AutomateTestAction extends TestAction {
             }
         }
 
-        return sessions;
+        return null;
     }
 
     @Exported

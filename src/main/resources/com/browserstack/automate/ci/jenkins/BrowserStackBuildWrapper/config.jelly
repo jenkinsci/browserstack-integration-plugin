@@ -43,4 +43,8 @@
         </f:entry>
     </f:optionalBlock>
 
+    <f:block>
+        <small>Note: Skip this if you are using BrowserStack Local bindings in your code.</small>
+    </f:block>
+
 </j:jelly>
