@@ -29,17 +29,6 @@
                     }
                     </style>
                 </j:if>
-                <j:if test="${session.publicUrl == null}">
-                    <h2>${session.name}</h2>
-                    <h3>${h.capitalize(session.browser)} ${session.browserVersion}, ${h.capitalize(session.os)} ${session.osVersion}</h3>
-                    <h4>Session: <a href="${session.browserUrl}" target="_blank">${session.id}</a><st:nbsp/><st:nbsp/><a href="${session.logUrl}" target="_blank">View Logs</a></h4>
-
-                    <video id="browserstack-session-video" preload="auto" width="480" height="360" controls="true">
-                        <source src="${session.videoUrl}" type="video/mp4"/>
-                    </video>
-                    <br/><br/>
-                    <pre>${it.logs(session)}</pre>
-                </j:if>
             </div>
         </j:forEach>
     </j:if>
