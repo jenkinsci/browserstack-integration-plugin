@@ -15,13 +15,35 @@
 
                     <iframe src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
 
+                    <script type="text/javascript">
+                        var testAction = <st:bind value="${it}"/>
+                        //<![CDATA[
+                        var startTime = (new Date).valueOf();
+                        function onLoadIFrame() {
+                            testAction.iframeLoadTime((new Date).valueOf() - startTime);
+                        }
+
+                        var reports = document.getElementsByClassName('browserstack-session-frame');
+                        if (reports && reports.length) {
+                            for (var i = 0; i < reports.length; i++) {
+                                var report = reports[i];
+                                if (report.addEventListener) {
+                                    report.addEventListener('load', onLoadIFrame, true);
+                                } else if (report.attachEvent) {
+                                    report.attachEvent('onload', onLoadIFrame);
+                                }
+                            }
+                        }
+                        //]]>
+                    </script>
+
                     <style type="text/css">
                     .browserstack-session-frame {
                         width: 100%;
                         height: 900px;
                         border: 1px solid #000000;
                         margin-top: 10px;
-                        background: url('${resURL}/plugin/automate-jenkins/images/ajax-loader-main.gif') 50% 15% no-repeat;
+                        background: url('${resURL}/plugin/browserstack-integration/images/ajax-loader-main.gif') 50% 15% no-repeat;
                     }
 
                     .browserstack-session a {

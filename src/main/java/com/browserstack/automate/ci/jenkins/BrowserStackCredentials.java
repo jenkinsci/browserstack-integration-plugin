@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.AutomateClient;
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.exception.AutomateException;
 import com.cloudbees.plugins.credentials.*;
 import com.cloudbees.plugins.credentials.common.IdCredentials;
@@ -52,6 +53,7 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         this.description = Util.fixNull(description);
         this.username = Util.fixNull(username);
         this.accesskey = Secret.fromString(accesskey);
+        Analytics.trackInstall();
     }
 
     @Exported
