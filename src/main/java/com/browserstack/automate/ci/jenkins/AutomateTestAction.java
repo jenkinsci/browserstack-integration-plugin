@@ -1,12 +1,14 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.AutomateClient;
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.BrowserStackBuildWrapper.BuildWrapperItem;
 import com.browserstack.automate.exception.AutomateException;
 import com.browserstack.automate.model.Session;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestAction;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.export.Exported;
 
 import java.util.ArrayList;
@@ -57,6 +59,10 @@ public class AutomateTestAction extends TestAction {
                         }
                     }
 
+                    if (!activeSessions.isEmpty()) {
+                        Analytics.trackIframeRequest();
+                    }
+
                     return Collections.unmodifiableList(activeSessions);
                 }
             }
@@ -74,6 +80,11 @@ public class AutomateTestAction extends TestAction {
         }
 
         return "View Logs: " + session.getLogUrl();
+    }
+
+    @JavaScriptMethod
+    public void iframeLoadTime(int time) {
+        Analytics.trackIframeLoad(time);
     }
 
     @Override

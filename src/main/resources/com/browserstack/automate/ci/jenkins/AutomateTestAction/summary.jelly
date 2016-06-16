@@ -15,6 +15,28 @@
 
                     <iframe src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
 
+                    <script type="text/javascript">
+                        var testAction = <st:bind value="${it}"/>
+                        //<![CDATA[
+                        var startTime = (new Date).valueOf();
+                        function onLoadIFrame() {
+                            testAction.iframeLoadTime((new Date).valueOf() - startTime);
+                        }
+
+                        var reports = document.getElementsByClassName('browserstack-session-frame');
+                        if (reports && reports.length) {
+                            for (var i = 0; i < reports.length; i++) {
+                                var report = reports[i];
+                                if (report.addEventListener) {
+                                    report.addEventListener('load', onLoadIFrame, true);
+                                } else if (report.attachEvent) {
+                                    report.attachEvent('onload', onLoadIFrame);
+                                }
+                            }
+                        }
+                        //]]>
+                    </script>
+
                     <style type="text/css">
                     .browserstack-session-frame {
                         width: 100%;

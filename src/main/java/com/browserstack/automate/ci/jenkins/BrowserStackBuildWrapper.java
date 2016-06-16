@@ -1,9 +1,11 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.ci.jenkins.util.BrowserListingInfo;
 import com.browserstack.client.model.BrowserStackObject;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Launcher;
@@ -11,10 +13,13 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractItem;
 import hudson.model.BuildListener;
 import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
+import hudson.tasks.junit.JUnitResultArchiver;
+import hudson.tasks.junit.TestDataPublisher;
 import hudson.util.DescribableList;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -23,6 +28,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +80,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             loadBrowsers(logger);
         }
 
+        recordBuildStats(build);
         return buildEnv;
     }
 
@@ -126,6 +133,31 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     public void setCredentialsId(String credentialsId) {
         this.credentialsId = credentialsId;
+    }
+
+    private void recordBuildStats(AbstractBuild build) {
+        boolean localEnabled = (localConfig != null);
+        boolean localPathSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalPath());
+        boolean localOptionsSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalOptions());
+        boolean isReportEnabled = false;
+
+        DescribableList publishersList = build.getProject().getPublishersList();
+        if (publishersList != null) {
+            Describable describable = publishersList.get(JUnitResultArchiver.class);
+
+            if (describable instanceof JUnitResultArchiver) {
+                JUnitResultArchiver jUnitResultArchiver = (JUnitResultArchiver) describable;
+
+                for (TestDataPublisher testDataPublisher : jUnitResultArchiver.getTestDataPublishers()) {
+                    if (testDataPublisher instanceof AutomateTestDataPublisher) {
+                        isReportEnabled = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet, isReportEnabled);
     }
 
 

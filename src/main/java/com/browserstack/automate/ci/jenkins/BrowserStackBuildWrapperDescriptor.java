@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.ci.jenkins.util.BrowserListingInfo;
 import com.browserstack.client.model.DesktopPlatform;
@@ -47,6 +48,7 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
     public BrowserStackBuildWrapperDescriptor() {
         super(BrowserStackBuildWrapper.class);
         load();
+        Analytics.trackInstall();
     }
 
     @Override
