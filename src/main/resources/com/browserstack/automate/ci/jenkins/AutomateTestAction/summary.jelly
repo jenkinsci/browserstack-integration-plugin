@@ -43,7 +43,7 @@
                         height: 900px;
                         border: 1px solid #000000;
                         margin-top: 10px;
-                        background: url('${resURL}/plugin/automate-jenkins/images/ajax-loader-main.gif') 50% 15% no-repeat;
+                        background: url('${resURL}/plugin/browserstack-integration/images/ajax-loader-main.gif') 50% 15% no-repeat;
                     }
 
                     .browserstack-session a {
