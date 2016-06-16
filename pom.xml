@@ -10,9 +10,22 @@
     </parent>
 
     <groupId>com.browserstack</groupId>
-    <artifactId>automate-jenkins</artifactId>
+    <artifactId>browserstack-integration</artifactId>
     <version>1.0</version>
     <packaging>hpi</packaging>
+
+    <name>BrowserStack</name>
+    <description>This plugin allows you to integrate with BrowserStack.</description>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
+
+    <developers>
+        <developer>
+            <id>support</id>
+            <name>BrowserStack Support</name>
+            <email>support@browserstack.com</email>
+        </developer>
+    </developers>
+
 
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
@@ -20,10 +33,6 @@
         <java.level>6</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <name>BrowserStack</name>
-    <description>This plugin allows you to integrate with BrowserStack.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
 
     <licenses>
         <license>
