@@ -31,8 +31,18 @@ public class Analytics {
 
     private static VersionTracker versionTracker = new VersionTracker(Jenkins.getInstance().getRootDir());
 
+    private static boolean isEnabled = true;
+
     static {
         trackInstall();
+    }
+
+    public static boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public static void setEnabled(boolean isEnabled) {
+        Analytics.isEnabled = isEnabled;
     }
 
     public static void trackInstall() {
@@ -40,9 +50,9 @@ public class Analytics {
             String version = getPluginWrapper().getVersion();
 
             if (versionTracker.init(version)) {
-                ga.postAsync(newEventHit("install", "install"));
+                postAsync(newEventHit("install", "install"));
             } else if (versionTracker.updateVersion(version)) {
-                ga.postAsync(newEventHit("install", "update"));
+                postAsync(newEventHit("install", "update"));
             }
         } catch (IOException e) {
             LOGGER.warning("Failed to track install: " + e.getMessage());
@@ -52,7 +62,7 @@ public class Analytics {
     public static void trackBuildRun(boolean localEnabled, boolean localPathSet,
                                      boolean localOptionsSet, boolean isReportEnabled) {
 
-        EventHit eventHit = newEventHit("buildRun", (localEnabled ? "with" : "without") + "Local");
+        EventHit eventHit = newEventHit((localEnabled ? "with" : "without") + "Local", "buildRun");
         if (isReportEnabled) {
             eventHit.eventLabel("embedTrue");
         } else {
@@ -71,15 +81,21 @@ public class Analytics {
             eventHit.customDimension(4, "withoutLocalOptions");
         }
 
-        ga.postAsync(eventHit);
+        postAsync(eventHit);
     }
 
     public static void trackIframeRequest() {
-        ga.post(newEventHit("iframe", "iframeRequested"));
+        postAsync(newEventHit("iframeRequested", "iframe"));
     }
 
     public static void trackIframeLoad(int loadTime) {
-        ga.post(newTimingHit("iframe", "iframeLoadTimeMs", loadTime));
+        postAsync(newTimingHit("iframeLoadTimeMs", "iframe", loadTime));
+    }
+
+    private static void postAsync(GoogleAnalyticsRequest request) {
+        if (isEnabled) {
+            ga.postAsync(request);
+        }
     }
 
     private static EventHit newEventHit(String category, String action) {

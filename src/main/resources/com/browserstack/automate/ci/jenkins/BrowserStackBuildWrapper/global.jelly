@@ -7,6 +7,9 @@
         <f:entry title="${%credentials}" field="credentialsId">
             <c:select/>
         </f:entry>
-    </f:section>
 
+        <f:entry title="${%statsTitle}">
+            <f:checkbox field="usageStatsEnabled" default="true"/>
+        </f:entry>
+    </f:section>
 </j:jelly>
