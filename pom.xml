@@ -11,7 +11,7 @@
 
     <groupId>com.browserstack</groupId>
     <artifactId>browserstack-integration</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <packaging>hpi</packaging>
 
     <name>BrowserStack</name>
