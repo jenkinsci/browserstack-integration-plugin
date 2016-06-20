@@ -1,7 +1,7 @@
 package com.browserstack.automate.ci.jenkins;
 
-import static com.browserstack.automate.ci.common.TestCaseTracker.log;
-import static com.browserstack.automate.ci.common.TestCaseTracker.logDebug;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.logDebug;
 
 
 import javax.annotation.Nonnull;

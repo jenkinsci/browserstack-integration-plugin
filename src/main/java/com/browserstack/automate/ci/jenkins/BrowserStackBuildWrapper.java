@@ -1,13 +1,14 @@
 package com.browserstack.automate.ci.jenkins;
 
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+
+
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
-import com.browserstack.automate.ci.jenkins.util.BrowserListingInfo;
-import com.browserstack.client.model.BrowserStackObject;
-import com.brsanthu.googleanalytics.GoogleAnalytics;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractItem;
@@ -21,37 +22,24 @@ import hudson.tasks.BuildWrapper;
 import hudson.tasks.junit.JUnitResultArchiver;
 import hudson.tasks.junit.TestDataPublisher;
 import hudson.util.DescribableList;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-
-import static com.browserstack.automate.ci.common.TestCaseTracker.log;
 
 
 public class BrowserStackBuildWrapper extends BuildWrapper {
-    private static final boolean ENABLE_BROWSER_LISTING = false;
 
-
-    private final BrowserConfig[] browserConfigs;
     private final LocalConfig localConfig;
 
     private String credentialsId;
     private String username;
     private String accesskey;
-    private boolean hasLoadedBrowsers;
-    private BrowserListingInfo browserListingInfo;
 
     @DataBoundConstructor
-    public BrowserStackBuildWrapper(String credentialsId, BrowserConfig[] browserConfig, LocalConfig localConfig) {
+    public BrowserStackBuildWrapper(String credentialsId, LocalConfig localConfig) {
         this.credentialsId = credentialsId;
-        this.browserConfigs = browserConfig;
         this.localConfig = localConfig;
     }
 
@@ -76,10 +64,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             }
         }
 
-        if (ENABLE_BROWSER_LISTING) {
-            loadBrowsers(logger);
-        }
-
         recordBuildStats(build);
         return buildEnv;
     }
@@ -94,37 +78,8 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         return new BuildOutputStream(logger, accesskey);
     }
 
-    public BrowserConfig[] getBrowserConfigs() {
-        return this.browserConfigs;
-    }
-
     public LocalConfig getLocalConfig() {
         return this.localConfig;
-    }
-
-    private void loadBrowsers(PrintStream logger) {
-        if (!ENABLE_BROWSER_LISTING || hasLoadedBrowsers) {
-            return;
-        }
-
-        if (username == null || accesskey == null) {
-            log(logger, "Missing BrowserStack credentials");
-            return;
-        }
-
-        browserListingInfo = BrowserListingInfo.getInstance();
-        if (browserListingInfo == null) {
-            log(logger, "Error loading browsers: Failed to load OS/Browser list");
-            return;
-        }
-
-        try {
-            browserListingInfo.init(this.username, this.accesskey);
-            hasLoadedBrowsers = true;
-            log(logger, "Loading browsers... DONE");
-        } catch (IOException e) {
-            log(logger, "Error loading browsers: " + e.getMessage());
-        }
     }
 
     public String getCredentialsId() {
@@ -164,7 +119,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     private interface EnvVars {
         String BROWSERSTACK_USER = "BROWSERSTACK_USER";
         String BROWSERSTACK_ACCESSKEY = "BROWSERSTACK_ACCESSKEY";
-        String BROWSERSTACK_BROWSERS = "BROWSERSTACK_BROWSERS";
         String BROWSERSTACK_LOCAL = "BROWSERSTACK_LOCAL";
         String BROWSERSTACK_LOCAL_IDENTIFIER = "BROWSERSTACK_LOCAL_IDENTIFIER";
         String BROWSERSTACK_BUILD = "BROWSERSTACK_BUILD";
@@ -197,16 +151,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                     String accesskey = credentials.getDecryptedAccesskey();
                     env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
                     logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
-                }
-            }
-
-            if (ENABLE_BROWSER_LISTING) {
-                try {
-                    String browsersJson = new ObjectMapper().writeValueAsString(generateBrowserList());
-                    env.put(EnvVars.BROWSERSTACK_BROWSERS, browsersJson);
-                    logEnvVar(EnvVars.BROWSERSTACK_BROWSERS, browsersJson);
-                } catch (JsonProcessingException e) {
-                    // ignore
                 }
             }
 
@@ -267,30 +211,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             return true;
         }
 
-        private List<BrowserStackObject> generateBrowserList() {
-            List<BrowserStackObject> allBrowsers = new ArrayList<BrowserStackObject>();
-
-            browserListingInfo = BrowserListingInfo.getInstance();
-            if (browserListingInfo == null) {
-                return allBrowsers;
-            }
-
-            if (browserConfigs != null) {
-                for (BrowserConfig browserConfig : browserConfigs) {
-                    if (browserConfig.getOs() != null && !browserConfig.getOs().equals("null")) {
-                        BrowserStackObject browser = browserListingInfo.getDisplayBrowser(browserConfig.getOs(), browserConfig.getBrowser());
-                        if (browser != null) {
-                            BrowserStackObject automateBrowser = browserListingInfo.getAutomateBrowser(browser);
-                            if (automateBrowser != null) {
-                                allBrowsers.add(automateBrowser);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return allBrowsers;
-        }
     }
 
     static BuildWrapperItem<BrowserStackBuildWrapper> findBrowserStackBuildWrapper(final Job<?, ?> job) {

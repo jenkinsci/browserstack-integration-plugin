@@ -2,6 +2,8 @@ package com.browserstack.automate.ci.common;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.browserstack.automate.ci.common.logger.PluginLogger;
+
 import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,7 +79,7 @@ public class AutomateTestCase implements Serializable {
             try {
                 testCaseIndex = Long.parseLong(testCaseIndexStr);
             } catch (NumberFormatException e) {
-                TestCaseTracker.logDebug(System.out, "ERROR: Failed to parse testCaseIndex as Long: " + testCaseIndexStr);
+                PluginLogger.logDebug(System.out, "ERROR: Failed to parse testCaseIndex as Long: " + testCaseIndexStr);
                 return null;
             }
 
@@ -90,7 +92,7 @@ public class AutomateTestCase implements Serializable {
     private static AutomateTestCase parseTestCasePath(final String testCasePath, final String sessionId,
                                                       final long testCaseIndex, final String testCaseObjectId) {
         if (testCasePath.matches(REGEX_TEST_CLASSPATH)) {
-            TestCaseTracker.logDebug(System.out, "Parsing as package.class.testName");
+            PluginLogger.logDebug(System.out, "Parsing as package.class.testName");
 
             int pos = testCasePath.lastIndexOf(".");
             if (pos != -1) {
@@ -103,18 +105,18 @@ public class AutomateTestCase implements Serializable {
                     // try for [package.class].testName
                     String className = path.substring(pos + 1, testCasePath.length());
                     String packageName = path.substring(0, pos);
-                    TestCaseTracker.logDebug(System.out, "Parsed as package.class.testName");
+                    PluginLogger.logDebug(System.out, "Parsed as package.class.testName");
                     return new AutomateTestCase(sessionId, packageName, className, testCaseName, testCaseIndex, testCaseObjectId);
                 } else {
                     // try for [class].testName
-                    TestCaseTracker.logDebug(System.out, "Parsed as (root).class.testName");
+                    PluginLogger.logDebug(System.out, "Parsed as (root).class.testName");
                     return new AutomateTestCase(sessionId, PACKAGE_DEFAULT, path, testCaseName, testCaseIndex, testCaseObjectId);
                 }
             }
         }
 
         if (testCasePath.matches(REGEX_TEST_ID_HASH)) {
-            TestCaseTracker.logDebug(System.out, "Parsed as test hash");
+            PluginLogger.logDebug(System.out, "Parsed as test hash");
             return new AutomateTestCase(sessionId, testCasePath, testCaseIndex, testCaseObjectId);
         }
 
