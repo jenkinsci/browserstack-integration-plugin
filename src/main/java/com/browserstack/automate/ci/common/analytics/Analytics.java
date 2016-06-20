@@ -52,7 +52,7 @@ public class Analytics {
     public static void trackBuildRun(boolean localEnabled, boolean localPathSet,
                                      boolean localOptionsSet, boolean isReportEnabled) {
 
-        EventHit eventHit = newEventHit("buildRun", (localEnabled ? "with" : "without") + "Local");
+        EventHit eventHit = newEventHit((localEnabled ? "with" : "without") + "Local", "buildRun");
         if (isReportEnabled) {
             eventHit.eventLabel("embedTrue");
         } else {
@@ -75,11 +75,11 @@ public class Analytics {
     }
 
     public static void trackIframeRequest() {
-        ga.post(newEventHit("iframe", "iframeRequested"));
+        ga.post(newEventHit("iframeRequested", "iframe"));
     }
 
     public static void trackIframeLoad(int loadTime) {
-        ga.post(newTimingHit("iframe", "iframeLoadTimeMs", loadTime));
+        ga.post(newTimingHit("iframeLoadTimeMs", "iframe", loadTime));
     }
 
     private static EventHit newEventHit(String category, String action) {
