@@ -63,8 +63,10 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         if (formData.has(NAMESPACE)) {
-            req.bindJSON(this, formData.getJSONObject(NAMESPACE));
+            JSONObject config = formData.getJSONObject(NAMESPACE);
+            req.bindJSON(this, config);
             save();
+            Analytics.setEnabled(!config.has("usageStatsEnabled") || config.getBoolean("usageStatsEnabled"));
         }
 
         return true;

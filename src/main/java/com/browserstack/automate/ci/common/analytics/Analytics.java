@@ -31,7 +31,7 @@ public class Analytics {
 
     private static VersionTracker versionTracker = new VersionTracker(Jenkins.getInstance().getRootDir());
 
-    private static boolean isEnabled;
+    private static boolean isEnabled = true;
 
     static {
         trackInstall();
