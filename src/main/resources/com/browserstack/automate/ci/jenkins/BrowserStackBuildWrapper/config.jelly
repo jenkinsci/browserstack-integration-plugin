@@ -8,35 +8,14 @@
         <c:select default="${descriptor.getCredentialsId()}"/>
     </f:entry>
 
-    <!--
-    <f:entry title="${%osBrowserSelectTitle}" field="browserConfig">
-        <f:repeatable var="browserConfig" items="${instance.browserConfigs}" add="Add more" minimum="1">
-            <table width="65%">
-                <f:entry title="OS" field="os">
-                    <f:select default="${browserConfig.os}"/>
-                </f:entry>
-                <f:entry title="Browser" field="browser">
-                    <f:select default="${browserConfig.browser}"/>
-                </f:entry>
-                <f:entry title="">
-                    <div align="right">
-                        <f:repeatableDeleteButton/>
-                    </div>
-                </f:entry>
-            </table>
-        </f:repeatable>
-    </f:entry>
-    -->
-
     <f:optionalBlock title="${%browserStackLocalBlock}" field="localConfig"
                      checked="${instance.localConfig != null}">
         <j:set var="localConfig" value="${instance.localConfig}"/>
 
-        <!-- // TODO: figure out how path should work for Master-Slave configurations
+        <!-- // TODO: figure out how path should work for Master-Slave configurations -->
         <f:entry title="${%browserStackLocalPath}" field="localPath">
             <f:textbox value="${localConfig.localPath}"/>
         </f:entry>
-        -->
 
         <f:entry title="${%browserStackLocalOptions}" field="localOptions">
             <f:textbox value="${localConfig.localOptions}"/>
