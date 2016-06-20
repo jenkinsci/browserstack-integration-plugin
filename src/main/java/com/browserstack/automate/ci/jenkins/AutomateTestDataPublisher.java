@@ -1,5 +1,13 @@
 package com.browserstack.automate.ci.jenkins;
 
+import static com.browserstack.automate.ci.common.TestCaseTracker.log;
+import static com.browserstack.automate.ci.common.TestCaseTracker.logDebug;
+
+
+import javax.annotation.Nonnull;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import com.browserstack.automate.ci.common.AutomateTestCase;
 import hudson.Extension;
 import hudson.FilePath;
@@ -14,16 +22,11 @@ import hudson.tasks.junit.SuiteResult;
 import hudson.tasks.junit.TestDataPublisher;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
-import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.browserstack.automate.ci.common.TestCaseTracker.log;
-import static com.browserstack.automate.ci.common.TestCaseTracker.logDebug;
 
 public class AutomateTestDataPublisher extends TestDataPublisher {
     private static final String TAG = "[BrowserStack]";
@@ -68,8 +71,7 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
 
                 String testId = String.format("%s{%d}", testCaseName, testIndex);
                 if (testSessionMap.containsKey(testId)) {
-                    AutomateTestAction automateTestAction = new AutomateTestAction(run, caseResult);
-                    automateTestAction.addSession(testSessionMap.get(testId));
+                    AutomateTestAction automateTestAction = new AutomateTestAction(run, caseResult, testSessionMap.get(testId));
                     automateActionData.registerTestAction(caseResult.getId(), automateTestAction);
                     logDebug(listener.getLogger(), "registerTestAction: " + testId + " => " + automateTestAction);
                     sessionCount++;

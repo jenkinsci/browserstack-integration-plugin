@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<testsuite name="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions">
+
+    <testcase class="TestCaseWithFourUniqueSessions" classname="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions" id="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions.testTheFirstCase{0}" index="0" name="testTheFirstCase" package="com.browserstack.automate.application.tests">
+        <session>7d813ed7ff3eec251d5b729d8fe3c236eebb42a3</session>
+    </testcase>
+
+    <testcase class="TestCaseWithFourUniqueSessions" classname="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions" id="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions.testTheSecondCase{0}" index="1" name="testTheSecondCase" package="com.browserstack.automate.application.tests">
+        <session>00ccc0a49d55904e2fbd9a80c4b25801ba20834b</session>
+    </testcase>
+
+    <testcase class="TestCaseWithFourUniqueSessions" classname="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions" id="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions.testTheThirdCase{0}" index="2" name="testTheThirdCase" package="com.browserstack.automate.application.tests">
+        <session>873f1d50c6bae923d269b8d93a2a6ba9b4481765</session>
+    </testcase>
+
+    <testcase class="TestCaseWithFourUniqueSessions" classname="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions" id="com.browserstack.automate.application.tests.TestCaseWithFourUniqueSessions.testTheFourthCase{0}" index="3" name="testTheFourthCase" package="com.browserstack.automate.application.tests">
+        <session>1395af49ce01da68ecf836e119037f78f04adf11</session>
+    </testcase>
+
+</testsuite>

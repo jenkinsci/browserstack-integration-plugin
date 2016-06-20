@@ -1,13 +1,13 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import static junit.framework.TestCase.assertTrue;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * @author Shirish Kamath
@@ -15,14 +15,12 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class GlobalConfigTest {
 
-    HtmlPage page;
-
     @Rule
-    public JenkinsRule j = new JenkinsRule();
+    public JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Before
     public void setUp() throws Exception {
-        page = j.createWebClient().goTo("configure");
+
     }
 
     @After
@@ -32,8 +30,9 @@ public class GlobalConfigTest {
 
     @Test
     public void testConfigElements() throws Exception {
+        HtmlPage page = jenkinsRule.createWebClient().goTo("configure");
         String pageText = page.asText();
-        assertTrue("Missing: BrowserStack Global Config", pageText.contains("BrowserStack"));
+        Assert.assertTrue("Missing: BrowserStack Global Config", pageText.contains("BrowserStack"));
     }
 
 
