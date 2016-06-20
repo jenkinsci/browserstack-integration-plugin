@@ -1,11 +1,10 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
 
-    <j:set var="sessions" value="${it.sessions}"/>
+    <j:set var="session" value="${it.session}"/>
     <j:set var="error" value="${it.lastError}"/>
 
-    <j:if test="${sessions != null}">
-        <j:forEach var="session" items="${sessions}">
+    <j:if test="${session != null}">
             <div id="browserstack-session-${session.id}" class="browserstack-session">
                 <j:if test="${session.publicUrl != null}">
                     <h2>${%title}</h2>
@@ -13,26 +12,22 @@
                         <a href="${session.browserUrl}" target="_blank">${%linkText}</a>
                     </j:if>
 
-                    <iframe src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
+                    <iframe id="browserstack-iframe-${session.id}" src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
 
                     <script type="text/javascript">
                         var testAction = <st:bind value="${it}"/>
+                        var sessionId = <st:bind value="${session.id}" />
                         //<![CDATA[
                         var startTime = (new Date).valueOf();
                         function onLoadIFrame() {
                             testAction.iframeLoadTime((new Date).valueOf() - startTime);
                         }
 
-                        var reports = document.getElementsByClassName('browserstack-session-frame');
-                        if (reports && reports.length) {
-                            for (var i = 0; i < reports.length; i++) {
-                                var report = reports[i];
-                                if (report.addEventListener) {
-                                    report.addEventListener('load', onLoadIFrame, true);
-                                } else if (report.attachEvent) {
-                                    report.attachEvent('onload', onLoadIFrame);
-                                }
-                            }
+                        var iframeElem = document.getElementById('browserstack-iframe-' + sessionId);
+                        if (iframeElem.addEventListener) {
+                            iframeElem.addEventListener('load', onLoadIFrame, true);
+                        } else if (iframeElem.attachEvent) {
+                            iframeElem.attachEvent('onload', onLoadIFrame);
                         }
                         //]]>
                     </script>
@@ -52,7 +47,6 @@
                     </style>
                 </j:if>
             </div>
-        </j:forEach>
     </j:if>
 
     <j:if test="${error != null}">

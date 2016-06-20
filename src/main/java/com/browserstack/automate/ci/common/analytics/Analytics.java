@@ -23,7 +23,7 @@ public class Analytics {
 
     private static final GoogleAnalytics ga = new GoogleAnalytics("UA-79358556-2");
 
-    private static final Logger LOGGER = Logger.getLogger(Analytics.class.getSimpleName());
+    private static final Logger LOGGER = Logger.getLogger(Analytics.class.getName());
 
     private static String clientId;
 
