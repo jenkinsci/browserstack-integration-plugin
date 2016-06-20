@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserMacOrderIndex;
 import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserWinOrderIndex;
@@ -44,11 +43,16 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
 
     private String credentialsId;
     private LocalConfig localConfig;
+    private boolean usageStatsEnabled;
 
     public BrowserStackBuildWrapperDescriptor() {
         super(BrowserStackBuildWrapper.class);
         load();
-        Analytics.trackInstall();
+
+        Analytics.setEnabled(usageStatsEnabled);
+        if (usageStatsEnabled) {
+            Analytics.trackInstall();
+        }
     }
 
     @Override
@@ -181,6 +185,14 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
 
     public void setLocalConfig(LocalConfig localConfig) {
         this.localConfig = localConfig;
+    }
+
+    public boolean getEnableUsageStats() {
+        return usageStatsEnabled;
+    }
+
+    public void setEnableUsageStats(boolean usageStatsEnabled) {
+        this.usageStatsEnabled = usageStatsEnabled;
     }
 
     private static int compareIntegers(int x, int y) {
