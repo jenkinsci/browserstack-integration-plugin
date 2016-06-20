@@ -11,8 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class TestCaseTracker {
-    private static final String PROPERTY_DEBUG = "browserstack.testassist.debug";
-    private static String TAG = "[BrowserStackAutomate]";
+    private static final String PROPERTY_DEBUG = "browserstack.automate.debug";
+    private static String TAG = "[BrowserStack]";
 
     private final AutomateClient automateClient;
 
@@ -60,7 +60,7 @@ public class TestCaseTracker {
     }
 
     public static void log(PrintStream printStream, String message) {
-        printStream.println(TAG + ": " + message);
+        printStream.println(TAG + " " + message);
     }
 
     public static void logDebug(PrintStream printStream, String message) {

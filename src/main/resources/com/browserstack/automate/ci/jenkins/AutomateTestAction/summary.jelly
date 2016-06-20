@@ -1,32 +1,56 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
 
-    <j:set var="sessions" value="${it.sessions}"/>
+    <j:set var="session" value="${it.session}"/>
     <j:set var="error" value="${it.lastError}"/>
 
-    <j:forEach var="session" items="${sessions}" varStatus="theCount">
-        <div id="browserstack-session-${session.id}" class="browserstack-session">
-            <j:if test="${session.publicUrl == null}">
-                <h2>${session.name}</h2>
-                <h3>${h.capitalize(session.browser)} ${session.browserVersion}, ${h.capitalize(session.os)} ${session.osVersion}</h3>
-                <h4>Session: <a href="${session.browserUrl}" target="_blank">${session.id}</a><st:nbsp/><st:nbsp/><a href="${session.logUrl}" target="_blank">View Logs</a></h4>
-
-                <video id="browserstack-session-video" preload="auto" width="480" height="360" controls="true">
-                    <source src="${session.videoUrl}" type="video/mp4"/>
-                </video>
-                <br/><br/>
-                <pre>${it.logs(session)}</pre>
-            </j:if>
-
-            <j:if test="${error != null}">
-                <h2>BrowserStack Automate</h2>
-                <h4>Error: ${error}</h4>
-            </j:if>
-            <j:if test="${error == null}">
+    <j:if test="${session != null}">
+            <div id="browserstack-session-${session.id}" class="browserstack-session">
                 <j:if test="${session.publicUrl != null}">
-                    <iframe src="${session.publicUrl}" style="width: 100%; height: 900px; border: none" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
+                    <h2>${%title}</h2>
+                    <j:if test="${session.browserUrl != null}">
+                        <a href="${session.browserUrl}" target="_blank">${%linkText}</a>
+                    </j:if>
+
+                    <iframe id="browserstack-iframe-${session.id}" src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
+
+                    <script type="text/javascript">
+                        var testAction = <st:bind value="${it}"/>
+                        var sessionId = <st:bind value="${session.id}" />
+                        //<![CDATA[
+                        var startTime = (new Date).valueOf();
+                        function onLoadIFrame() {
+                            testAction.iframeLoadTime((new Date).valueOf() - startTime);
+                        }
+
+                        var iframeElem = document.getElementById('browserstack-iframe-' + sessionId);
+                        if (iframeElem.addEventListener) {
+                            iframeElem.addEventListener('load', onLoadIFrame, true);
+                        } else if (iframeElem.attachEvent) {
+                            iframeElem.attachEvent('onload', onLoadIFrame);
+                        }
+                        //]]>
+                    </script>
+
+                    <style type="text/css">
+                    .browserstack-session-frame {
+                        width: 100%;
+                        height: 900px;
+                        border: 1px solid #000000;
+                        margin-top: 10px;
+                        background: url('${resURL}/plugin/browserstack-integration/images/ajax-loader-main.gif') 50% 15% no-repeat;
+                    }
+
+                    .browserstack-session a {
+                        text-decoration: none;
+                    }
+                    </style>
                 </j:if>
-            </j:if>
-        </div>
-    </j:forEach>
+            </div>
+    </j:if>
+
+    <j:if test="${error != null}">
+        <h2>BrowserStack Automate</h2>
+        <h4>Error: ${error}</h4>
+    </j:if>
 </j:jelly>

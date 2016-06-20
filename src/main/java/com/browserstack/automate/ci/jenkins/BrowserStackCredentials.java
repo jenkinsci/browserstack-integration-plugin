@@ -1,7 +1,8 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.AutomateClient;
-import com.browserstack.automate.model.AccountUsage;
+import com.browserstack.automate.ci.common.analytics.Analytics;
+import com.browserstack.automate.exception.AutomateException;
 import com.cloudbees.plugins.credentials.*;
 import com.cloudbees.plugins.credentials.common.IdCredentials;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
@@ -52,6 +53,7 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         this.description = Util.fixNull(description);
         this.username = Util.fixNull(username);
         this.accesskey = Secret.fromString(accesskey);
+        Analytics.trackInstall();
     }
 
     @Exported
@@ -103,16 +105,17 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
             return FormValidation.ok();
         }
 
-        AccountUsage accountUsage;
         try {
             AutomateClient client = new AutomateClient(username, accesskey);
-            accountUsage = client.getAccountUsage();
+            if (client.getAccountUsage() != null) {
+                return FormValidation.ok(OK_VALID_AUTH);
+            }
+        } catch (AutomateException e) {
+            if (e.getStatusCode() == 401) {
+                return FormValidation.error(ERR_INVALID_AUTH);
+            }
         } catch (Exception e) {
             return FormValidation.error(e.getMessage());
-        }
-
-        if (accountUsage != null) {
-            return FormValidation.ok(OK_VALID_AUTH);
         }
 
         return FormValidation.error(ERR_INVALID_AUTH);

@@ -3,10 +3,13 @@
          xmlns:f="/lib/form"
          xmlns:c="/lib/credentials">
 
-    <f:section title="${%sectionTitle}" name="browserStackAutomate">
+    <f:section title="${%sectionTitle}" name="browserStack">
         <f:entry title="${%credentials}" field="credentialsId">
             <c:select/>
         </f:entry>
-    </f:section>
 
+        <f:entry title="${%statsTitle}">
+            <f:checkbox field="usageStatsEnabled" default="true"/>
+        </f:entry>
+    </f:section>
 </j:jelly>

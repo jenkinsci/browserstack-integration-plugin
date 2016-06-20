@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.ci.jenkins.util.BrowserListingInfo;
 import com.browserstack.client.model.DesktopPlatform;
@@ -17,42 +18,55 @@ import hudson.security.ACL;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.FileScanner;
+import org.apache.tools.ant.types.FileSet;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserMacOrderIndex;
 import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserWinOrderIndex;
 
 @Extension
 public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescriptor {
-    private static final String NAMESPACE = "browserStackAutomate";
+    private static final String NAMESPACE = "browserStack";
 
     private String credentialsId;
     private LocalConfig localConfig;
+    private boolean usageStatsEnabled;
 
     public BrowserStackBuildWrapperDescriptor() {
         super(BrowserStackBuildWrapper.class);
         load();
+
+        Analytics.setEnabled(usageStatsEnabled);
+        if (usageStatsEnabled) {
+            Analytics.trackInstall();
+        }
     }
 
     @Override
     public String getDisplayName() {
-        return "BrowserStack Automate";
+        return "BrowserStack";
     }
 
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         if (formData.has(NAMESPACE)) {
-            req.bindJSON(this, formData.getJSONObject(NAMESPACE));
+            JSONObject config = formData.getJSONObject(NAMESPACE);
+            req.bindJSON(this, config);
             save();
+            Analytics.setEnabled(!config.has("usageStatsEnabled") || config.getBoolean("usageStatsEnabled"));
         }
 
         return true;
@@ -152,9 +166,7 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
             if (f != null) {
                 return FormValidation.ok();
             }
-        } catch (IOException e) {
-            // ignore
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             return FormValidation.error(e.getMessage());
         }
 
@@ -177,6 +189,14 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
         this.localConfig = localConfig;
     }
 
+    public boolean getEnableUsageStats() {
+        return usageStatsEnabled;
+    }
+
+    public void setEnableUsageStats(boolean usageStatsEnabled) {
+        this.usageStatsEnabled = usageStatsEnabled;
+    }
+
     private static int compareIntegers(int x, int y) {
         return (x == y) ? 0 : (x < y) ? -1 : 1;
     }
@@ -187,18 +207,26 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
             return null;
         }
 
+        // For absolute paths
         FormValidation validateExec = FormValidation.validateExecutable(path);
         if (validateExec.kind == FormValidation.Kind.OK) {
             return f;
         }
 
+        // Ant style path definitions
         FilePath workspace = project.getSomeWorkspace();
         if (workspace != null) {
-            FilePath childPath = workspace.child(path);
-            if (!childPath.isRemote() && childPath.exists() && !childPath.isDirectory()) {
-                f = new File(childPath.toURI());
-                if (f.canExecute()) {
-                    return f;
+            File workspaceRoot = new File(workspace.toURI());
+            FileSet fileSet = Util.createFileSet(workspaceRoot, path);
+            FileScanner fs = fileSet.getDirectoryScanner();
+            fs.setIncludes(new String[]{path});
+            fs.scan();
+
+            String[] includedFiles = fs.getIncludedFiles();
+            if (includedFiles.length > 0) {
+                File includedFile = new File(workspaceRoot, includedFiles[0]);
+                if (includedFile.exists() && includedFile.isFile() && includedFile.canExecute()) {
+                    return includedFile;
                 }
             }
         }

@@ -1,83 +1,84 @@
 package com.browserstack.automate.ci.jenkins;
 
+import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.export.Exported;
+
 import com.browserstack.automate.AutomateClient;
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.BrowserStackBuildWrapper.BuildWrapperItem;
 import com.browserstack.automate.exception.AutomateException;
+import com.browserstack.automate.exception.SessionNotFound;
 import com.browserstack.automate.model.Session;
+import com.browserstack.client.exception.BrowserStackException;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestAction;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.export.Exported;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+/**
+ * A {@link TestAction} extension to display the BrowserStack Automate video for the session.
+ *
+ * @author Shirish Kamath
+ * @author Anirudha Khanna
+ */
 public class AutomateTestAction extends TestAction {
-    public final CaseResult caseResult;
-    private final List<Session> sessions;
-    private final Run<?, ?> run;
-    private String lastError;
 
-    public AutomateTestAction(Run<?, ?> run, CaseResult caseResult) {
+    private final CaseResult caseResult;
+    private final String sessionId;
+    private final Run<?, ?> run;
+    private transient BrowserStackException lastException;
+
+    public AutomateTestAction(Run<?, ?> run, CaseResult caseResult, String sessionId) {
         this.run = run;
         this.caseResult = caseResult;
-        this.sessions = new ArrayList<Session>();
-    }
-
-    public void addSession(final Session session) {
-        if (session != null) {
-            sessions.add(session);
-        }
-    }
-
-    public boolean isEmpty() {
-        return sessions.isEmpty();
+        this.sessionId = sessionId;
     }
 
     @Exported
     public String getLastError() {
-        return lastError;
+        return (lastException != null) ? lastException.getMessage() : null;
+    }
+
+    // For testing only.
+    BrowserStackException getLastException() {
+        return this.lastException;
     }
 
     @Exported
-    public List<Session> getSessions() {
-        if (!sessions.isEmpty() && run != null) {
-            BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem = BrowserStackBuildWrapper.findBrowserStackBuildWrapper(run.getParent());
-            if (wrapperItem != null && wrapperItem.buildWrapper != null) {
-                BrowserStackCredentials credentials = BrowserStackCredentials.getCredentials(wrapperItem.buildItem, wrapperItem.buildWrapper.getCredentialsId());
-                if (credentials != null) {
-                    AutomateClient automateClient = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-                    List<Session> activeSessions = new ArrayList<Session>();
-
-                    for (Session session : sessions) {
-                        try {
-                            activeSessions.add(automateClient.getSession(session.getId()));
-                        } catch (AutomateException e) {
-                            lastError = (StringUtils.isNotBlank(e.getMessage())) ? e.getMessage() : null;
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                    }
-
-                    return Collections.unmodifiableList(activeSessions);
-                }
-            }
+    public Session getSession() {
+        if (sessionId == null || sessionId.isEmpty() || run == null) {
+            return null;
         }
 
-        return sessions;
-    }
+        BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem = BrowserStackBuildWrapper.findBrowserStackBuildWrapper(run.getParent());
+        if (wrapperItem == null || wrapperItem.buildWrapper == null) {
+            return null;
+        }
 
-    @Exported
-    public String getLogs(Session session) {
+        BrowserStackCredentials credentials = BrowserStackCredentials.getCredentials(wrapperItem.buildItem, wrapperItem.buildWrapper.getCredentialsId());
+        if (credentials == null) {
+            return null;
+        }
+
+        AutomateClient automateClient = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
+        Session activeSession = null;
+
         try {
-            return session.getLogs();
-        } catch (Exception e) {
-            // ignore
+            activeSession = automateClient.getSession(this.sessionId);
+            Analytics.trackIframeRequest();
+        } catch (AutomateException aex) {
+            lastException = aex;
+            return null;
+        } catch (SessionNotFound snfEx) {
+            lastException = snfEx;
+            return null;
         }
 
-        return "View Logs: " + session.getLogUrl();
+        return activeSession;
+    }
+
+    @JavaScriptMethod
+    public void iframeLoadTime(int time) {
+        Analytics.trackIframeLoad(time);
     }
 
     @Override

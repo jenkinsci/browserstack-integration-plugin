@@ -2,33 +2,26 @@ package com.browserstack.automate.ci.jenkins.local;
 
 import com.browserstack.local.Local;
 import hudson.Launcher;
-import hudson.Proc;
+import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-public class JenkinsBrowserStackLocal extends Local {
+public class JenkinsBrowserStackLocal extends Local implements Serializable {
     private static final String OPTION_LOCAL_IDENTIFIER = "localIdentifier";
-    private static final Pattern PATTERN_PID = Pattern.compile("\"pid\":(\\d+)");
 
-    private final Launcher launcher;
     private final String accesskey;
-    private final String binaryHome;
     private final String[] arguments;
     private String localIdentifier;
-    private int pid;
 
-    public JenkinsBrowserStackLocal(Launcher launcher, String accesskey, String binaryHome, String argString) {
-        this.launcher = launcher;
+    public JenkinsBrowserStackLocal(String accesskey, String argString) {
         this.accesskey = accesskey;
-        this.binaryHome = binaryHome;
         this.arguments = processLocalArguments((argString != null) ? argString.trim() : "");
     }
 
@@ -64,25 +57,33 @@ public class JenkinsBrowserStackLocal extends Local {
     public void start() throws Exception {
         Map<String, String> localOptions = new HashMap<String, String>();
         localOptions.put("key", accesskey);
-
-        if (StringUtils.isNotBlank(binaryHome)) {
-            localOptions.put("binarypath", binaryHome);
-        }
-
         super.start(localOptions);
+    }
+
+    public void start(Launcher launcher) throws Exception {
+        launcher.getChannel().call(new MasterToSlaveCallable<Void, Exception>() {
+            @Override
+            public Void call() throws Exception {
+                JenkinsBrowserStackLocal.this.start();
+                return null;
+            }
+        });
+    }
+
+    public void stop(Launcher launcher) throws Exception {
+        launcher.getChannel().call(new MasterToSlaveCallable<Void, Exception>() {
+            @Override
+            public Void call() throws Exception {
+                JenkinsBrowserStackLocal.this.stop();
+                return null;
+            }
+        });
     }
 
     @Override
     protected LocalProcess runCommand(List<String> command) throws IOException {
         DaemonAction daemonAction = detectDaemonAction(command);
-        if (pid > 0 && SystemUtils.IS_OS_WINDOWS && daemonAction == DaemonAction.STOP) {
-            // temporary fix for daemon mode stop on Windows
-            command = new ArrayList<String>();
-            command.add("taskkill");
-            command.add("/PID");
-            command.add("" + pid);
-            command.add("/F");
-        } else if (daemonAction != null) {
+        if (daemonAction != null) {
             for (String arg : arguments) {
                 if (StringUtils.isNotBlank(arg)) {
                     command.add(arg.trim());
@@ -90,57 +91,11 @@ public class JenkinsBrowserStackLocal extends Local {
             }
         }
 
-        final Proc process = launcher.launch()
-                .cmds(command)
-                .readStdout()
-                .readStderr()
-                .start();
-
-        return new LocalProcess() {
-            public InputStream getInputStream() {
-                if (SystemUtils.IS_OS_WINDOWS) {
-                    return processStdout(process.getStdout());
-                }
-
-                return process.getStdout();
-            }
-
-            public InputStream getErrorStream() {
-                return process.getStderr();
-            }
-
-            public int waitFor() throws Exception {
-                return process.join();
-            }
-        };
+        return super.runCommand(command);
     }
 
     public String getLocalIdentifier() {
         return localIdentifier;
-    }
-
-    private InputStream processStdout(InputStream inputStream) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
-        try {
-            while ((len = inputStream.read(buffer)) > -1) {
-                baos.write(buffer, 0, len);
-            }
-            baos.flush();
-            Matcher matcher = PATTERN_PID.matcher(new String(baos.toByteArray()));
-            if (matcher.find()) {
-                pid = Integer.parseInt(matcher.group(1));
-            }
-
-            return new ByteArrayInputStream(baos.toByteArray());
-        } catch (NumberFormatException e) {
-            // invalid pid
-        } catch (IOException e) {
-            // ignore
-        }
-
-        return inputStream;
     }
 
     private static DaemonAction detectDaemonAction(List<String> command) {

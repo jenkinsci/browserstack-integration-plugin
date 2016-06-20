@@ -1,27 +1,38 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.browserstack.automate.ci.common.TestCaseTracker;
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.ci.jenkins.util.BrowserListingInfo;
 import com.browserstack.client.model.BrowserStackObject;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Launcher;
-import hudson.Util;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractItem;
+import hudson.model.BuildListener;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
+import hudson.tasks.junit.JUnitResultArchiver;
+import hudson.tasks.junit.TestDataPublisher;
 import hudson.util.DescribableList;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static com.browserstack.automate.ci.common.TestCaseTracker.log;
 
 
 public class BrowserStackBuildWrapper extends BuildWrapper {
@@ -45,45 +56,32 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     }
 
     @Override
-    public Environment setUp(AbstractBuild build, Launcher launcher,
-                             BuildListener listener) throws IOException, InterruptedException {
+    public Environment setUp(final AbstractBuild build, final Launcher launcher,
+                             final BuildListener listener) throws IOException, InterruptedException {
         final PrintStream logger = listener.getLogger();
 
-        final BrowserStackCredentials credentials = BrowserStackCredentials.getCredentials(build.getProject(),
-                credentialsId);
+        final BrowserStackCredentials credentials = BrowserStackCredentials.getCredentials(build.getProject(), credentialsId);
         if (credentials != null) {
             this.username = credentials.getUsername();
             this.accesskey = credentials.getDecryptedAccesskey();
         }
 
-        JenkinsBrowserStackLocal browserstackLocal = null;
-        boolean isMaster = (Computer.currentComputer() instanceof Hudson.MasterComputer);
-        if (isMaster && accesskey != null && this.localConfig != null) {
-            String binaryPath = Util.fixEmptyAndTrim(this.localConfig.getLocalPath());
-            if (StringUtils.isNotBlank(binaryPath)) {
-                File binPath = getDescriptor().resolvePath(build.getProject(), binaryPath);
-                if (binPath == null) {
-                    TestCaseTracker.log(logger, "Local: ERROR: Failed to find binary path.");
-                } else {
-                    binaryPath = binPath.getAbsolutePath();
-                }
-            }
-
-            String argString = this.localConfig.getLocalOptions();
-            browserstackLocal = new JenkinsBrowserStackLocal(launcher, accesskey, binaryPath, argString);
-
+        AutomateBuildEnvironment buildEnv = new AutomateBuildEnvironment(credentials, launcher, logger);
+        if (accesskey != null && this.localConfig != null) {
             try {
-                browserstackLocal.start();
+                buildEnv.startBrowserStackLocal();
             } catch (Exception e) {
-                TestCaseTracker.log(logger, "Local: ERROR: " + e.getMessage());
-                listener.error("Local: ERROR: Failed to set up BrowserStack Local");
-                listener.fatalError("Local: ERROR: " + e.getMessage());
+                listener.fatalError(e.getMessage());
                 throw new IOException(e.getCause());
             }
         }
 
-        // loadBrowsers(logger);
-        return new AutomateBuildEnvironment(credentials, browserstackLocal, logger);
+        if (ENABLE_BROWSER_LISTING) {
+            loadBrowsers(logger);
+        }
+
+        recordBuildStats(build);
+        return buildEnv;
     }
 
     @Override
@@ -93,7 +91,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     @Override
     public OutputStream decorateLogger(AbstractBuild build, OutputStream logger) throws IOException, InterruptedException, Run.RunnerAbortedException {
-        return new BuildOutputStream(build, logger, accesskey);
+        return new BuildOutputStream(logger, accesskey);
     }
 
     public BrowserConfig[] getBrowserConfigs() {
@@ -110,22 +108,22 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         }
 
         if (username == null || accesskey == null) {
-            TestCaseTracker.log(logger, "Missing BrowserStack credentials");
+            log(logger, "Missing BrowserStack credentials");
             return;
         }
 
         browserListingInfo = BrowserListingInfo.getInstance();
         if (browserListingInfo == null) {
-            TestCaseTracker.log(logger, "Error loading browsers: Failed to load OS/Browser list");
+            log(logger, "Error loading browsers: Failed to load OS/Browser list");
             return;
         }
 
         try {
             browserListingInfo.init(this.username, this.accesskey);
             hasLoadedBrowsers = true;
-            TestCaseTracker.log(logger, "Loading browsers... DONE");
+            log(logger, "Loading browsers... DONE");
         } catch (IOException e) {
-            TestCaseTracker.log(logger, "Error loading browsers: " + e.getMessage());
+            log(logger, "Error loading browsers: " + e.getMessage());
         }
     }
 
@@ -137,6 +135,31 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         this.credentialsId = credentialsId;
     }
 
+    private void recordBuildStats(AbstractBuild build) {
+        boolean localEnabled = (localConfig != null);
+        boolean localPathSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalPath());
+        boolean localOptionsSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalOptions());
+        boolean isReportEnabled = false;
+
+        DescribableList publishersList = build.getProject().getPublishersList();
+        if (publishersList != null) {
+            Describable describable = publishersList.get(JUnitResultArchiver.class);
+
+            if (describable instanceof JUnitResultArchiver) {
+                JUnitResultArchiver jUnitResultArchiver = (JUnitResultArchiver) describable;
+
+                for (TestDataPublisher testDataPublisher : jUnitResultArchiver.getTestDataPublishers()) {
+                    if (testDataPublisher instanceof AutomateTestDataPublisher) {
+                        isReportEnabled = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet, isReportEnabled);
+    }
+
 
     private interface EnvVars {
         String BROWSERSTACK_USER = "BROWSERSTACK_USER";
@@ -144,16 +167,21 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         String BROWSERSTACK_BROWSERS = "BROWSERSTACK_BROWSERS";
         String BROWSERSTACK_LOCAL = "BROWSERSTACK_LOCAL";
         String BROWSERSTACK_LOCAL_IDENTIFIER = "BROWSERSTACK_LOCAL_IDENTIFIER";
+        String BROWSERSTACK_BUILD = "BROWSERSTACK_BUILD";
     }
 
     private class AutomateBuildEnvironment extends BuildWrapper.Environment {
-        private final BrowserStackCredentials credentials;
-        private final JenkinsBrowserStackLocal browserstackLocal;
-        private final PrintStream logger;
+        private static final String ENV_JENKINS_BUILD_TAG = "BUILD_TAG";
 
-        AutomateBuildEnvironment(BrowserStackCredentials credentials, JenkinsBrowserStackLocal browserstackLocal, PrintStream logger) {
+        private final BrowserStackCredentials credentials;
+        private final Launcher launcher;
+        private final PrintStream logger;
+        private JenkinsBrowserStackLocal browserstackLocal;
+        private boolean isTearDownPhase;
+
+        AutomateBuildEnvironment(BrowserStackCredentials credentials, Launcher launcher, PrintStream logger) {
             this.credentials = credentials;
-            this.browserstackLocal = browserstackLocal;
+            this.launcher = launcher;
             this.logger = logger;
         }
 
@@ -162,13 +190,13 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 if (credentials.hasUsername()) {
                     String username = credentials.getUsername();
                     env.put(EnvVars.BROWSERSTACK_USER, username);
-                    TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_USER + "=" + username);
+                    logEnvVar(EnvVars.BROWSERSTACK_USER, username);
                 }
 
                 if (credentials.hasAccesskey()) {
                     String accesskey = credentials.getDecryptedAccesskey();
                     env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
-                    TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_ACCESSKEY + "=" + accesskey);
+                    logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
                 }
             }
 
@@ -176,7 +204,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 try {
                     String browsersJson = new ObjectMapper().writeValueAsString(generateBrowserList());
                     env.put(EnvVars.BROWSERSTACK_BROWSERS, browsersJson);
-                    TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_BROWSERS + "=" + browsersJson);
+                    logEnvVar(EnvVars.BROWSERSTACK_BROWSERS, browsersJson);
                 } catch (JsonProcessingException e) {
                     // ignore
                 }
@@ -184,24 +212,56 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
             String isLocalEnabled = BrowserStackBuildWrapper.this.localConfig != null ? "true" : "false";
             env.put(EnvVars.BROWSERSTACK_LOCAL, "" + isLocalEnabled);
-            TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_LOCAL + "=" + isLocalEnabled);
+            logEnvVar(EnvVars.BROWSERSTACK_LOCAL, isLocalEnabled);
 
             String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
             if (StringUtils.isNotBlank(localIdentifier)) {
                 env.put(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
-                TestCaseTracker.log(logger, EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER + "=" + localIdentifier);
+                logEnvVar(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
+            }
+
+            String buildTag = env.get(ENV_JENKINS_BUILD_TAG);
+            if (buildTag != null) {
+                env.put(EnvVars.BROWSERSTACK_BUILD, buildTag);
+                logEnvVar(EnvVars.BROWSERSTACK_BUILD, buildTag);
             }
 
             super.buildEnvVars(env);
         }
 
-        public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
+        private void logEnvVar(String key, String value) {
+            if (!isTearDownPhase) {
+                log(logger, key + "=" + value);
+            }
+        }
+
+        public void startBrowserStackLocal() throws Exception {
+            browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig.getLocalOptions());
+            log(logger, "Local: Starting BrowserStack Local...");
+            browserstackLocal.start(launcher);
+            log(logger, "Local: Started");
+        }
+
+        public void stopBrowserStackLocal() throws Exception {
             if (browserstackLocal != null) {
+                log(logger, "Local: Stopping BrowserStack Local...");
+
                 try {
-                    browserstackLocal.stop();
+                    browserstackLocal.stop(launcher);
+                    log(logger, "Local: Stopped");
                 } catch (Exception e) {
-                    TestCaseTracker.log(logger, "Local: ERROR: " + e.getMessage());
+                    log(logger, "Local: ERROR: " + e.getMessage());
                 }
+            }
+        }
+
+        public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
+            isTearDownPhase = true;
+
+            try {
+                stopBrowserStackLocal();
+            } catch (Exception e) {
+                throw new IOException(e.getCause());
             }
 
             return true;
