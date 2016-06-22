@@ -17,7 +17,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Created with IntelliJ IDEA.
+ * Builder step that copies the given resource to the specified folder under the <strong>target</strong> directory.
+ * It creates the directories if they don't exist.
  *
  * @author Anirudha Khanna
  */

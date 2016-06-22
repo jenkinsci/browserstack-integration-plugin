@@ -1,9 +1,23 @@
 package com.browserstack.automate.ci.jenkins;
 
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.export.Exported;
+
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.exception.AutomateException;
-import com.cloudbees.plugins.credentials.*;
+import com.cloudbees.plugins.credentials.BaseCredentials;
+import com.cloudbees.plugins.credentials.CredentialsDescriptor;
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsNameProvider;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.CredentialsStore;
+import com.cloudbees.plugins.credentials.NameWith;
 import com.cloudbees.plugins.credentials.common.IdCredentials;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.Domain;
@@ -20,11 +34,6 @@ import hudson.model.User;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.export.Exported;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +56,8 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
 
 
     @DataBoundConstructor
-    public BrowserStackCredentials(CredentialsScope scope, String id, String description, String username, String accesskey) {
-        super(scope);
+    public BrowserStackCredentials(String id, String description, String username, String accesskey) {
+        super(CredentialsScope.GLOBAL);
         this.id = IdCredentials.Helpers.fixEmptyId(id);
         this.description = Util.fixNull(description);
         this.username = Util.fixNull(username);
@@ -167,6 +176,22 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         @Override
         public String getDisplayName() {
             return CREDENTIAL_DISPLAY_NAME;
+        }
+
+        /**
+         * @return always returns false since the scope of Local credentials are always Global.
+         */
+        @Override
+        public boolean isScopeRelevant() {
+            return false;
+        }
+
+        /**
+         * @return always returns false since the scope of Local credentials are always Global.
+         */
+        @SuppressWarnings("unused") // used by stapler
+        public boolean isScopeRelevant(ModelObject object) {
+            return false;
         }
 
         @CheckForNull

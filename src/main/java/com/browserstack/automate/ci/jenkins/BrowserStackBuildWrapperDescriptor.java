@@ -1,10 +1,14 @@
 package com.browserstack.automate.ci.jenkins;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.FileScanner;
+import org.apache.tools.ant.types.FileSet;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
-import com.browserstack.automate.ci.jenkins.util.BrowserListingInfo;
-import com.browserstack.client.model.DesktopPlatform;
-import com.browserstack.client.model.Platform;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -19,23 +23,10 @@ import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.FileScanner;
-import org.apache.tools.ant.types.FileSet;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
-import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserMacOrderIndex;
-import static com.browserstack.automate.ci.jenkins.util.BrowserListingInfo.getBrowserWinOrderIndex;
 
 @Extension
 public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescriptor {
@@ -77,67 +68,6 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
         return true;
     }
 
-    public ListBoxModel doFillOsItems() {
-        ListBoxModel osList = new ListBoxModel();
-        BrowserListingInfo browserListingInfo = BrowserListingInfo.getInstance();
-        if (browserListingInfo == null) {
-            return osList;
-        }
-
-        Map<String, Platform> osMap = browserListingInfo.getOsMap();
-        if (osMap != null) {
-            for (Map.Entry<String, Platform> entry : osMap.entrySet()) {
-                String displayName = BrowserListingInfo.getDisplayOs(entry.getValue().getOsDisplayName());
-                osList.add(displayName, displayName);
-            }
-
-            Collections.sort(osList, new Comparator<ListBoxModel.Option>() {
-                public int compare(ListBoxModel.Option o1, ListBoxModel.Option o2) {
-                    return compareIntegers(
-                            BrowserListingInfo.getOsOrderIndex(o1.name.toLowerCase()),
-                            BrowserListingInfo.getOsOrderIndex(o2.name.toLowerCase()));
-                }
-            });
-        }
-
-        osList.add(0, new ListBoxModel.Option("-- Select OS --", "null"));
-        return osList;
-    }
-
-    public ListBoxModel doFillBrowserItems(@QueryParameter final String os) {
-        ListBoxModel browserList = new ListBoxModel();
-        String osName = (os != null && !os.equals("null")) ? os.toLowerCase() : null;
-        BrowserListingInfo browserListingInfo = BrowserListingInfo.getInstance();
-
-        if (osName != null && browserListingInfo != null) {
-            Map<String, List<String>> osBrowserMap = browserListingInfo.getOsBrowserMap();
-            if (osBrowserMap != null && osBrowserMap.containsKey(osName)) {
-                for (String browser : osBrowserMap.get(osName)) {
-                    browserList.add(browser, browser);
-                }
-
-                Map<String, Platform> osMap = browserListingInfo.getOsMap();
-                if (osMap != null && osMap.containsKey(osName) && osMap.get(osName) instanceof DesktopPlatform) {
-                    final boolean isWindows = osName.contains("windows");
-
-                    Collections.sort(browserList, new Comparator<ListBoxModel.Option>() {
-                        public int compare(ListBoxModel.Option o1, ListBoxModel.Option o2) {
-                            String b1 = BrowserListingInfo.extractBrowserName(o1.name).toLowerCase();
-                            String b2 = BrowserListingInfo.extractBrowserName(o2.name).toLowerCase();
-
-                            return compareIntegers(isWindows ?
-                                    getBrowserWinOrderIndex(b1) :
-                                    getBrowserMacOrderIndex(b1), isWindows ?
-                                    getBrowserWinOrderIndex(b2) :
-                                    getBrowserMacOrderIndex(b2));
-                        }
-                    });
-                }
-            }
-        }
-
-        return browserList;
-    }
 
     public ListBoxModel doFillCredentialsIdItems(@AncestorInPath final Item context) {
         if (context != null && !context.hasPermission(Item.CONFIGURE)) {

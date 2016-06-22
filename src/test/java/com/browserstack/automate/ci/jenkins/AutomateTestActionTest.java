@@ -19,7 +19,6 @@ import com.browserstack.automate.exception.AutomateException;
 import com.browserstack.automate.exception.SessionNotFound;
 import com.browserstack.automate.model.Session;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
-import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
@@ -122,14 +121,12 @@ public class AutomateTestActionTest {
         LocalConfig localConfig = new LocalConfig();
         localConfig.setLocalOptions("-force");
 
-        BrowserStackBuildWrapper buildWrapper = new BrowserStackBuildWrapper(credentialsId, null, localConfig);
+        BrowserStackBuildWrapper buildWrapper = new BrowserStackBuildWrapper(credentialsId, localConfig);
         project.getBuildWrappersList().add(buildWrapper);
     }
 
     private static void addCredentials(String id, String username, String accessKey) throws IOException {
-        BrowserStackCredentials credentials = new BrowserStackCredentials(
-                                                                         CredentialsScope.GLOBAL,
-                                                                         id,
+        BrowserStackCredentials credentials = new BrowserStackCredentials(id,
                                                                          "browserstack-credentials-description",
                                                                          username,
                                                                          accessKey);
