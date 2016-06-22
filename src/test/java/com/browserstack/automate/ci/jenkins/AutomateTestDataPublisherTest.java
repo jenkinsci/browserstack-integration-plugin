@@ -19,7 +19,6 @@ import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.jenkins.helpers.CopyResourceFileToWorkspaceTarget;
 import com.browserstack.automate.model.Session;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
-import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
@@ -128,9 +127,7 @@ public class AutomateTestDataPublisherTest {
     }
 
     private static void addCredentials(String id, String username, String accessKey) throws IOException {
-        BrowserStackCredentials credentials = new BrowserStackCredentials(
-                                                                         CredentialsScope.GLOBAL,
-                                                                         id,
+        BrowserStackCredentials credentials = new BrowserStackCredentials(id,
                                                                          "browserstack-credentials-description",
                                                                          username,
                                                                          accessKey);
