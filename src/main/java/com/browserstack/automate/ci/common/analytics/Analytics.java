@@ -60,14 +60,9 @@ public class Analytics {
     }
 
     public static void trackBuildRun(boolean localEnabled, boolean localPathSet,
-                                     boolean localOptionsSet, boolean isReportEnabled) {
+                                     boolean localOptionsSet) {
 
         EventHit eventHit = newEventHit((localEnabled ? "with" : "without") + "Local", "buildRun");
-        if (isReportEnabled) {
-            eventHit.eventLabel("embedTrue");
-        } else {
-            eventHit.eventLabel("embedFalse");
-        }
 
         if (localPathSet) {
             eventHit.customDimension(1, "withLocalPath");
@@ -80,6 +75,13 @@ public class Analytics {
         } else {
             eventHit.customDimension(4, "withoutLocalOptions");
         }
+
+        postAsync(eventHit);
+    }
+
+    public static void trackReportingEvent(boolean isReportEmbedded) {
+        String action = isReportEmbedded ? "reportEmbedded" : "reportNotEmbedded";
+        EventHit eventHit = newEventHit("reproting", action);
 
         postAsync(eventHit);
     }
