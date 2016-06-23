@@ -81,7 +81,7 @@ public class Analytics {
 
     public static void trackReportingEvent(boolean isReportEmbedded) {
         String action = isReportEmbedded ? "reportEmbedded" : "reportNotEmbedded";
-        EventHit eventHit = newEventHit("reproting", action);
+        EventHit eventHit = newEventHit("reporting", action);
 
         postAsync(eventHit);
     }
