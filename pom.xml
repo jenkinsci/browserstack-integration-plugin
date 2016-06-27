@@ -16,7 +16,7 @@
 
     <name>BrowserStack</name>
     <description>This plugin allows you to integrate with BrowserStack.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Integration+Plugin</url>
 
     <developers>
         <developer>
@@ -24,7 +24,18 @@
             <name>BrowserStack Support</name>
             <email>support@browserstack.com</email>
         </developer>
+        <developer>
+            <id>integration</id>
+            <name>BrowserStack Integrations</name>
+            <email>integrations@browserstack.com</email>
+        </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:ssh://github.com/jenkinsci/browserstack-integration-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/browserstack-integration-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/browserstack-integration-plugin</url>
+    </scm>
 
 
     <properties>
