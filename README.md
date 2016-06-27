@@ -37,4 +37,8 @@ To build the plugin *hpi* package, run  `mvn clean package`. This will compile t
 
 ## Reporting Issues
 
-TBD
+Before creating an Issue please read the [JIRA guidelines](https://wiki.jenkins-ci.org/display/JENKINS/How+to+report+an+issue).
+
+* Create a [Bug](https://issues.jenkins-ci.org/secure/CreateIssue.jspa?pid=10172&issuetype=1&components=19622).
+* Request for a [New Feature](https://issues.jenkins-ci.org/secure/CreateIssue.jspa?pid=10172&issuetype=2&components=19622).
+* Request for an [Improvement](https://issues.jenkins-ci.org/secure/CreateIssue.jspa?pid=10172&issuetype=4&components=19622) in current functionality.
