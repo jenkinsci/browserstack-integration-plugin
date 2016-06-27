@@ -14,13 +14,10 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractItem;
 import hudson.model.BuildListener;
 import hudson.model.BuildableItemWithBuildWrappers;
-import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
-import hudson.tasks.junit.JUnitResultArchiver;
-import hudson.tasks.junit.TestDataPublisher;
 import hudson.util.DescribableList;
 
 import java.io.IOException;
@@ -64,7 +61,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             }
         }
 
-        recordBuildStats(build);
+        recordBuildStats();
         return buildEnv;
     }
 
@@ -90,29 +87,11 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         this.credentialsId = credentialsId;
     }
 
-    private void recordBuildStats(AbstractBuild build) {
+    private void recordBuildStats() {
         boolean localEnabled = (localConfig != null);
         boolean localPathSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalPath());
         boolean localOptionsSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalOptions());
-        boolean isReportEnabled = false;
-
-        DescribableList publishersList = build.getProject().getPublishersList();
-        if (publishersList != null) {
-            Describable describable = publishersList.get(JUnitResultArchiver.class);
-
-            if (describable instanceof JUnitResultArchiver) {
-                JUnitResultArchiver jUnitResultArchiver = (JUnitResultArchiver) describable;
-
-                for (TestDataPublisher testDataPublisher : jUnitResultArchiver.getTestDataPublishers()) {
-                    if (testDataPublisher instanceof AutomateTestDataPublisher) {
-                        isReportEnabled = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet, isReportEnabled);
+        Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet);
     }
 
 

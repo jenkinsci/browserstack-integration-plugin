@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.browserstack.automate.ci.common.AutomateTestCase;
+import com.browserstack.automate.ci.common.analytics.Analytics;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -37,7 +38,9 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
 
     @DataBoundConstructor
     public AutomateTestDataPublisher() {
-
+        // This constructor is only called when the TestDataPublisher is created.
+        // This is only when the user explicitly chooses to enable BrowserStack as an additional Test report.
+        Analytics.trackReportingEvent(true);
     }
 
     @Override
