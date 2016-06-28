@@ -158,8 +158,9 @@ public class Analytics {
 
         try {
             PluginWrapper pluginWrapper = getPluginWrapper();
-            gaRequest.applicationName("jenkins-" + Jenkins.VERSION);
-            gaRequest.applicationId(pluginWrapper.getShortName());
+            gaRequest.applicationName(Jenkins.VERSION);
+            // For Jenkins we add a 'jenkins' at the end because the plugin name is browserstack-integration.
+            gaRequest.applicationId(pluginWrapper.getShortName() + "-jenkins");
             gaRequest.applicationVersion(pluginWrapper.getVersion());
         } catch (IOException e) {
             LOGGER.warning("Failed to load plugin properties: " + e.getMessage());
