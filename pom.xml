@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project>
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -43,6 +42,10 @@
         <jenkins.version>1.580.1</jenkins.version>
         <java.level>6</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- This is the testing Tracking Id. If you want to build the project for production, please use the
+             production profile which replaces this with the production tracking id. -->
+        <google.analytics.tracking.id>UA-79358556-2</google.analytics.tracking.id>
     </properties>
 
     <licenses>
@@ -123,6 +126,22 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>plugin.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>plugin.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -160,5 +179,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <google.analytics.tracking.id>UA-79358556-1</google.analytics.tracking.id>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
