@@ -10,11 +10,12 @@ develop | [![Build Status](https://travis-ci.org/browserstack/jenkins-plugin.svg
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [BrowserStack Jenkins Plugin](#browserstack-jenkins-plugin)
-  - [Features](#features)
-  - [Prerequisites](#prerequisites)
-  - [Building the Plugin](#building-the-plugin)
-  - [Reporting Issues](#reporting-issues)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Building the Plugin](#building-the-plugin)
+  - [For Testing](#for-testing)
+  - [For Release](#for-release)
+- [Reporting Issues](#reporting-issues)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -33,7 +34,16 @@ This plugin allows you to integrate your Selenium tests in Jenkins with BrowserS
   
 ## Building the Plugin
 
-To build the plugin *hpi* package, run  `mvn clean package`. This will compile the code, run the unit tests and build the *hpi* package as well.
+### For Testing
+
+When building the plugin package for internal testing build the *hpi* package using `mvn clean package`. This will compile the code, run unit tests and build the *hpi* package.
+The Google Analytics tracking id that will be used by default will be the one for testing.
+
+### For Release
+
+When building the plugin package for users to install in their Jenkins instance using the command `mvn clean package -Prelease`. 
+This will do the same thing as when building the plugin **For Testing** but the production Google Analytics tracking id will be used for 
+tracking analytics, if the user has it enabled.
 
 ## Reporting Issues
 
