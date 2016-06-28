@@ -1,14 +1,20 @@
 package com.browserstack.automate.ci.common.analytics;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.brsanthu.googleanalytics.EventHit;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsRequest;
 import com.brsanthu.googleanalytics.TimingHit;
+import com.trilead.ssh2.util.IOUtils;
 import hudson.Plugin;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
@@ -18,10 +24,12 @@ import java.util.logging.Logger;
 public class Analytics {
 
     private static final String PLUGIN_NAME = "browserstack-integration";
+    private static final String PLUGIN_PROPERTIES_FILE = "plugin.properties";
+    private static final String GOOGLE_PROPERTIES_KEY = "google.analytics.tracking.id";
 
     private static final String DEFAULT_CLIENT_ID = "unknown-client";
 
-    private static final GoogleAnalytics ga = new GoogleAnalytics("UA-79358556-2");
+    private static final GoogleAnalytics googleAnalyticsClient;
 
     private static final Logger LOGGER = Logger.getLogger(Analytics.class.getName());
 
@@ -34,7 +42,32 @@ public class Analytics {
     private static boolean isEnabled = true;
 
     static {
+        googleAnalyticsClient = buildGoogleAnalyticsClient();
         trackInstall();
+    }
+
+    /**
+     * Method that builds a {@link GoogleAnalytics} object with the tracking id read from a plugins.properties file.
+     *
+     * @return a new instance of GoogleAnalytics.
+     */
+    private static GoogleAnalytics buildGoogleAnalyticsClient() {
+        Properties pluginProps = new Properties();
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(PLUGIN_PROPERTIES_FILE);
+            pluginProps.load(inputStream);
+
+            String trackingId = pluginProps.getProperty(GOOGLE_PROPERTIES_KEY);
+            if (StringUtils.isNotEmpty(trackingId)) {
+                return new GoogleAnalytics(trackingId);
+            }
+        } catch (IOException ioe) {
+            isEnabled = false;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return null;
     }
 
     public static boolean isEnabled() {
@@ -95,8 +128,8 @@ public class Analytics {
     }
 
     private static void postAsync(GoogleAnalyticsRequest request) {
-        if (isEnabled) {
-            ga.postAsync(request);
+        if (isEnabled && googleAnalyticsClient != null) {
+            googleAnalyticsClient.postAsync(request);
         }
     }
 
