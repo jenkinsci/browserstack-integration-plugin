@@ -10,7 +10,7 @@
 
     <groupId>com.browserstack</groupId>
     <artifactId>browserstack-integration</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>BrowserStack</name>
@@ -34,7 +34,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/browserstack-integration-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/browserstack-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/browserstack-integration-plugin</url>
-      <tag>v1.0.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
 
