@@ -8,7 +8,6 @@
         <version>1.580.1</version>
     </parent>
 
-    <groupId>com.browserstack</groupId>
     <artifactId>browserstack-integration</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
