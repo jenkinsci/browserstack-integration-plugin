@@ -14,7 +14,7 @@
 
     <name>BrowserStack</name>
     <description>This plugin allows you to integrate with BrowserStack.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Integration+Plugin</url>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
 
     <developers>
         <developer>
