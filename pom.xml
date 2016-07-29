@@ -45,7 +45,7 @@
 
         <!-- This is the testing Tracking Id. If you want to build the project for production, please use the
              production profile which replaces this with the production tracking id. -->
-        <google.analytics.tracking.id>UA-79358556-2</google.analytics.tracking.id>
+        <ga.tracking.id>UA-79358556-2</ga.tracking.id>
     </properties>
 
     <licenses>
@@ -185,7 +185,7 @@
         <profile>
             <id>release</id>
             <properties>
-                <google.analytics.tracking.id>UA-79358556-1</google.analytics.tracking.id>
+                <ga.tracking.id>UA-79358556-1</ga.tracking.id>
             </properties>
         </profile>
     </profiles>

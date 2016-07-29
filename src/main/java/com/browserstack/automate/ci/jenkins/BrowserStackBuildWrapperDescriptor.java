@@ -34,13 +34,13 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
 
     private String credentialsId;
     private LocalConfig localConfig;
-    private boolean usageStatsEnabled;
+    // By default usage stats are enabled. But user's can choose to disable through Jenkin's configuration.
+    private boolean usageStatsEnabled = true;
 
     public BrowserStackBuildWrapperDescriptor() {
         super(BrowserStackBuildWrapper.class);
         load();
 
-        Analytics.setEnabled(usageStatsEnabled);
         if (usageStatsEnabled) {
             Analytics.trackInstall();
         }
@@ -57,7 +57,9 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
             JSONObject config = formData.getJSONObject(NAMESPACE);
             req.bindJSON(this, config);
             save();
-            Analytics.setEnabled(!config.has("usageStatsEnabled") || config.getBoolean("usageStatsEnabled"));
+            if (config.has("usageStatsEnabled")) {
+                setEnableUsageStats(config.getBoolean("usageStatsEnabled"));
+            }
         }
 
         return true;
@@ -125,6 +127,13 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
 
     public void setEnableUsageStats(boolean usageStatsEnabled) {
         this.usageStatsEnabled = usageStatsEnabled;
+        Analytics.setEnabled(this.usageStatsEnabled);
+        // We track an install if one has not been done before.
+        // Since a user could have chosen to disable the plugin and then chosen to re-enable it,
+        // before installing a newer version of the plugin.
+        if (this.usageStatsEnabled) {
+            Analytics.trackInstall();
+        }
     }
 
     private static int compareIntegers(int x, int y) {
