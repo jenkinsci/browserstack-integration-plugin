@@ -11,10 +11,10 @@ import hudson.Plugin;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class Analytics {
 
     private static final String PLUGIN_NAME = "browserstack-integration";
-    private static final String PLUGIN_PROPERTIES_FILE = "plugin.properties";
+    private static final String PLUGIN_PROPERTIES_FILE = "/plugin.properties";
     private static final String GOOGLE_PROPERTIES_KEY = "google.analytics.tracking.id";
 
     private static final String DEFAULT_CLIENT_ID = "unknown-client";
@@ -55,14 +55,20 @@ public class Analytics {
         Properties pluginProps = new Properties();
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(PLUGIN_PROPERTIES_FILE);
+            inputStream = Analytics.class.getResourceAsStream(PLUGIN_PROPERTIES_FILE);
+            if (inputStream == null) {
+                LOGGER.warning("Unable to load plugin properties " + PLUGIN_PROPERTIES_FILE);
+                return null;
+            }
             pluginProps.load(inputStream);
 
             String trackingId = pluginProps.getProperty(GOOGLE_PROPERTIES_KEY);
+            LOGGER.fine("Using Google Analytics Tracking ID :: " + trackingId);
             if (StringUtils.isNotEmpty(trackingId)) {
                 return new GoogleAnalytics(trackingId);
             }
         } catch (IOException ioe) {
+            LOGGER.warning("Unable to log analytics to GA cause of exception. " + ioe.getMessage());
             isEnabled = false;
         } finally {
             IOUtils.closeQuietly(inputStream);
@@ -129,6 +135,10 @@ public class Analytics {
 
     private static void postAsync(GoogleAnalyticsRequest request) {
         if (isEnabled && googleAnalyticsClient != null) {
+            if (LOGGER.getLevel() == Level.FINE && request.hitType().equals("event")) {
+                LOGGER.fine("Posting Event :: " + ((EventHit) request).eventCategory()
+                            + "." + ((EventHit) request).eventAction());
+            }
             googleAnalyticsClient.postAsync(request);
         }
     }

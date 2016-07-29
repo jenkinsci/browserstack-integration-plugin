@@ -1,5 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
+         xmlns:st="jelly:stapler"
          xmlns:f="/lib/form"
          xmlns:c="/lib/credentials">
 
@@ -9,7 +10,7 @@
         </f:entry>
 
         <f:entry title="${%statsTitle}">
-            <f:checkbox field="usageStatsEnabled" default="true"/>
+            <f:checkbox field="usageStatsEnabled" default="true" checked="${descriptor.getEnableUsageStats()}"/>
         </f:entry>
     </f:section>
 </j:jelly>
