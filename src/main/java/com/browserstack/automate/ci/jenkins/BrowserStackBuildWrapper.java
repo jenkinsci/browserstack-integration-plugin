@@ -16,17 +16,18 @@ import hudson.model.BuildListener;
 import hudson.model.BuildableItemWithBuildWrappers;
 import hudson.model.Descriptor;
 import hudson.model.Job;
-import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
 import hudson.util.DescribableList;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Map;
 
 
 public class BrowserStackBuildWrapper extends BuildWrapper {
+
+    private static final char CHAR_MASK = '*';
 
     private final LocalConfig localConfig;
 
@@ -70,10 +71,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         return (BrowserStackBuildWrapperDescriptor) super.getDescriptor();
     }
 
-    @Override
-    public OutputStream decorateLogger(AbstractBuild build, OutputStream logger) throws IOException, InterruptedException, Run.RunnerAbortedException {
-        return new BuildOutputStream(logger, accesskey);
-    }
 
     public LocalConfig getLocalConfig() {
         return this.localConfig;
@@ -129,7 +126,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 if (credentials.hasAccesskey()) {
                     String accesskey = credentials.getDecryptedAccesskey();
                     env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
-                    logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
+                    logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, maskString(accesskey));
                 }
             }
 
@@ -150,6 +147,17 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             }
 
             super.buildEnvVars(env);
+        }
+
+        /**
+         * Returns a string with only '*' of length equal to the length of the inputStr
+         * @param strToMask
+         * @return masked string
+         */
+        private String maskString(String strToMask) {
+            char[] maskChars = new char[strToMask.length()];
+            Arrays.fill(maskChars, CHAR_MASK);
+            return new String(maskChars);
         }
 
         private void logEnvVar(String key, String value) {
