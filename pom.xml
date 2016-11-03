@@ -41,6 +41,8 @@
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>1.580.1</jenkins.version>
         <java.level>6</java.level>
+        <java.level.test>6</java.level.test>
+        <maven-surefire-plugin.version>2.9</maven-surefire-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- This is the testing Tracking Id. If you want to build the project for production, please use the
@@ -58,7 +60,11 @@
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public</url>
+        </repository>
+        <repository>
+            <id>maven.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public</url>
         </repository>
         <repository>
             <id>sonatype-nexus-snapshots</id>
@@ -68,7 +74,11 @@
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>maven.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public</url>
         </pluginRepository>
     </pluginRepositories>
 
