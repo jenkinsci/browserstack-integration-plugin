@@ -123,14 +123,14 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                     String username = credentials.getUsername();
                     env.put(EnvVars.BROWSERSTACK_USER, username);
                     env.put(EnvVars.BROWSERSTACK_USERNAME, username);
-                    logEnvVar(EnvVars.BROWSERSTACK_USER, username);
+                    logEnvVar(EnvVars.BROWSERSTACK_USER_NAME, username);
                 }
 
                 if (credentials.hasAccesskey()) {
                     String accesskey = credentials.getDecryptedAccesskey();
                     env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
                     env.put(EnvVars.BROWSERSTACK_ACCESS_KEY, accesskey);
-                    logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, maskString(accesskey));
+                    logEnvVar(EnvVars.BROWSERSTACK_ACCESS_KEY, maskString(accesskey));
                 }
             }
 
