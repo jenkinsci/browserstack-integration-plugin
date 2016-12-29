@@ -94,7 +94,9 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     private interface EnvVars {
         String BROWSERSTACK_USER = "BROWSERSTACK_USER";
+        String BROWSERSTACK_USERNAME = "BROWSERSTACK_USERNAME";
         String BROWSERSTACK_ACCESSKEY = "BROWSERSTACK_ACCESSKEY";
+        String BROWSERSTACK_ACCESS_KEY = "BROWSERSTACK_ACCESS_KEY";
         String BROWSERSTACK_LOCAL = "BROWSERSTACK_LOCAL";
         String BROWSERSTACK_LOCAL_IDENTIFIER = "BROWSERSTACK_LOCAL_IDENTIFIER";
         String BROWSERSTACK_BUILD = "BROWSERSTACK_BUILD";
@@ -120,13 +122,15 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 if (credentials.hasUsername()) {
                     String username = credentials.getUsername();
                     env.put(EnvVars.BROWSERSTACK_USER, username);
-                    logEnvVar(EnvVars.BROWSERSTACK_USER, username);
+                    env.put(EnvVars.BROWSERSTACK_USERNAME, username);
+                    logEnvVar(EnvVars.BROWSERSTACK_USERNAME, username);
                 }
 
                 if (credentials.hasAccesskey()) {
                     String accesskey = credentials.getDecryptedAccesskey();
                     env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
-                    logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, maskString(accesskey));
+                    env.put(EnvVars.BROWSERSTACK_ACCESS_KEY, accesskey);
+                    logEnvVar(EnvVars.BROWSERSTACK_ACCESS_KEY, maskString(accesskey));
                 }
             }
 
