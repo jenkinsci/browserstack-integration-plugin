@@ -121,8 +121,9 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             if (credentials != null) {
                 if (credentials.hasUsername()) {
                     String username = credentials.getUsername();
-                    env.put(EnvVars.BROWSERSTACK_USER, username);
-                    env.put(EnvVars.BROWSERSTACK_USERNAME, username);
+
+                    env.put(EnvVars.BROWSERSTACK_USER, username + "-jenkins");
+                    env.put(EnvVars.BROWSERSTACK_USERNAME, username + "-jenkins");
                     logEnvVar(EnvVars.BROWSERSTACK_USERNAME, username);
                 }
 
@@ -134,20 +135,22 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 }
             }
 
-            String isLocalEnabled = BrowserStackBuildWrapper.this.localConfig != null ? "true" : "false";
-            env.put(EnvVars.BROWSERSTACK_LOCAL, "" + isLocalEnabled);
-            logEnvVar(EnvVars.BROWSERSTACK_LOCAL, isLocalEnabled);
-
-            String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
-            if (StringUtils.isNotBlank(localIdentifier)) {
-                env.put(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
-                logEnvVar(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
-            }
 
             String buildTag = env.get(ENV_JENKINS_BUILD_TAG);
             if (buildTag != null) {
                 env.put(EnvVars.BROWSERSTACK_BUILD, buildTag);
                 logEnvVar(EnvVars.BROWSERSTACK_BUILD, buildTag);
+            }
+
+            String isLocalEnabled = BrowserStackBuildWrapper.this.localConfig != null ? "true" : "false";
+            env.put(EnvVars.BROWSERSTACK_LOCAL, "" + isLocalEnabled);
+            logEnvVar(EnvVars.BROWSERSTACK_LOCAL, isLocalEnabled);
+
+            String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
+
+            if (StringUtils.isNotBlank(localIdentifier)){
+                env.put(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier + "-" + buildTag);
+                logEnvVar(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier + "-" + buildTag);
             }
 
             super.buildEnvVars(env);
