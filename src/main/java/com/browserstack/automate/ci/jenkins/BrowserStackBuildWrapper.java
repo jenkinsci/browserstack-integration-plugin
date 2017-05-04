@@ -55,7 +55,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         AutomateBuildEnvironment buildEnv = new AutomateBuildEnvironment(credentials, launcher, logger);
         if (accesskey != null && this.localConfig != null) {
             try {
-                buildEnv.startBrowserStackLocal();
+                buildEnv.startBrowserStackLocal(build.getFullDisplayName());
             } catch (Exception e) {
                 listener.fatalError(e.getMessage());
                 throw new IOException(e.getCause());
@@ -94,7 +94,9 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     private interface EnvVars {
         String BROWSERSTACK_USER = "BROWSERSTACK_USER";
+        String BROWSERSTACK_USERNAME = "BROWSERSTACK_USERNAME";
         String BROWSERSTACK_ACCESSKEY = "BROWSERSTACK_ACCESSKEY";
+        String BROWSERSTACK_ACCESS_KEY = "BROWSERSTACK_ACCESS_KEY";
         String BROWSERSTACK_LOCAL = "BROWSERSTACK_LOCAL";
         String BROWSERSTACK_LOCAL_IDENTIFIER = "BROWSERSTACK_LOCAL_IDENTIFIER";
         String BROWSERSTACK_BUILD = "BROWSERSTACK_BUILD";
@@ -119,15 +121,25 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             if (credentials != null) {
                 if (credentials.hasUsername()) {
                     String username = credentials.getUsername();
-                    env.put(EnvVars.BROWSERSTACK_USER, username);
-                    logEnvVar(EnvVars.BROWSERSTACK_USER, username);
+
+                    env.put(EnvVars.BROWSERSTACK_USER, username + "-jenkins");
+                    env.put(EnvVars.BROWSERSTACK_USERNAME, username + "-jenkins");
+                    logEnvVar(EnvVars.BROWSERSTACK_USERNAME, username);
                 }
 
                 if (credentials.hasAccesskey()) {
                     String accesskey = credentials.getDecryptedAccesskey();
                     env.put(EnvVars.BROWSERSTACK_ACCESSKEY, accesskey);
-                    logEnvVar(EnvVars.BROWSERSTACK_ACCESSKEY, maskString(accesskey));
+                    env.put(EnvVars.BROWSERSTACK_ACCESS_KEY, accesskey);
+                    logEnvVar(EnvVars.BROWSERSTACK_ACCESS_KEY, maskString(accesskey));
                 }
+            }
+
+
+            String buildTag = env.get(ENV_JENKINS_BUILD_TAG);
+            if (buildTag != null) {
+                env.put(EnvVars.BROWSERSTACK_BUILD, buildTag);
+                logEnvVar(EnvVars.BROWSERSTACK_BUILD, buildTag);
             }
 
             String isLocalEnabled = BrowserStackBuildWrapper.this.localConfig != null ? "true" : "false";
@@ -135,15 +147,10 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             logEnvVar(EnvVars.BROWSERSTACK_LOCAL, isLocalEnabled);
 
             String localIdentifier = (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
-            if (StringUtils.isNotBlank(localIdentifier)) {
+            
+            if (StringUtils.isNotBlank(localIdentifier)){
                 env.put(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
                 logEnvVar(EnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
-            }
-
-            String buildTag = env.get(ENV_JENKINS_BUILD_TAG);
-            if (buildTag != null) {
-                env.put(EnvVars.BROWSERSTACK_BUILD, buildTag);
-                logEnvVar(EnvVars.BROWSERSTACK_BUILD, buildTag);
             }
 
             super.buildEnvVars(env);
@@ -166,8 +173,8 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
             }
         }
 
-        public void startBrowserStackLocal() throws Exception {
-            browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig.getLocalOptions());
+        public void startBrowserStackLocal(String buildTag) throws Exception {
+            browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig.getLocalOptions(), buildTag);
             log(logger, "Local: Starting BrowserStack Local...");
             browserstackLocal.start(launcher);
             log(logger, "Local: Started");
