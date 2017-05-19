@@ -60,6 +60,12 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
         super.start(localOptions);
     }
 
+    public void stop() throws Exception {
+        Map<String, String> localOptions = new HashMap<String, String>();
+        localOptions.put("key", accesskey);
+        super.stop(localOptions);
+    }
+
     public void start(Launcher launcher) throws Exception {
         launcher.getChannel().call(new MasterToSlaveCallable<Void, Exception>() {
             @Override
