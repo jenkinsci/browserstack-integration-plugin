@@ -48,7 +48,7 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
             arguments.add(args[i]);
         }
 
-        localIdentifier = UUID.randomUUID().toString().replaceAll("\\-", "") + "-" + buildTag.replaceAll("\\s","");
+        localIdentifier = UUID.randomUUID().toString().replaceAll("\\-", "") + "-" + buildTag.replaceAll("\\s","").replaceAll("#", "_");
 
         arguments.add(localIdPos, localIdentifier);
         arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
@@ -59,6 +59,12 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
         Map<String, String> localOptions = new HashMap<String, String>();
         localOptions.put("key", accesskey);
         super.start(localOptions);
+    }
+
+    public void stop() throws Exception {
+        Map<String, String> localOptions = new HashMap<String, String>();
+        localOptions.put("key", accesskey);
+        super.stop(localOptions);
     }
 
     public void start(Launcher launcher) throws Exception {
