@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Finds XML files in the workspace that match the supplied Ant pattern,
- * and parses them for test case => session mapping.
+ * and parses them for test case - session mapping.
  *
  * Logic for detection of stale report files is from Jenkins JUnit plugin.
  *

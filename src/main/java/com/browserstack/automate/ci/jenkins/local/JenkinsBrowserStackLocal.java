@@ -20,12 +20,12 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     private final String[] arguments;
     private String localIdentifier;
 
-    public JenkinsBrowserStackLocal(String accesskey, String argString) {
+    public JenkinsBrowserStackLocal(String accesskey, String argString, String buildTag) {
         this.accesskey = accesskey;
-        this.arguments = processLocalArguments((argString != null) ? argString.trim() : "");
+        this.arguments = processLocalArguments((argString != null) ? argString.trim() : "", buildTag);
     }
 
-    private String[] processLocalArguments(final String argString) {
+    private String[] processLocalArguments(final String argString, String buildTag) {
         String[] args = argString.split("\\s+");
         int localIdPos = 0;
         List<String> arguments = new ArrayList<String>();
@@ -48,7 +48,8 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
             arguments.add(args[i]);
         }
 
-        localIdentifier = UUID.randomUUID().toString().replaceAll("\\-", "");
+        localIdentifier = UUID.randomUUID().toString().replaceAll("\\-", "") + "-" + buildTag.replaceAll("\\s","");
+
         arguments.add(localIdPos, localIdentifier);
         arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
         return arguments.toArray(new String[]{});
