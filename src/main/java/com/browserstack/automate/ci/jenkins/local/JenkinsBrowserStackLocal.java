@@ -48,7 +48,7 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
             arguments.add(args[i]);
         }
 
-        localIdentifier = UUID.randomUUID().toString().replaceAll("\\-", "") + "-" + buildTag.replaceAll("\\s","");
+        localIdentifier = UUID.randomUUID().toString().replaceAll("\\-", "") + "-" + buildTag.replaceAll("\\s","").replaceAll("#", "_");
 
         arguments.add(localIdPos, localIdentifier);
         arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
