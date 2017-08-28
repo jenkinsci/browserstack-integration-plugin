@@ -17,12 +17,15 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     private static final String OPTION_LOCAL_IDENTIFIER = "localIdentifier";
 
     private final String accesskey;
+    private final String binarypath;
     private final String[] arguments;
     private String localIdentifier;
 
-    public JenkinsBrowserStackLocal(String accesskey, String argString, String buildTag) {
+    public JenkinsBrowserStackLocal(String accesskey, LocalConfig localConfig, String buildTag) {
         this.accesskey = accesskey;
-        this.arguments = processLocalArguments((argString != null) ? argString.trim() : "", buildTag);
+        this.binarypath = localConfig.getLocalPath();
+        String localOptions = localConfig.getLocalOptions();
+        this.arguments = processLocalArguments((localOptions != null) ? localOptions.trim() : "", buildTag);
     }
 
     private String[] processLocalArguments(final String argString, String buildTag) {
@@ -58,12 +61,14 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     public void start() throws Exception {
         Map<String, String> localOptions = new HashMap<String, String>();
         localOptions.put("key", accesskey);
+        if (binarypath != null && binarypath.length() > 0) localOptions.put("binarypath", binarypath);
         super.start(localOptions);
     }
 
     public void stop() throws Exception {
         Map<String, String> localOptions = new HashMap<String, String>();
         localOptions.put("key", accesskey);
+        if (binarypath != null && binarypath.length() > 0) localOptions.put("binarypath", binarypath);
         super.stop(localOptions);
     }
 
