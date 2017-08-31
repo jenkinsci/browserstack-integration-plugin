@@ -174,7 +174,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         }
 
         public void startBrowserStackLocal(String buildTag) throws Exception {
-            browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig.getLocalOptions(), buildTag);
+            browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig, buildTag);
             log(logger, "Local: Starting BrowserStack Local...");
             browserstackLocal.start(launcher);
             log(logger, "Local: Started");
