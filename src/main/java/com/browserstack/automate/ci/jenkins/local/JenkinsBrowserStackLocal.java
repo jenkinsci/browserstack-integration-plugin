@@ -68,6 +68,7 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     public void stop() throws Exception {
         Map<String, String> localOptions = new HashMap<String, String>();
         localOptions.put("key", accesskey);
+        localOptions.put("localIdentifier", localIdentifier);
         if (binarypath != null && binarypath.length() > 0) localOptions.put("binarypath", binarypath);
         super.stop(localOptions);
     }
