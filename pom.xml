@@ -114,7 +114,7 @@
         <dependency>
             <groupId>com.browserstack</groupId>
             <artifactId>automate-client-java</artifactId>
-            <version>0.2</version>
+            <version>0.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
