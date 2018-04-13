@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.model.BrowserStackSession;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
@@ -86,14 +87,17 @@ public class AutomateTestActionTest {
 
         /* =================== Execute ================= */
         FreeStyleBuild build = project.scheduleBuild2(0).get();
-        AutomateTestAction automateTestAction = new AutomateTestAction(build, mockedCaseResult, "Random4756SessionId");
+        BrowserStackSession browserStackSession = new BrowserStackSession("Random4756SessionId", "");
+        AutomateTestAction automateTestAction = new AutomateTestAction(build, mockedCaseResult,
+                browserStackSession.getAsJSONObject().toString());
         Session automateSession = automateTestAction.getSession();
-
         /* =================== Verify ================= */
         Assert.assertNull("Automate Session MUST be null.", automateSession);
         Assert.assertNotNull("Exception MUST not be null.", automateTestAction.getLastException());
-        Assert.assertTrue("Exception should be of Type AutomateException", automateTestAction.getLastException() instanceof AutomateException);
-        Assert.assertTrue("Exception message MUST not be empty", StringUtils.isNotEmpty(automateTestAction.getLastError()));
+        Assert.assertTrue("Exception should be of Type AutomateException",
+                automateTestAction.getLastException() instanceof AutomateException);
+        Assert.assertTrue("Exception message MUST not be empty",
+                StringUtils.isNotEmpty(automateTestAction.getLastError()));
     }
 
     @Test
@@ -105,14 +109,18 @@ public class AutomateTestActionTest {
 
         /* =================== Execute ================= */
         FreeStyleBuild build = project.scheduleBuild2(0).get();
-        AutomateTestAction automateTestAction = new AutomateTestAction(build, mockedCaseResult, "Random4756SessionId");
+        BrowserStackSession browserStackSession = new BrowserStackSession("Random4756SessionId", "");
+        AutomateTestAction automateTestAction = new AutomateTestAction(build, mockedCaseResult,
+                browserStackSession.getAsJSONObject().toString());
         Session automateSession = automateTestAction.getSession();
 
         /* =================== Verify ================= */
         Assert.assertNull("Automate Session MUST be null.", automateSession);
         Assert.assertNotNull("Exception MUST not be null.", automateTestAction.getLastException());
-        Assert.assertTrue("Exception should be of Type SessionNotFound", automateTestAction.getLastException() instanceof SessionNotFound);
-        Assert.assertTrue("Exception message MUST not be empty", StringUtils.isNotEmpty(automateTestAction.getLastError()));
+        Assert.assertTrue("Exception should be of Type SessionNotFound",
+                automateTestAction.getLastException() instanceof SessionNotFound);
+        Assert.assertTrue("Exception message MUST not be empty",
+                StringUtils.isNotEmpty(automateTestAction.getLastError()));
     }
 
     public void addBuildStep() throws IOException {
@@ -127,9 +135,9 @@ public class AutomateTestActionTest {
 
     private static void addCredentials(String id, String username, String accessKey) throws IOException {
         BrowserStackCredentials credentials = new BrowserStackCredentials(id,
-                                                                         "browserstack-credentials-description",
-                                                                         username,
-                                                                         accessKey);
+                "browserstack-credentials-description",
+                username,
+                accessKey);
         addCredentials(credentials);
     }
 

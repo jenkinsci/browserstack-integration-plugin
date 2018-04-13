@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.model.BrowserStackSession;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.export.Exported;
 
@@ -13,6 +14,8 @@ import com.browserstack.client.exception.BrowserStackException;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestAction;
+import com.browserstack.appautomate.AppAutomateClient;
+import com.browserstack.automate.exception.AppAutomateException;
 
 /**
  * A {@link TestAction} extension to display the BrowserStack Automate video for the session.
@@ -23,14 +26,14 @@ import hudson.tasks.junit.TestAction;
 public class AutomateTestAction extends TestAction {
 
     private final CaseResult caseResult;
-    private final String sessionId;
+    private final BrowserStackSession browserStackSession;
     private final Run<?, ?> run;
     private transient BrowserStackException lastException;
 
-    public AutomateTestAction(Run<?, ?> run, CaseResult caseResult, String sessionId) {
+    public AutomateTestAction(Run<?, ?> run, CaseResult caseResult, String sessionStr) {
         this.run = run;
         this.caseResult = caseResult;
-        this.sessionId = sessionId;
+        this.browserStackSession = new BrowserStackSession(sessionStr);
     }
 
     @Exported
@@ -45,32 +48,31 @@ public class AutomateTestAction extends TestAction {
 
     @Exported
     public Session getSession() {
-        if (sessionId == null || sessionId.isEmpty() || run == null) {
+        if (this.browserStackSession.getSessionId() == null || this.browserStackSession.getSessionId().isEmpty()
+                || run == null) {
             return null;
         }
 
-        BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem = BrowserStackBuildWrapper.findBrowserStackBuildWrapper(run.getParent());
+        BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem = BrowserStackBuildWrapper
+                .findBrowserStackBuildWrapper(run.getParent());
         if (wrapperItem == null || wrapperItem.buildWrapper == null) {
             return null;
         }
 
-        BrowserStackCredentials credentials = BrowserStackCredentials.getCredentials(wrapperItem.buildItem, wrapperItem.buildWrapper.getCredentialsId());
+        BrowserStackCredentials credentials = BrowserStackCredentials.getCredentials(wrapperItem.buildItem,
+                wrapperItem.buildWrapper.getCredentialsId());
         if (credentials == null) {
             return null;
         }
-
-        AutomateClient automateClient = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         Session activeSession = null;
 
-        try {
-            activeSession = automateClient.getSession(this.sessionId);
-            Analytics.trackIframeRequest();
-        } catch (AutomateException aex) {
-            lastException = aex;
-            return null;
-        } catch (SessionNotFound snfEx) {
-            lastException = snfEx;
-            return null;
+        switch (this.browserStackSession.getProjectType()) {
+            case AUTOMATE:
+                activeSession = getAutomateSession(credentials, activeSession);
+                break;
+            case APP_AUTOMATE:
+                activeSession = getAppAutomateSession(credentials, activeSession);
+                break;
         }
 
         return activeSession;
@@ -96,5 +98,37 @@ public class AutomateTestAction extends TestAction {
 
     public String getUrlName() {
         return null;
+    }
+
+    private Session getAppAutomateSession(BrowserStackCredentials credentials, Session activeSession) {
+        AppAutomateClient appAutomateClient = new AppAutomateClient(credentials.getUsername(),
+                credentials.getDecryptedAccesskey());
+        try {
+            activeSession = appAutomateClient.getSession(this.browserStackSession.getSessionId());
+            Analytics.trackIframeRequest();
+        } catch (SessionNotFound snfEx) {
+            lastException = snfEx;
+            return null;
+        } catch (AppAutomateException aex) {
+            lastException = aex;
+            return null;
+        }
+        return activeSession;
+    }
+
+    private Session getAutomateSession(BrowserStackCredentials credentials, Session activeSession) {
+        AutomateClient automateClient = new AutomateClient(credentials.getUsername(),
+                credentials.getDecryptedAccesskey());
+        try {
+            activeSession = automateClient.getSession(this.browserStackSession.getSessionId());
+            Analytics.trackIframeRequest();
+        } catch (AutomateException aex) {
+            lastException = aex;
+            return null;
+        } catch (SessionNotFound snfEx) {
+            lastException = snfEx;
+            return null;
+        }
+        return activeSession;
     }
 }

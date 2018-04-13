@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.common.report;
 
+import com.browserstack.automate.ci.common.model.BrowserStackSession;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,7 +43,13 @@ public class XmlReporter {
                     String testId = el.getAttribute("id");
                     NodeList sessionNode = el.getElementsByTagName("session");
                     if (sessionNode.getLength() > 0 && sessionNode.item(0).getNodeType() == Node.ELEMENT_NODE) {
-                        testSessionMap.put(testId, sessionNode.item(0).getTextContent());
+                        NodeList projectTypeNode = el.getElementsByTagName("projectType");
+                        String projectType = projectTypeNode.getLength() > 0 ? projectTypeNode.item(0).getTextContent()
+                                : "";
+
+                        BrowserStackSession session = new BrowserStackSession(sessionNode.item(0).getTextContent(),
+                                projectType);
+                        testSessionMap.put(testId, session.getAsJSONObject().toString());
                     }
                 }
             }
