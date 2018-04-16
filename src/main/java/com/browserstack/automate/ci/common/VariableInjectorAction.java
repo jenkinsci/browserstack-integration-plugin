@@ -2,6 +2,7 @@ package com.browserstack.automate.ci.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 import org.kohsuke.stapler.StaplerProxy;
 import hudson.model.Run;
@@ -9,7 +10,6 @@ import jenkins.model.RunAction2;
 
 /**
  *
- * <p>
  * Description : This class is for injecting environment variables.
  */
 public class VariableInjectorAction implements RunAction2, StaplerProxy {
@@ -23,12 +23,12 @@ public class VariableInjectorAction implements RunAction2, StaplerProxy {
 
   @Override
   public String getIconFileName() {
-    return "document-properties.gif";
+    return Constants.VariableInjectorAction.ICON_FILE_NAME;
   }
 
   @Override
   public String getDisplayName() {
-    return "Environment Variables";
+    return Constants.VariableInjectorAction.DISPLAY_NAME;
   }
 
   @Override
@@ -56,16 +56,17 @@ public class VariableInjectorAction implements RunAction2, StaplerProxy {
     if (envMap == null) {
       envMap = new HashMap<String, String>();
     }
-
     envMap.putAll(newEnvMap);
   }
-
-  public Map<String, String> getEnvMap() {
+  
+  public Set<String> getEnvMapKeys() {
     if (envMap == null) {
-      return new HashMap<String, String>();
+      return null;
     }
-    return envMap;
+    return envMap.keySet(); 
   }
-
+  
+  public String getEnvValue(String key) {
+    return this.envMap.get(key);
+  }
 }
-

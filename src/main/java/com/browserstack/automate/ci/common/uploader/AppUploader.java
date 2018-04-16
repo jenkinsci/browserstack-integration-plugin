@@ -25,5 +25,4 @@ public class AppUploader {
         new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
     return appAutomateClient.uploadApp(this.appPath);
   }
-
 }

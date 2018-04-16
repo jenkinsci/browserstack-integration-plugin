@@ -1,14 +1,13 @@
 package com.browserstack.automate.ci.common;
 
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildVariableContributor;
 
 /**
  * Description : For injecting environment variables to be accessed by next build step.
- *
  *
  */
 @Extension
@@ -18,13 +17,12 @@ public class BrowserStackBuildVariableContributor extends BuildVariableContribut
   public void buildVariablesFor(AbstractBuild build, Map<String, String> variables) {
     VariableInjectorAction action = build.getAction(VariableInjectorAction.class);
     if (action != null) {
-      Map<String, String> envMap = action.getEnvMap();
-      for (Entry<String, String> entry : envMap.entrySet()) {
-        variables.put(entry.getKey(), entry.getValue());
+      Set<String> envMapKeySet = action.getEnvMapKeys();
+      if (envMapKeySet != null) {
+        for (String key : envMapKeySet) {
+          variables.put(key, action.getEnvValue(key));
+        }
       }
-
     }
-
   }
-
 }
