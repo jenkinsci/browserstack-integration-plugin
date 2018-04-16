@@ -1,6 +1,8 @@
 package com.browserstack.automate.ci.common.report;
 
 import com.browserstack.automate.ci.common.model.BrowserStackSession;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -46,10 +48,11 @@ public class XmlReporter {
             NodeList projectTypeNode = el.getElementsByTagName("projectType");
             String projectType =
                 projectTypeNode.getLength() > 0 ? projectTypeNode.item(0).getTextContent() : "";
+            Gson gson = new GsonBuilder().create();
 
             BrowserStackSession session =
                 new BrowserStackSession(sessionNode.item(0).getTextContent(), projectType);
-            testSessionMap.put(testId, session.getAsJSONObject().toString());
+            testSessionMap.put(testId, gson.toJson(session));
           }
         }
       }

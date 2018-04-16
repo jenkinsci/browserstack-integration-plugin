@@ -1,14 +1,11 @@
 package com.browserstack.automate.ci.common.model;
 
-import org.json.JSONObject;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 
 /**
  * Description : For storing info of a browserstack session.
  *
- *
  */
-
 
 public class BrowserStackSession {
 
@@ -20,17 +17,7 @@ public class BrowserStackSession {
 
   public BrowserStackSession(String sessionId, String projectType) {
     this.sessionId = sessionId;
-
     this.projectType = getProjectTypeFromString(projectType);
-  }
-
-  public BrowserStackSession(JSONObject jsonObject) {
-    this.sessionId = jsonObject.getString(KEY_SESSION_ID);
-    this.projectType = getProjectTypeFromString(jsonObject.optString(KEY_PROJECT_TYPE, ""));
-  }
-
-  public BrowserStackSession(String jsonString) {
-    this(new JSONObject(jsonString));
   }
 
   private ProjectType getProjectTypeFromString(String projectType) {
@@ -41,13 +28,6 @@ public class BrowserStackSession {
     }
   }
 
-  public JSONObject getAsJSONObject() {
-    JSONObject sessionObj = new JSONObject();
-    sessionObj.put(KEY_SESSION_ID, this.sessionId);
-    sessionObj.put(KEY_PROJECT_TYPE, this.projectType.toString());
-    return sessionObj;
-  }
-
   public String getSessionId() {
     return sessionId;
   }
@@ -55,6 +35,4 @@ public class BrowserStackSession {
   public ProjectType getProjectType() {
     return projectType;
   }
-
 }
-

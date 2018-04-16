@@ -1,20 +1,22 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.browserstack.automate.ci.common.model.BrowserStackSession;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.export.Exported;
+import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
+import com.browserstack.automate.ci.common.model.BrowserStackSession;
 import com.browserstack.automate.ci.jenkins.BrowserStackBuildWrapper.BuildWrapperItem;
+import com.browserstack.automate.exception.AppAutomateException;
 import com.browserstack.automate.exception.AutomateException;
 import com.browserstack.automate.exception.SessionNotFound;
 import com.browserstack.automate.model.Session;
 import com.browserstack.client.exception.BrowserStackException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestAction;
-import com.browserstack.appautomate.AppAutomateClient;
-import com.browserstack.automate.exception.AppAutomateException;
 
 /**
  * A {@link TestAction} extension to display the BrowserStack Automate video for the session.
@@ -32,7 +34,10 @@ public class AutomateTestAction extends TestAction {
   public AutomateTestAction(Run<?, ?> run, CaseResult caseResult, String sessionStr) {
     this.run = run;
     this.caseResult = caseResult;
-    this.browserStackSession = new BrowserStackSession(sessionStr);
+
+    // Generate BrowserStackSession object from jsonobject
+    Gson gson = new GsonBuilder().create();
+    this.browserStackSession = gson.fromJson(sessionStr, BrowserStackSession.class);
   }
 
   @Exported

@@ -21,6 +21,8 @@ import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.tasks.junit.CaseResult;
@@ -87,8 +89,9 @@ public class AutomateTestActionTest {
     /* =================== Execute ================= */
     FreeStyleBuild build = project.scheduleBuild2(0).get();
     BrowserStackSession browserStackSession = new BrowserStackSession("Random4756SessionId", "");
-    AutomateTestAction automateTestAction = new AutomateTestAction(build, mockedCaseResult,
-        browserStackSession.getAsJSONObject().toString());
+    Gson gson = new GsonBuilder().create();
+    AutomateTestAction automateTestAction =
+        new AutomateTestAction(build, mockedCaseResult, gson.toJson(browserStackSession));
     Session automateSession = automateTestAction.getSession();
     /* =================== Verify ================= */
     Assert.assertNull("Automate Session MUST be null.", automateSession);
@@ -109,8 +112,9 @@ public class AutomateTestActionTest {
     /* =================== Execute ================= */
     FreeStyleBuild build = project.scheduleBuild2(0).get();
     BrowserStackSession browserStackSession = new BrowserStackSession("Random4756SessionId", "");
-    AutomateTestAction automateTestAction = new AutomateTestAction(build, mockedCaseResult,
-        browserStackSession.getAsJSONObject().toString());
+    Gson gson = new GsonBuilder().create();
+    AutomateTestAction automateTestAction =
+        new AutomateTestAction(build, mockedCaseResult, gson.toJson(browserStackSession));
     Session automateSession = automateTestAction.getSession();
 
     /* =================== Verify ================= */
