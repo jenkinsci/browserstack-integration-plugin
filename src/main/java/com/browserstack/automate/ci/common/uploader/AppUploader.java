@@ -23,6 +23,6 @@ public class AppUploader {
       throws AppAutomateException, FileNotFoundException, InvalidFileExtensionException {
     AppAutomateClient appAutomateClient =
         new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-    return appAutomateClient.uploadApp(this.appPath);
+    return appAutomateClient.uploadApp(this.appPath).getAppUrl();
   }
 }

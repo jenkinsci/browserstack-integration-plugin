@@ -5,12 +5,14 @@ import org.kohsuke.stapler.export.Exported;
 import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
+import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.ci.common.model.BrowserStackSession;
 import com.browserstack.automate.ci.jenkins.BrowserStackBuildWrapper.BuildWrapperItem;
 import com.browserstack.automate.exception.AppAutomateException;
 import com.browserstack.automate.exception.AutomateException;
 import com.browserstack.automate.exception.SessionNotFound;
 import com.browserstack.automate.model.Session;
+import com.browserstack.client.BrowserStackClient;
 import com.browserstack.client.exception.BrowserStackException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -68,16 +70,7 @@ public class AutomateTestAction extends TestAction {
     if (credentials == null) {
       return null;
     }
-    Session activeSession = null;
-
-    switch (this.browserStackSession.getProjectType()) {
-      case AUTOMATE:
-        activeSession = getAutomateSession(credentials, activeSession);
-        break;
-      case APP_AUTOMATE:
-        activeSession = getAppAutomateSession(credentials, activeSession);
-        break;
-    }
+    Session activeSession = getSession(credentials, this.browserStackSession.getProjectType());
 
     return activeSession;
   }
@@ -104,34 +97,27 @@ public class AutomateTestAction extends TestAction {
     return null;
   }
 
-  private Session getAppAutomateSession(BrowserStackCredentials credentials,
-      Session activeSession) {
-    AppAutomateClient appAutomateClient =
-        new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-    try {
-      activeSession = appAutomateClient.getSession(this.browserStackSession.getSessionId());
-      Analytics.trackIframeRequest();
-    } catch (SessionNotFound snfEx) {
-      lastException = snfEx;
-      return null;
-    } catch (AppAutomateException aex) {
-      lastException = aex;
-      return null;
+  private Session getSession(BrowserStackCredentials credentials, ProjectType projectType) {
+    Session activeSession = null;
+    BrowserStackClient client = null;
+    if (projectType.equals(ProjectType.APP_AUTOMATE)) {
+      client =
+          new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
+    } else {
+      client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
     }
-    return activeSession;
-  }
-
-  private Session getAutomateSession(BrowserStackCredentials credentials, Session activeSession) {
-    AutomateClient automateClient =
-        new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
     try {
-      activeSession = automateClient.getSession(this.browserStackSession.getSessionId());
+      activeSession = client.getSession(this.browserStackSession.getSessionId());
       Analytics.trackIframeRequest();
-    } catch (AutomateException aex) {
-      lastException = aex;
-      return null;
     } catch (SessionNotFound snfEx) {
       lastException = snfEx;
+      return null;
+    } catch (BrowserStackException aex) {
+      if (aex instanceof AppAutomateException) {
+        lastException = new AppAutomateException(aex);
+      } else {
+        lastException = new AutomateException(aex);
+      }
       return null;
     }
     return activeSession;
