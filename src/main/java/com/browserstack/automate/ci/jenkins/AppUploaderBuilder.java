@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import com.browserstack.automate.ci.common.VariableInjectorAction;
@@ -15,8 +16,8 @@ import com.browserstack.automate.exception.AppAutomateException;
 import com.browserstack.automate.exception.InvalidFileExtensionException;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -36,8 +37,9 @@ public class AppUploaderBuilder extends Builder {
   }
 
   @Override
-  public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener)
-      throws InterruptedException, IOException {
+  public boolean perform(@Nonnull AbstractBuild<?, ?> build, @Nonnull Launcher launcher,
+      @Nonnull BuildListener listener) throws InterruptedException, IOException {
+    PluginLogger.log(listener.getLogger(), "Starting upload process.");
 
     BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem =
         BrowserStackBuildWrapper.findBrowserStackBuildWrapper(build.getParent());
@@ -78,7 +80,7 @@ public class AppUploaderBuilder extends Builder {
   }
 
   // This method is for injecting appId so that next build step can use it.
-  private void addAppIdToEnvironment(Build<?, ?> build, String appId) {
+  private void addAppIdToEnvironment(AbstractBuild<?, ?> build, String appId) {
     VariableInjectorAction variableInjectorAction = build.getAction(VariableInjectorAction.class);
     if (variableInjectorAction == null) {
       variableInjectorAction = new VariableInjectorAction(new HashMap<String, String>());
