@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>browserstack-integration</artifactId>
-    <version>1.0.11-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>BrowserStack</name>
@@ -81,7 +81,7 @@
         </repository>
         <repository>
             <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/releases</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>com.browserstack</groupId>
             <artifactId>automate-client-java</artifactId>
-            <version>0.2</version>
+            <version>0.3</version>
         </dependency>
 
         <dependency>
@@ -146,6 +146,13 @@
             <artifactId>google-analytics-java</artifactId>
             <version>1.1.2</version>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.2</version>
+		</dependency>
     </dependencies>
 
     <build>

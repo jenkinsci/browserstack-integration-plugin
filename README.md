@@ -52,3 +52,9 @@ Before creating an Issue please read the [JIRA guidelines](https://wiki.jenkins-
 * Create a [Bug](https://issues.jenkins-ci.org/secure/CreateIssue.jspa?pid=10172&issuetype=1&components=19622).
 * Request for a [New Feature](https://issues.jenkins-ci.org/secure/CreateIssue.jspa?pid=10172&issuetype=2&components=19622).
 * Request for an [Improvement](https://issues.jenkins-ci.org/secure/CreateIssue.jspa?pid=10172&issuetype=4&components=19622) in current functionality.
+
+## For Code formatting
+Code style files are their in code_formatter folder, for eclipse and intellij idea:
+* For Eclipse : Under Window/Preferences select Java/Code Style/Formatter. Import the settings file by selecting Import.
+* For Intellij Idea : Settings → Code Style → Java, click Manage, and import that XML file by simply clicking Import.
+
