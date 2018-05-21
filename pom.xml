@@ -56,6 +56,7 @@
         <java.level>6</java.level>
         <java.level.test>6</java.level.test>
         <maven-surefire-plugin.version>2.9</maven-surefire-plugin.version>
+        <junit-quickcheck.version>0.8</junit-quickcheck.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- This is the testing Tracking Id. If you want to build the project for production, please use the
@@ -109,6 +110,25 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.9.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pholser</groupId>
+            <artifactId>junit-quickcheck-core</artifactId>
+            <version>${junit-quickcheck.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pholser</groupId>
+            <artifactId>junit-quickcheck-generators</artifactId>
+            <version>${junit-quickcheck.version}</version>
         </dependency>
 
         <dependency>
