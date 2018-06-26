@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>browserstack-integration</artifactId>
-    <version>1.0.11-SNAPSHOT</version>
+    <version>1.1.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>BrowserStack</name>
@@ -56,6 +56,7 @@
         <java.level>6</java.level>
         <java.level.test>6</java.level.test>
         <maven-surefire-plugin.version>2.9</maven-surefire-plugin.version>
+        <junit-quickcheck.version>0.8</junit-quickcheck.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- This is the testing Tracking Id. If you want to build the project for production, please use the
@@ -81,7 +82,7 @@
         </repository>
         <repository>
             <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/releases</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -112,9 +113,28 @@
         </dependency>
 
         <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.9.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pholser</groupId>
+            <artifactId>junit-quickcheck-core</artifactId>
+            <version>${junit-quickcheck.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pholser</groupId>
+            <artifactId>junit-quickcheck-generators</artifactId>
+            <version>${junit-quickcheck.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.browserstack</groupId>
             <artifactId>automate-client-java</artifactId>
-            <version>0.2</version>
+            <version>0.3</version>
         </dependency>
 
         <dependency>
@@ -146,6 +166,13 @@
             <artifactId>google-analytics-java</artifactId>
             <version>1.1.2</version>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.2</version>
+		</dependency>
     </dependencies>
 
     <build>
