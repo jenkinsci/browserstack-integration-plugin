@@ -1,243 +1,309 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>1.580.1</version>
-    </parent>
+	<parent>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<version>3.4</version>
+	</parent>
 
-    <artifactId>browserstack-integration</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
-    <packaging>hpi</packaging>
+	<artifactId>browserstack-integration</artifactId>
+	<version>1.1.1-SNAPSHOT</version>
+	<packaging>hpi</packaging>
 
-    <name>BrowserStack</name>
-    <description>This plugin allows you to integrate with BrowserStack.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
+	<name>BrowserStack</name>
+	<description>This plugin allows you to integrate with BrowserStack.</description>
+	<url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
 
-    <developers>
-        <developer>
-            <id>support</id>
-            <name>BrowserStack Support</name>
-            <email>support@browserstack.com</email>
-        </developer>
-        <developer>
-            <id>integration</id>
-            <name>BrowserStack Integrations</name>
-            <email>integrations@browserstack.com</email>
-        </developer>
-    </developers>
+	<developers>
+		<developer>
+			<id>support</id>
+			<name>BrowserStack Support</name>
+			<email>support@browserstack.com</email>
+		</developer>
+		<developer>
+			<id>integration</id>
+			<name>BrowserStack Integrations</name>
+			<email>integrations@browserstack.com</email>
+		</developer>
+	</developers>
 
-    <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/browserstack-integration-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/browserstack-integration-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/browserstack-integration-plugin</url>
-      <tag>HEAD</tag>
-    </scm>
+	<scm>
+		<connection>scm:git:ssh://github.com/jenkinsci/browserstack-integration-plugin.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/browserstack-integration-plugin.git</developerConnection>
+		<url>https://github.com/jenkinsci/browserstack-integration-plugin</url>
+		<tag>HEAD</tag>
+	</scm>
 
-    <!-- Adding a distribution management section here to override the now defunct mave.jenkins-ci.org.
-         If we update the parent pom version to newer than 2.5 then this section is not needed. -->
-    <distributionManagement>
-        <repository>
-            <id>maven.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>maven.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<!-- Adding a distribution management section here to override the now defunct 
+		mave.jenkins-ci.org. If we update the parent pom version to newer than 2.5 
+		then this section is not needed. -->
+	<distributionManagement>
+		<repository>
+			<id>maven.jenkins-ci.org</id>
+			<url>https://repo.jenkins-ci.org/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.jenkins-ci.org</id>
+			<url>https://repo.jenkins-ci.org/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 
-    <properties>
-        <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>1.580.1</jenkins.version>
-        <java.level>6</java.level>
-        <java.level.test>6</java.level.test>
-        <maven-surefire-plugin.version>2.9</maven-surefire-plugin.version>
-        <junit-quickcheck.version>0.8</junit-quickcheck.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<properties>
+		<!-- Baseline Jenkins version you use to build the plugin. Users must have 
+			this version or newer to run. -->
+		<jenkins.version>2.7.3</jenkins.version>
+		<java.level>8</java.level>
+		<java.level.test>8</java.level.test>
+		<maven-surefire-plugin.version>2.9</maven-surefire-plugin.version>
+		<junit-quickcheck.version>0.8</junit-quickcheck.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- This is the testing Tracking Id. If you want to build the project for production, please use the
-             production profile which replaces this with the production tracking id. -->
-        <ga.tracking.id>UA-79358556-2</ga.tracking.id>
-    </properties>
+		<!-- This is the testing Tracking Id. If you want to build the project 
+			for production, please use the production profile which replaces this with 
+			the production tracking id. -->
+		<ga.tracking.id>UA-79358556-2</ga.tracking.id>
+	</properties>
 
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>http://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://opensource.org/licenses/MIT</url>
+		</license>
+	</licenses>
 
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public</url>
-        </repository>
-        <repository>
-            <id>maven.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public</url>
-        </repository>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>maven.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public</url>
-        </pluginRepository>
-    </pluginRepositories>
+	<repositories>
+		<repository>
+			<id>repo.jenkins-ci.org</id>
+			<url>https://repo.jenkins-ci.org/public</url>
+		</repository>
+		<repository>
+			<id>maven.jenkins-ci.org</id>
+			<url>https://repo.jenkins-ci.org/public</url>
+		</repository>
+		<repository>
+			<id>sonatype-nexus-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>repo.jenkins-ci.org</id>
+			<url>https://repo.jenkins-ci.org/public</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>maven.jenkins-ci.org</id>
+			<url>https://repo.jenkins-ci.org/public</url>
+		</pluginRepository>
+	</pluginRepositories>
 
-    <dependencies>
+	<dependencies>
 
-        <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>1.24</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.jmockit</groupId>
+			<artifactId>jmockit</artifactId>
+			<version>1.24</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.9.1</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.9.1</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>com.pholser</groupId>
-            <artifactId>junit-quickcheck-core</artifactId>
-            <version>${junit-quickcheck.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.pholser</groupId>
+			<artifactId>junit-quickcheck-core</artifactId>
+			<version>${junit-quickcheck.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.pholser</groupId>
-            <artifactId>junit-quickcheck-generators</artifactId>
-            <version>${junit-quickcheck.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.pholser</groupId>
+			<artifactId>junit-quickcheck-generators</artifactId>
+			<version>${junit-quickcheck.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.browserstack</groupId>
-            <artifactId>automate-client-java</artifactId>
-            <version>0.3</version>
-        </dependency>
+		<dependency>
+			<groupId>com.browserstack</groupId>
+			<artifactId>automate-client-java</artifactId>
+			<version>0.3</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.browserstack</groupId>
-            <artifactId>browserstack-local-java</artifactId>
-            <version>1.0.2</version>
-        </dependency>
+		<dependency>
+			<groupId>com.browserstack</groupId>
+			<artifactId>browserstack-local-java</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
-        </dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.10</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>credentials</artifactId>
-            <version>1.8</version>
-        </dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>credentials</artifactId>
+			<version>1.8</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>1.10</version>
-        </dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>junit</artifactId>
+			<version>1.10</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.brsanthu</groupId>
-            <artifactId>google-analytics-java</artifactId>
-            <version>1.1.2</version>
-        </dependency>
-        
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+			<groupId>com.brsanthu</groupId>
+			<artifactId>google-analytics-java</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.8.2</version>
 		</dependency>
-    </dependencies>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>plugin.properties</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>plugin.properties</exclude>
-                </excludes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-step-api</artifactId>
+			<version>2.12</version>
+			<scope>compile</scope>
+		</dependency>
 
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <systemProperties>
-                        <property>
-                            <name>hudson.udp</name>
-                            <value>33849</value>
-                        </property>
-                    </systemProperties>
-                    <reuseForks>true</reuseForks>
-                    <forkCount>1</forkCount>
-                    <argLine>${argLine} -Xmx512m -XX:MaxPermSize=256m</argLine>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-cps</artifactId>
+			<version>2.39</version>
+			<scope>compile</scope>
+		</dependency>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <properties>
-                <ga.tracking.id>UA-79358556-1</ga.tracking.id>
-            </properties>
-        </profile>
-    </profiles>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-job</artifactId>
+			<version>2.11.2</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-basic-steps</artifactId>
+			<version>2.6</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-durable-task-step</artifactId>
+			<version>2.13</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-api</artifactId>
+			<version>2.20</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-support</artifactId>
+			<version>2.14</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>structs</artifactId>
+			<version>1.7</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>plugin.properties</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>plugin.properties</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.5.201505241946</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<systemProperties>
+						<property>
+							<name>hudson.udp</name>
+							<value>33849</value>
+						</property>
+					</systemProperties>
+					<reuseForks>true</reuseForks>
+					<forkCount>1</forkCount>
+					<argLine>${argLine} -Xmx512m -XX:MaxPermSize=256m</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<properties>
+				<ga.tracking.id>UA-79358556-1</ga.tracking.id>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>

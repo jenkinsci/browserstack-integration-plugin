@@ -6,7 +6,7 @@ import org.apache.tools.ant.types.FileSet;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-
+import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
@@ -23,153 +23,95 @@ import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 @Extension
 public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescriptor {
-    private static final String NAMESPACE = "browserStack";
+  private static final String NAMESPACE = "browserStack";
 
-    private String credentialsId;
-    private LocalConfig localConfig;
-    // By default usage stats are enabled. But user's can choose to disable through Jenkin's configuration.
-    private boolean usageStatsEnabled = true;
+  private String credentialsId;
+  private LocalConfig localConfig;
+  // By default usage stats are enabled. But user's can choose to disable through Jenkin's
+  // configuration.
+  private boolean usageStatsEnabled = true;
 
-    public BrowserStackBuildWrapperDescriptor() {
-        super(BrowserStackBuildWrapper.class);
-        load();
+  public BrowserStackBuildWrapperDescriptor() {
+    super(BrowserStackBuildWrapper.class);
+    load();
 
-        if (usageStatsEnabled) {
-            Analytics.trackInstall();
-        }
+    if (usageStatsEnabled) {
+      Analytics.trackInstall();
+    }
+  }
+
+  @Override
+  public String getDisplayName() {
+    return "BrowserStack";
+  }
+
+  @Override
+  public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+    if (formData.has(NAMESPACE)) {
+      JSONObject config = formData.getJSONObject(NAMESPACE);
+      req.bindJSON(this, config);
+      save();
+      if (config.has("usageStatsEnabled")) {
+        setEnableUsageStats(config.getBoolean("usageStatsEnabled"));
+      }
     }
 
-    @Override
-    public String getDisplayName() {
-        return "BrowserStack";
+    return true;
+  }
+
+  @Override
+  public boolean isApplicable(AbstractProject<?, ?> item) {
+    return true;
+  }
+
+
+  public ListBoxModel doFillCredentialsIdItems(@AncestorInPath final Item context) {
+    return BrowserStackBuildWrapperOperations.doFillCredentialsIdItems(context);
+  }
+
+  public FormValidation doCheckLocalPath(@AncestorInPath final AbstractProject project,
+      @QueryParameter final String localPath) {
+    return BrowserStackBuildWrapperOperations.doCheckLocalPath(project, localPath);
+  }
+
+  public String getCredentialsId() {
+    return credentialsId;
+  }
+
+  public void setCredentialsId(String credentialsId) {
+    this.credentialsId = credentialsId;
+  }
+
+  public LocalConfig getLocalConfig() {
+    return localConfig;
+  }
+
+  public void setLocalConfig(LocalConfig localConfig) {
+    this.localConfig = localConfig;
+  }
+
+  public boolean getEnableUsageStats() {
+    return usageStatsEnabled;
+  }
+
+  public void setEnableUsageStats(boolean usageStatsEnabled) {
+    this.usageStatsEnabled = usageStatsEnabled;
+    Analytics.setEnabled(this.usageStatsEnabled);
+    // We track an install if one has not been done before.
+    // Since a user could have chosen to disable the plugin and then chosen to re-enable it,
+    // before installing a newer version of the plugin.
+    if (this.usageStatsEnabled) {
+      Analytics.trackInstall();
     }
+  }
 
-    @Override
-    public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-        if (formData.has(NAMESPACE)) {
-            JSONObject config = formData.getJSONObject(NAMESPACE);
-            req.bindJSON(this, config);
-            save();
-            if (config.has("usageStatsEnabled")) {
-                setEnableUsageStats(config.getBoolean("usageStatsEnabled"));
-            }
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean isApplicable(AbstractProject<?, ?> item) {
-        return true;
-    }
-
-
-    public ListBoxModel doFillCredentialsIdItems(@AncestorInPath final Item context) {
-        if (context != null && !context.hasPermission(Item.CONFIGURE)) {
-            return new StandardListBoxModel();
-        }
-
-        return new StandardListBoxModel()
-                .withMatching(CredentialsMatchers.anyOf(
-                        CredentialsMatchers.instanceOf(BrowserStackCredentials.class)),
-                        CredentialsProvider.lookupCredentials(
-                                BrowserStackCredentials.class,
-                                context,
-                                ACL.SYSTEM,
-                                new ArrayList<DomainRequirement>()));
-    }
-
-    public FormValidation doCheckLocalPath(@AncestorInPath final AbstractProject project,
-                                           @QueryParameter final String localPath) {
-        final String path = Util.fixEmptyAndTrim(localPath);
-        if (StringUtils.isBlank(path)) {
-            return FormValidation.ok();
-        }
-
-        try {
-            File f = resolvePath(project, localPath);
-            if (f != null) {
-                return FormValidation.ok();
-            }
-        } catch (Exception e) {
-            return FormValidation.error(e.getMessage());
-        }
-
-        return FormValidation.error("Invalid path.");
-    }
-
-    public String getCredentialsId() {
-        return credentialsId;
-    }
-
-    public void setCredentialsId(String credentialsId) {
-        this.credentialsId = credentialsId;
-    }
-
-    public LocalConfig getLocalConfig() {
-        return localConfig;
-    }
-
-    public void setLocalConfig(LocalConfig localConfig) {
-        this.localConfig = localConfig;
-    }
-
-    public boolean getEnableUsageStats() {
-        return usageStatsEnabled;
-    }
-
-    public void setEnableUsageStats(boolean usageStatsEnabled) {
-        this.usageStatsEnabled = usageStatsEnabled;
-        Analytics.setEnabled(this.usageStatsEnabled);
-        // We track an install if one has not been done before.
-        // Since a user could have chosen to disable the plugin and then chosen to re-enable it,
-        // before installing a newer version of the plugin.
-        if (this.usageStatsEnabled) {
-            Analytics.trackInstall();
-        }
-    }
-
-    private static int compareIntegers(int x, int y) {
-        return (x == y) ? 0 : (x < y) ? -1 : 1;
-    }
-
-    public File resolvePath(final AbstractProject project, final String path) throws IOException, InterruptedException {
-        File f = new File(path);
-        if (f.isAbsolute() && (!f.isFile() || !f.canExecute())) {
-            return null;
-        }
-
-        // For absolute paths
-        FormValidation validateExec = FormValidation.validateExecutable(path);
-        if (validateExec.kind == FormValidation.Kind.OK) {
-            return f;
-        }
-
-        // Ant style path definitions
-        FilePath workspace = project.getSomeWorkspace();
-        if (workspace != null) {
-            File workspaceRoot = new File(workspace.toURI());
-            FileSet fileSet = Util.createFileSet(workspaceRoot, path);
-            FileScanner fs = fileSet.getDirectoryScanner();
-            fs.setIncludes(new String[]{path});
-            fs.scan();
-
-            String[] includedFiles = fs.getIncludedFiles();
-            if (includedFiles.length > 0) {
-                File includedFile = new File(workspaceRoot, includedFiles[0]);
-                if (includedFile.exists() && includedFile.isFile() && includedFile.canExecute()) {
-                    return includedFile;
-                }
-            }
-        }
-
-        return null;
-    }
+  private static int compareIntegers(int x, int y) {
+    return (x == y) ? 0 : (x < y) ? -1 : 1;
+  }
 }

@@ -58,20 +58,12 @@ public class AutomateTestAction extends TestAction {
         || this.browserStackSession.getSessionId().isEmpty() || run == null) {
       return null;
     }
-
-    BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem =
-        BrowserStackBuildWrapper.findBrowserStackBuildWrapper(run.getParent());
-    if (wrapperItem == null || wrapperItem.buildWrapper == null) {
+    BrowserStackBuildAction buildAction = run.getAction(BrowserStackBuildAction.class);
+    if (buildAction == null) {
       return null;
     }
-
-    BrowserStackCredentials credentials = BrowserStackCredentials
-        .getCredentials(wrapperItem.buildItem, wrapperItem.buildWrapper.getCredentialsId());
-    if (credentials == null) {
-      return null;
-    }
+    BrowserStackCredentials credentials = buildAction.getBrowserStackCredentials();
     Session activeSession = getSession(credentials, this.browserStackSession.getProjectType());
-
     return activeSession;
   }
 

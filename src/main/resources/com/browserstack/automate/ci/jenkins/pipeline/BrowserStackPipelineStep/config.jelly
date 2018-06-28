@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core"
+         xmlns:st="jelly:stapler"
+         xmlns:f="/lib/form"
+         xmlns:c="/lib/credentials">
+
+    <f:entry title="${%credentials}" field="credentialsId">
+        <c:select default="${descriptor.getCredentialsId()}"/>
+    </f:entry>
+
+    <f:optionalBlock title="${%browserStackLocalBlock}" field="localConfig"
+                     checked="${instance.localConfig != null}">
+        <j:set var="localConfig" value="${instance.localConfig}"/>
+
+        <!-- // TODO: figure out how path should work for Master-Slave configurations -->
+        <f:entry title="${%browserStackLocalPath}" field="localPath">
+            <f:textbox value="${localConfig.localPath}"/>
+        </f:entry>
+
+        <f:entry title="${%browserStackLocalOptions}" field="localOptions">
+            <f:textbox value="${localConfig.localOptions}"/>
+        </f:entry>
+    </f:optionalBlock>
+
+    <f:block>
+        <small>Note: Skip this if you are using BrowserStack Local bindings in your code.</small>
+    </f:block>
+
+</j:jelly>
