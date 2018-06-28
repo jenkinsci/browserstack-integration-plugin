@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
-	xmlns:st="jelly:stapler"
- 	xmlns:f="/lib/form">
+  xmlns:st="jelly:stapler"
+  xmlns:f="/lib/form">
     <f:entry title="App path" field="appPath">
-        <f:textbox/>
+      <f:textbox/>
     </f:entry>
 </j:jelly>
