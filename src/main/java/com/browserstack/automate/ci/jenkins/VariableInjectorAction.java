@@ -1,4 +1,4 @@
-package com.browserstack.automate.ci.common;
+package com.browserstack.automate.ci.jenkins;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +15,7 @@ import jenkins.model.RunAction2;
  *
  * Description : This class is for injecting environment variables.
  */
-public class VariableInjectorAction
-    implements RunAction2, StaplerProxy, EnvironmentContributingAction {
+public class VariableInjectorAction implements EnvironmentContributingAction {
 
   protected transient @CheckForNull Map<String, String> envMap;
   private transient @CheckForNull Run<?, ?> build;
@@ -27,33 +26,17 @@ public class VariableInjectorAction
 
   @Override
   public String getIconFileName() {
-    return Constants.VariableInjectorAction.ICON_FILE_NAME;
+    return null;
   }
 
   @Override
   public String getDisplayName() {
-    return Constants.VariableInjectorAction.DISPLAY_NAME;
+    return null;
   }
 
   @Override
   public String getUrlName() {
     return null;
-  }
-
-  @Override
-  public Object getTarget() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void onAttached(Run<?, ?> r) {
-    build = r;
-
-  }
-
-  @Override
-  public void onLoad(Run<?, ?> r) {
-    build = r;
   }
 
   public void overrideAll(Map<String, String> newEnvMap) {
