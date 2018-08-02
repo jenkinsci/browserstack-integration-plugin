@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.jenkins.pipeline;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -44,6 +45,11 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
 
     BrowserStackCredentials credentials =
         BrowserStackCredentials.getCredentials(run.getParent(), credentialsId);
+
+    if (credentials == null) {
+      logError(logger, "Credentials id is invalid. Aborting!!!");
+      return null;
+    }
 
     BrowserStackBuildAction action = run.getAction(BrowserStackBuildAction.class);
     if (action == null) {
