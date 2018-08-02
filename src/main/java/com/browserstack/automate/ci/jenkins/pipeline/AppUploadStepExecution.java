@@ -52,6 +52,7 @@ public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<
         .withContext(EnvironmentExpander.merge(getContext().get(EnvironmentExpander.class),
             new ExpanderImpl(overrides)))
         .withCallback(BodyExecutionCallback.wrap(getContext())).start();
+    PluginLogger.log(logger, "Environment variable BROWSERSTACK_APP_ID set with value : " + appId);
     return null;
   }
 }
