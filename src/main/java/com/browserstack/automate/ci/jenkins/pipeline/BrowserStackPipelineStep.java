@@ -7,6 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
@@ -26,8 +27,12 @@ public class BrowserStackPipelineStep extends Step {
   public LocalConfig localConfig;
 
   @DataBoundConstructor
-  public BrowserStackPipelineStep(String credentialsId, LocalConfig localConfig) {
+  public BrowserStackPipelineStep(String credentialsId) {
     this.credentialsId = credentialsId;
+  }
+
+  @DataBoundSetter
+  public void setLocalConfig(LocalConfig localConfig) {
     this.localConfig = localConfig;
   }
 
