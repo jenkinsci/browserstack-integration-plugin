@@ -139,7 +139,7 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.3</version>
+      <version>0.4</version>
     </dependency>
 
     <dependency>
