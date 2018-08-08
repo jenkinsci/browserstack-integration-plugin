@@ -45,11 +45,16 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
 
     @Override
     public TestResultAction.Data getTestData(AbstractBuild<?, ?> abstractBuild, Launcher launcher, BuildListener buildListener, TestResult testResult) throws IOException, InterruptedException {
-        return contributeTestData(abstractBuild, abstractBuild.getWorkspace(), launcher, buildListener, testResult);
+        FilePath filePath = abstractBuild.getWorkspace();
+        if(filePath == null) {
+            return null;
+        }else {
+            return contributeTestData(abstractBuild, filePath, launcher, buildListener, testResult);
+        }
     }
 
     @Override
-    public TestResultAction.Data contributeTestData(Run<?, ?> run, @Nonnull FilePath workspace,
+    public TestResultAction.Data contributeTestData(Run<?, ?> run, FilePath workspace,
                                                     Launcher launcher, TaskListener listener,
                                                     TestResult testResult) throws IOException, InterruptedException {
         log(listener.getLogger(), "Publishing test results");
