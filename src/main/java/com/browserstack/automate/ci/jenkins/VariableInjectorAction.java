@@ -17,7 +17,7 @@ import jenkins.model.RunAction2;
  */
 public class VariableInjectorAction implements EnvironmentContributingAction {
 
-  protected transient @CheckForNull Map<String, String> envMap;
+  protected transient @CheckForNull Map<String, String> envMap = new HashMap<String, String>();;
   private transient @CheckForNull Run<?, ?> build;
 
   public VariableInjectorAction(Map<String, String> envMap) {
@@ -53,12 +53,10 @@ public class VariableInjectorAction implements EnvironmentContributingAction {
     return envMap.keySet();
   }
 
-  public String getEnvValue(String key) {
-    return this.envMap.get(key);
-  }
-
   @Override
   public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-    env.putAll(this.envMap);
+    if (this.envMap != null && env != null) {
+      env.putAll(this.envMap);
+    }
   }
 }
