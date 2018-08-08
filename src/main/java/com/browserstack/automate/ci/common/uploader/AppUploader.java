@@ -5,18 +5,15 @@ import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.browserstack.automate.exception.AppAutomateException;
 import com.browserstack.automate.exception.InvalidFileExtensionException;
-import hudson.model.BuildListener;
 
 public class AppUploader {
 
   String appPath;
   BrowserStackCredentials credentials;
-  BuildListener listener;
 
-  public AppUploader(String appPath, BrowserStackCredentials credentials, BuildListener listener) {
+  public AppUploader(String appPath, BrowserStackCredentials credentials) {
     this.appPath = appPath;
     this.credentials = credentials;
-    this.listener = listener;
   }
 
   public String uploadFile()

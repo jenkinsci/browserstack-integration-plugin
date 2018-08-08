@@ -1,8 +1,9 @@
 package com.browserstack.automate.ci.jenkins.local;
 
+import java.io.Serializable;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class LocalConfig {
+public class LocalConfig implements Serializable {
     private String localPath;
     private String localOptions;
 
