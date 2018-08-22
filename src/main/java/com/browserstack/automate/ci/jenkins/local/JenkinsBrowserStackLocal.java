@@ -15,6 +15,9 @@ import java.util.UUID;
 
 public class JenkinsBrowserStackLocal extends Local implements Serializable {
     private static final String OPTION_LOCAL_IDENTIFIER = "localIdentifier";
+    // local identifier doesn't override when user passes --local-identifier
+    // Not replacing existing localIdentifier because of legacy reason 
+    private static final String OPTION_LOCAL_IDENTIFIER_2 = "--local-identifier";
 
     private final String accesskey;
     private final String binarypath;
@@ -33,7 +36,7 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
         int localIdPos = 0;
         List<String> arguments = new ArrayList<String>();
         for (int i = 0; i < args.length; i++) {
-            if (args[i].contains(OPTION_LOCAL_IDENTIFIER)) {
+            if (args[i].contains(OPTION_LOCAL_IDENTIFIER) || args[i].contains(OPTION_LOCAL_IDENTIFIER_2)) {
                 localIdPos = i;
                 if (i < args.length - 1 && args[i + 1] != null && !args[i + 1].startsWith("-")) {
                     localIdentifier = args[i + 1];
