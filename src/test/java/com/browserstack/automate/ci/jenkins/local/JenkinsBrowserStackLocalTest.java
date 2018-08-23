@@ -65,5 +65,27 @@ public class JenkinsBrowserStackLocalTest {
        Assert.assertTrue("Local arguments should contain $proxy_user ", ArrayUtils.contains(arguments, PROXY_USER));
        Assert.assertTrue("Local arguments should contain $proxy_password ", ArrayUtils.contains(arguments, PROXY_PASSWORD));
     }
+    
+    @Test
+    public void testLocalIdentifierWithEnvLocalOptions() {
+      LocalConfig localConfig = new LocalConfig();
+      localConfig.setLocalOptions("--local-identifier "+ LOCAL_IDENTIFIER +" --proxy-host $proxy_host --proxy-port $proxy_port --proxy-user $proxy_user --proxy-password $proxy_password");
+      String buildTag = "tag";
+      EnvVars envVars = new EnvVars();
+      envVars.put("proxy_host", PROXY_HOST);
+      envVars.put("proxy_port", PROXY_PORT);
+      envVars.put("proxy_user", PROXY_USER);
+      envVars.put("proxy_password", PROXY_PASSWORD);
+      JenkinsBrowserStackLocal jenkinsBSLocal = new JenkinsBrowserStackLocal(ACCESS_KEY, localConfig, buildTag, envVars, System.out);
+      String[] arguments = jenkinsBSLocal.getArguments();
+      String localIdentifier = jenkinsBSLocal.getLocalIdentifier();
+     
+      Assert.assertTrue("Local arguments should contain $proxy_host ", ArrayUtils.contains(arguments, PROXY_HOST));
+      Assert.assertTrue("Local arguments should contain $proxy_port ", ArrayUtils.contains(arguments, PROXY_PORT));
+      Assert.assertTrue("Local arguments should contain $proxy_user ", ArrayUtils.contains(arguments, PROXY_USER));
+      Assert.assertTrue("Local arguments should contain $proxy_password ", ArrayUtils.contains(arguments, PROXY_PASSWORD));
+      Assert.assertEquals("Local identifier should be overriden when passed through localOption", LOCAL_IDENTIFIER, localIdentifier);
+      
+    }
 
 }
