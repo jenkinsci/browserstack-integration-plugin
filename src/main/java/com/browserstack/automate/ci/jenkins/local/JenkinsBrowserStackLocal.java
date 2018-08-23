@@ -27,7 +27,7 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     private final String[] arguments;
     private String localIdentifier;
     private EnvVars envVars;
-    private PrintStream logger;
+    private transient PrintStream logger; // transient since PrintStream is no serializable, it breaks in PipeLine tests 
 
     public JenkinsBrowserStackLocal(String accesskey, LocalConfig localConfig, String buildTag, EnvVars envVars, PrintStream logger) {
         this.accesskey = accesskey;
@@ -126,6 +126,10 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
 
     public String getLocalIdentifier() {
         return localIdentifier;
+    }
+
+    public String[] getArguments() {
+        return arguments;
     }
 
     private static DaemonAction detectDaemonAction(List<String> command) {
