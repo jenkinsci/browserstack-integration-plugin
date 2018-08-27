@@ -63,7 +63,7 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
     if (accessKey != null && this.localConfig != null) {
       try {
         startBrowserStackLocal(run.getFullDisplayName(), taskListener.getLogger(), accessKey,
-            launcher, run.getEnvironment(taskListener));
+            launcher,  getContext().get(EnvVars.class));
       } catch (Exception e) {
         taskListener.fatalError(e.getMessage());
         throw new IOException(e.getCause());
