@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class JenkinsBrowserStackLocal extends Local implements Serializable {
+    private static final long serialVersionUID = 1830651088511115761L;
     private static final String OPTION_LOCAL_IDENTIFIER = "localIdentifier";
     // local identifier doesn't override when user passes --local-identifier
     // Not replacing existing localIdentifier because of legacy reason 
@@ -131,7 +132,9 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     }
 
     public String[] getArguments() {
-        return arguments;
+      // using clone()  here because without it findbugs raises EI_EXPOSE_REP.
+      // https://stackoverflow.com/a/1732803/2577465
+      return arguments.clone();
     }
 
     private static DaemonAction detectDaemonAction(List<String> command) {
