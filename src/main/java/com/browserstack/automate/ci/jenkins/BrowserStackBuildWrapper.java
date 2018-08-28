@@ -11,6 +11,7 @@ import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractItem;
@@ -60,7 +61,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     AutomateBuildEnvironment buildEnv = new AutomateBuildEnvironment(credentials, launcher, logger);
     if (accesskey != null && this.localConfig != null) {
       try {
-        buildEnv.startBrowserStackLocal(build.getFullDisplayName());
+        buildEnv.startBrowserStackLocal(build.getFullDisplayName(), build.getEnvironment(listener));
       } catch (Exception e) {
         listener.fatalError(e.getMessage());
         throw new IOException(e.getCause());
@@ -119,8 +120,8 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
       super.buildEnvVars(env);
     }
 
-    public void startBrowserStackLocal(String buildTag) throws Exception {
-      browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig, buildTag);
+    public void startBrowserStackLocal(String buildTag, EnvVars envVars) throws Exception {
+      browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig, buildTag, envVars, logger);
       log(logger, "Local: Starting BrowserStack Local...");
       browserstackLocal.start(launcher);
       log(logger, "Local: Started");

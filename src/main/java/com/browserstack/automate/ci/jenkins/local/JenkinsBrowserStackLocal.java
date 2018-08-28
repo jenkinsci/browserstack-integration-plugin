@@ -1,8 +1,11 @@
 package com.browserstack.automate.ci.jenkins.local;
 
+import com.browserstack.automate.ci.common.logger.PluginLogger;
 import com.browserstack.local.Local;
+import hudson.EnvVars;
 import hudson.Launcher;
 import jenkins.security.MasterToSlaveCallable;
+import java.io.PrintStream;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -14,16 +17,24 @@ import java.util.Map;
 import java.util.UUID;
 
 public class JenkinsBrowserStackLocal extends Local implements Serializable {
+    private static final long serialVersionUID = 1830651088511115761L;
     private static final String OPTION_LOCAL_IDENTIFIER = "localIdentifier";
+    // local identifier doesn't override when user passes --local-identifier
+    // Not replacing existing localIdentifier because of legacy reason 
+    private static final String OPTION_LOCAL_IDENTIFIER_2 = "--local-identifier";
 
     private final String accesskey;
     private final String binarypath;
     private final String[] arguments;
     private String localIdentifier;
+    private EnvVars envVars;
+    private transient PrintStream logger; // transient since PrintStream is no serializable, it breaks in PipeLine tests 
 
-    public JenkinsBrowserStackLocal(String accesskey, LocalConfig localConfig, String buildTag) {
+    public JenkinsBrowserStackLocal(String accesskey, LocalConfig localConfig, String buildTag, EnvVars envVars, PrintStream logger) {
         this.accesskey = accesskey;
         this.binarypath = localConfig.getLocalPath();
+        this.envVars = envVars;
+        this.logger = logger;
         String localOptions = localConfig.getLocalOptions();
         this.arguments = processLocalArguments((localOptions != null) ? localOptions.trim() : "", buildTag);
     }
@@ -31,14 +42,16 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     private String[] processLocalArguments(final String argString, String buildTag) {
         String[] args = argString.split("\\s+");
         int localIdPos = 0;
+        boolean localIdentifierOverriden = false;
         List<String> arguments = new ArrayList<String>();
         for (int i = 0; i < args.length; i++) {
-            if (args[i].contains(OPTION_LOCAL_IDENTIFIER)) {
+            if (args[i].contains(OPTION_LOCAL_IDENTIFIER) || args[i].contains(OPTION_LOCAL_IDENTIFIER_2)) {
                 localIdPos = i;
                 if (i < args.length - 1 && args[i + 1] != null && !args[i + 1].startsWith("-")) {
                     localIdentifier = args[i + 1];
                     if (StringUtils.isNotBlank(localIdentifier)) {
-                        return args;
+                        localIdentifierOverriden = true;
+                        continue;
                     }
 
                     // skip next, since already processed
@@ -47,14 +60,22 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
 
                 continue;
             }
+            
+            // inject from environment variable if variable starts with $
+            if (args[i].startsWith("$")) {
+                String envVarName = args[i].substring(1);
+            	PluginLogger.log(logger,
+                        "Local: Replacing " + args[i] + " in local options with Environment variable "+ envVarName);
+            	args[i] = envVars.get(envVarName);
+            }
 
             arguments.add(args[i]);
         }
-
-        localIdentifier = UUID.randomUUID().toString() + "-" + buildTag.replaceAll("[^\\w\\-\\.]", "_");
-
-        arguments.add(localIdPos, localIdentifier);
-        arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
+        if (!localIdentifierOverriden) {
+          localIdentifier = UUID.randomUUID().toString() + "-" + buildTag.replaceAll("[^\\w\\-\\.]", "_");
+          arguments.add(localIdPos, localIdentifier);
+          arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
+        }
         return arguments.toArray(new String[]{});
     }
 
@@ -108,6 +129,12 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
 
     public String getLocalIdentifier() {
         return localIdentifier;
+    }
+
+    public String[] getArguments() {
+      // using clone()  here because without it findbugs raises EI_EXPOSE_REP.
+      // https://stackoverflow.com/a/1732803/2577465
+      return arguments.clone();
     }
 
     private static DaemonAction detectDaemonAction(List<String> command) {

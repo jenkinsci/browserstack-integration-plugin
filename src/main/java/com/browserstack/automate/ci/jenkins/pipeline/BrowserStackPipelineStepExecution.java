@@ -16,6 +16,7 @@ import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -62,7 +63,7 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
     if (accessKey != null && this.localConfig != null) {
       try {
         startBrowserStackLocal(run.getFullDisplayName(), taskListener.getLogger(), accessKey,
-            launcher);
+            launcher,  getContext().get(EnvVars.class));
       } catch (Exception e) {
         taskListener.fatalError(e.getMessage());
         throw new IOException(e.getCause());
@@ -83,8 +84,8 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
   }
 
   public void startBrowserStackLocal(String buildTag, PrintStream logger, String accessKey,
-      Launcher launcher) throws Exception {
-    browserStackLocal = new JenkinsBrowserStackLocal(accessKey, localConfig, buildTag);
+      Launcher launcher, EnvVars envVars) throws Exception {
+    browserStackLocal = new JenkinsBrowserStackLocal(accessKey, localConfig, buildTag, envVars, logger);
     log(logger, "Local: Starting BrowserStack Local...");
     browserStackLocal.start(launcher);
     log(logger, "Local: Started");
