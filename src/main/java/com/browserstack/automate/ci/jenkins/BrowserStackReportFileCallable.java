@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.report.XmlReporter;
+import com.google.gson.Gson;
 import hudson.AbortException;
 import hudson.Util;
 import hudson.remoting.VirtualChannel;
@@ -10,6 +11,7 @@ import org.apache.tools.ant.types.FileSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +46,9 @@ public class BrowserStackReportFileCallable extends MasterToSlaveFileCallable<Ma
         DirectoryScanner ds = fs.getDirectoryScanner();
         ds.scan();
 
-        Map<String, String> testSessionMap = new HashMap<String, String>();
+        ArrayList<Map<String, String>> TestSessionMapList = new ArrayList<>();
         String[] filePaths = ds.getIncludedFiles();
+        HashMap<String, String> testSessionMap = new HashMap<>();
         if (filePaths.length == 0) {
             return testSessionMap;
         }
@@ -62,7 +65,9 @@ public class BrowserStackReportFileCallable extends MasterToSlaveFileCallable<Ma
             if (buildTime - 3000 <= f.lastModified()) {
                 Map<String, String> results = XmlReporter.parse(f);
                 if (!results.isEmpty()) {
+                    testSessionMap = new HashMap<>();
                     testSessionMap.putAll(results);
+                    TestSessionMapList.add(testSessionMap);
                     parsed = true;
                 }
             }
@@ -84,6 +89,9 @@ public class BrowserStackReportFileCallable extends MasterToSlaveFileCallable<Ma
                                     "For example, %s is %s old%n", f,
                             Util.getTimeSpanString(buildTime - f.lastModified())));
         }
+
+        testSessionMap = new HashMap<String, String>();
+        testSessionMap.put("results", new Gson().toJson(TestSessionMapList));
 
         return testSessionMap;
     }

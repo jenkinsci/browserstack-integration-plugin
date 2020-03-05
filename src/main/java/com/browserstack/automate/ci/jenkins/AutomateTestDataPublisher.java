@@ -6,6 +6,8 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.logDebug;
 
 import javax.annotation.Nonnull;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.browserstack.automate.ci.common.AutomateTestCase;
@@ -25,6 +27,8 @@ import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +66,10 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
         AutomateActionData automateActionData = new AutomateActionData();
         Map<String, Long> testCaseIndices = new HashMap<String, Long>();
 
+        String result = testSessionMap.get("results");
+        Type listType = new TypeToken<ArrayList>() {}.getType();
+        ArrayList<Map> testSessionMapList = new Gson().fromJson(result, listType);
+
         int testCount = 0;
         int sessionCount = 0;
 
@@ -77,7 +85,8 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
                 testCaseIndices.put(testCaseName, ++testIndex);
                 logDebug(listener.getLogger(), testCaseName + " / " + testCaseName + " <=> " + testIndex);
 
-                String testId = String.format("%s{%d}", testCaseName, testIndex);
+                String testId = String.format("%s{%d}", testCaseName, 0);
+                testSessionMap = testSessionMapList.get((int)(long)testIndex);
                 if (testSessionMap.containsKey(testId)) {
                     AutomateTestAction automateTestAction = new AutomateTestAction(run, caseResult, testSessionMap.get(testId));
                     automateActionData.registerTestAction(caseResult.getId(), automateTestAction);
