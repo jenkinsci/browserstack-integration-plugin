@@ -45,6 +45,7 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
     private static final String CREDENTIAL_DISPLAY_NAME = "BrowserStack";
     private static final String OK_VALID_AUTH = "Success";
     private static final String ERR_INVALID_AUTH = "Invalid username or access key!";
+    private static final String ERR_BS_BLOCKED = "Unable to connect to BrowserStack!";
 
     private final String id;
 
@@ -127,7 +128,7 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
             return FormValidation.error(e.getMessage());
         }
 
-        return FormValidation.error(ERR_INVALID_AUTH);
+        return FormValidation.error(ERR_BS_BLOCKED);
     }
 
     public static BrowserStackCredentials getCredentials(final AbstractItem buildItem, final String credentialsId) {
