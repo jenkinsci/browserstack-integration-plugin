@@ -1,0 +1,32 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+    <style>
+	.iframe-container {
+	    position: relative;
+    	padding-bottom: 56.25%;
+    	padding-top: 35px;
+    	height: 0;
+    	overflow: hidden;
+	}
+	.iframe-container iframe {
+    	position: absolute;
+    	top:0;
+    	left: 0;
+    	width: 100%;
+    	height: 100%;
+	}
+	</style>
+	<l:layout>
+        <st:include it="${it.build}" page="sidepanel.jelly"/>
+        <l:main-panel >
+       <div style="border-style: solid;border-width: thin;">
+	        	<div align="center">
+	        	<h3>Build Number: ${it.testType} </h3>
+	        	</div>
+       	 	</div>
+        	<div class="iframe-container">
+        	    <div>jingalala</div>
+            </div>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
