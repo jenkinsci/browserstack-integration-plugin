@@ -24,9 +24,15 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 public class BTPublisher extends Recorder implements SimpleBuildStep {
-    @DataBoundConstructor
-    public BTPublisher(String someText) {
+    private static final Log log = LogFactory.getLog(BTPublisher.class);
 
+    private String someText;
+    private String site;
+
+    @DataBoundConstructor
+    public BTPublisher(String someText, String site) {
+        this.someText = someText;
+        this.site = site;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -37,17 +43,17 @@ public class BTPublisher extends Recorder implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
 
-        listener.getLogger().println("RTP: Started!");
+        listener.getLogger().println("Generating Generic BrowserStack Reports");
 
         AbstractTextForBuild lfsBuildAction = new TextForBuild("<div>BT Publisher style</div>", "operatingSystem",
                 "browserName", "browserVersion", "resolution");
         lfsBuildAction.setBuild(build);
         ((TextForBuild) lfsBuildAction).setBuildName("buildname");
-        ((TextForBuild) lfsBuildAction).setBuildNumber("buildnumber");
-        ((TextForBuild) lfsBuildAction).setIframeLink("https://browserstack.com");
+        ((TextForBuild) lfsBuildAction).setBuildNumber(this.someText);
+        ((TextForBuild) lfsBuildAction).setIframeLink(this.site);
         build.addAction(lfsBuildAction);
 
-        listener.getLogger().println("RTP: Done!");
+        listener.getLogger().println("Generated Report for BrowserStack");
         return;
     }
 

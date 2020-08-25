@@ -19,13 +19,16 @@
 	<l:layout>
         <st:include it="${it.build}" page="sidepanel.jelly"/>
         <l:main-panel >
-       <div style="border-style: solid;border-width: thin;">
+        <div style="border-style: solid;border-width: thin;">
 	        	<div align="center">
-	        	<h3>Build Number: ${it.testType} </h3>
+	        	<h3>${it.iframeLink} </h3>
+	        	<h3>Browser: ${it.browser} </h3>
+	        	<h3>Resolution: ${it.resolution} </h3>
+	        	<h3>Build Number: ${it.buildNumber} </h3>
 	        	</div>
        	 	</div>
         	<div class="iframe-container">
-        	    <div>jingalala</div>
+            	<iframe src="${it.iframeLink}" height="1000" width="1024"></iframe>
             </div>
         </l:main-panel>
     </l:layout>

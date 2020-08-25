@@ -2,6 +2,7 @@ package com.browserstack.automate.ci.jenkins;
 
 import hudson.model.Action;
 import hudson.model.Run;
+import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 
 import java.util.ArrayList;
@@ -29,8 +30,8 @@ public class TextForBuild extends AbstractTextForBuild {
         this.browserName = browserName;
         this.browserVersion = browserVersion;
         this.resolution = resolution;
-        setIconFileName("some_icon");
-        setDisplayName("LT(" + operatingSystem + " " + browserName + "-" + browserVersion + " " + resolution + ")");
+        setIconFileName(Jenkins.RESOURCE_PATH + "/plugin/browserstack-integration/images/logo.png");
+        setDisplayName("Test Report");
         setTestUrl(displayName);
     }
 
