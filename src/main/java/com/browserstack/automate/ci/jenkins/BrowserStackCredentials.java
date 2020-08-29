@@ -123,6 +123,8 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         } catch (AutomateException e) {
             if (e.getStatusCode() == 401) {
                 return FormValidation.error(ERR_INVALID_AUTH);
+            } else {
+                return FormValidation.error(e.getMessage());
             }
         } catch (Exception e) {
             return FormValidation.error(e.getMessage());
