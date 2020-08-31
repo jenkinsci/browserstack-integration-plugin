@@ -45,12 +45,10 @@ public class BTPublisher extends Recorder implements SimpleBuildStep {
 
         listener.getLogger().println("Generating Generic BrowserStack Reports");
 
-        AbstractTextForBuild lfsBuildAction = new TextForBuild("<div>BT Publisher style</div>", "operatingSystem",
-                "browserName", "browserVersion", "resolution");
+        AbstractTextForBuild lfsBuildAction = new TextForBuild("<div>BT Publisher style</div>");
         lfsBuildAction.setBuild(build);
         ((TextForBuild) lfsBuildAction).setBuildName("buildname");
         ((TextForBuild) lfsBuildAction).setBuildNumber(this.someText);
-        ((TextForBuild) lfsBuildAction).setIframeLink(this.site);
         build.addAction(lfsBuildAction);
 
         listener.getLogger().println("Generated Report for BrowserStack");

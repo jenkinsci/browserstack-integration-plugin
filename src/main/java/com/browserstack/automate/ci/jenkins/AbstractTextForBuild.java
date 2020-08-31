@@ -8,7 +8,7 @@ public abstract class AbstractTextForBuild implements Action {
 
     protected String displayName;
     protected String iconFileName;
-    protected String testUrl;
+    protected String reportUrl;
 
     @Override
     public String getIconFileName() {
@@ -22,7 +22,7 @@ public abstract class AbstractTextForBuild implements Action {
 
     @Override
     public String getUrlName() {
-        return testUrl;
+        return reportUrl;
     }
 
     public Run<?, ?> getBuild() {
@@ -37,20 +37,12 @@ public abstract class AbstractTextForBuild implements Action {
         this.iconFileName = iconFileName;
     }
 
-    public void setDisplayName(String dn) {
-        // the displayname does not wrap after 46 characters
-        // so it will bleed into the view
-        int maxCharactersViewable = 46;
-        if (dn.length() > maxCharactersViewable - 3) {
-            // going to cut the string down and add "..."
-            dn = dn.substring(0, maxCharactersViewable - 3);
-            dn += "...";
-        }
-        displayName = dn;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    public void setTestUrl(String testUrl) {
-        this.testUrl = testUrl.replaceAll("[:.()|/ ]", "").toLowerCase();
+    public void setReportUrl(String reportUrl) {
+        this.reportUrl = reportUrl.replaceAll("[:.()|/ ]", "").toLowerCase();
     }
 
 }
