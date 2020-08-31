@@ -65,6 +65,11 @@ public class BrowserStackBuildWrapperOperations {
     if (buildTag != null) {
       env.put(BrowserStackEnvVars.BROWSERSTACK_BUILD, buildTag);
       logEnvVar(BrowserStackEnvVars.BROWSERSTACK_BUILD, buildTag);
+      
+      // Maintaining build name separately to have more control over it.
+      // To keep it consistent with other CI/CD plugins.
+      env.put(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME, buildTag);
+      logEnvVar(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME, buildTag);
     }
 
     String isLocalEnabled = localConfig != null ? "true" : "false";

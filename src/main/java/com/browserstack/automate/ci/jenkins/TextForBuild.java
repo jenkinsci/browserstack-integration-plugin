@@ -19,6 +19,8 @@ import com.browserstack.automate.model.Session;
 import com.browserstack.client.BrowserStackClient;
 import com.browserstack.client.exception.BrowserStackException;
 
+import org.json.JSONObject;
+
 public class TextForBuild extends AbstractTextForBuild {
     /*
      * Holds info about the Selenium Test
@@ -26,6 +28,7 @@ public class TextForBuild extends AbstractTextForBuild {
     private String buildName;
     private List<String> browserStackBuilds = new ArrayList<String>();
     private List<Session> browserStackSessions;
+    private List<JSONObject> result;
     private String buildNumber;
     private ProjectType projectType;
 
@@ -37,18 +40,15 @@ public class TextForBuild extends AbstractTextForBuild {
     }
 
     public void generateBrowserStackReport() {
-        System.out.println("INSIDE GENERATE BROWWSERSTACK REPORT...");
         BrowserStackBuildAction browserStackBuildAction = getBuild().getAction(BrowserStackBuildAction.class);
         if (browserStackBuildAction == null) {
             // TODO: add logging here of failure
-            System.out.println("browserStackBuildAction not found....");
             return;
         }
 
         BrowserStackCredentials credentials = browserStackBuildAction.getBrowserStackCredentials();
         if (credentials == null) {
             // TODO: adding logging here
-            System.out.println("Credentials not found...");
             return;
         }
 
@@ -56,52 +56,66 @@ public class TextForBuild extends AbstractTextForBuild {
         if (projectType.equals(ProjectType.APP_AUTOMATE)) {
             client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
-            System.out.println("Setting client as Automate........");
+            System.setProperty("browserstack.automate.api", "https://api.browserstack.com/automate");
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
         fetchBrowserStackBuilds(client);
         fetchBrowserStackSessions(client);
+        generateSessionsCollection();
     }
 
     private void fetchBrowserStackBuilds(BrowserStackClient client) {
         // TODO: fetch the buildIDs using the buildName
         // insert the buildIds in the List browserStackBuilds
-        System.out.println("Assigning random builds ids");
-        this.browserStackBuilds.add("1fe259030726f0ff9a00ac3e49049682a24e00d6");
+        this.browserStackBuilds.add("3e56e2d36339f9a711e4b8af1bd84f1767e75742");
     }
 
     private void fetchBrowserStackSessions(BrowserStackClient client) {
         List<Session> browserStackSessions;
-        Session a;
         try {
-            System.out.println("Trying to fetch sessions........");
-            // browserStackSessions = client.getSessions("1fe259030726f0ff9a00ac3e49049682a24e00d6");
-            a = client.getSession("dac3ed1bac2d923978cb8a6f416d2fa5f75a1949");
-            System.out.println("after fetching session...");
-            System.out.println(a);
+            browserStackSessions = client.getSessions(this.browserStackBuilds.get(0));
         } catch (BuildNotFound bnfException) {
             // TODO: add logging
-            System.out.println("BuildNotFound exception....");
-            System.out.println(bnfException);
-            return;
-        } catch (SessionNotFound snfException) {
-            System.out.println("Some snfException exception");
-            System.out.println(snfException);
             return;
         } catch (BrowserStackException bsException) {
             // TODO: add logging
-            System.out.println("Some BSTACK exception");
-            System.out.println(bsException);
             return;
         }
 
-        // this.browserStackSessions = browserStackSessions;
-        
-        // System.out.println("CHECK THE SESSIONS HERE ___________________________________________________");
-        // System.out.println(this.browserStackSessions);
-        System.out.println("CHECK SESSION HERE...");
-        System.out.println(a);
+        this.browserStackSessions = browserStackSessions; 
+    }
+
+    private void generateSessionsCollection() {
+        List<JSONObject> sessionsCollection = new ArrayList<JSONObject>();
+        for (int i = 0; i < this.browserStackSessions.size(); i++) {
+            Session session = this.browserStackSessions.get(i);
+            JSONObject sessionJSON = new JSONObject();
+
+            if (session.getName() == null || session.getName().isEmpty()) {
+                sessionJSON.put("name", session.getId());
+            } else {
+                sessionJSON.put("name", session.getName());
+            }
+
+            if (session.getDevice() == null || session.getDevice() == null) {
+                sessionJSON.put("browser", session.getBrowser());
+            } else {
+                sessionJSON.put("browser", session.getDevice());
+            }
+            sessionJSON.put("os", session.getOs());
+            sessionJSON.put("duration", session.getDuration());
+            sessionJSON.put("osVersion", session.getOsVersion());
+            sessionJSON.put("status", session.getStatus());
+            sessionJSON.put("url", session.getBrowserUrl());
+            sessionsCollection.add(sessionJSON);
+        }
+
+        this.result = sessionsCollection;
+    }
+
+    public List<JSONObject> getResult() {
+        return result;
     }
 
     public String getBuildName() {
