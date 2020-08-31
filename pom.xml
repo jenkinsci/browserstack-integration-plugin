@@ -135,6 +135,14 @@
       <version>${junit-quickcheck.version}</version>
     </dependency>
 
+    <!-- <dependency>
+      <groupId>com.browserstack</groupId>
+      <artifactId>automate-client-java</artifactId>
+      <scope>system</scope>
+      <version>0.4</version>
+      <systemPath>/Users/chaugs_rohan/Work/automate-client-java/target/automate-client-java-0.4.jar</systemPath>
+    </dependency> -->
+
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>

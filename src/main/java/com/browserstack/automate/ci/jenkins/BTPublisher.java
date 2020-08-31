@@ -21,18 +21,19 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
+
+import com.browserstack.automate.ci.common.enums.ProjectType;
+
 import java.io.IOException;
 
 public class BTPublisher extends Recorder implements SimpleBuildStep {
     private static final Log log = LogFactory.getLog(BTPublisher.class);
 
     private String someText;
-    private String site;
 
     @DataBoundConstructor
-    public BTPublisher(String someText, String site) {
+    public BTPublisher(String someText) {
         this.someText = someText;
-        this.site = site;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -45,11 +46,11 @@ public class BTPublisher extends Recorder implements SimpleBuildStep {
 
         listener.getLogger().println("Generating Generic BrowserStack Reports");
 
-        AbstractTextForBuild lfsBuildAction = new TextForBuild("<div>BT Publisher style</div>");
-        lfsBuildAction.setBuild(build);
-        ((TextForBuild) lfsBuildAction).setBuildName("buildname");
-        ((TextForBuild) lfsBuildAction).setBuildNumber(this.someText);
-        build.addAction(lfsBuildAction);
+        AbstractTextForBuild bstackReportAction = new TextForBuild(ProjectType.AUTOMATE, "this is the build name");
+        bstackReportAction.setBuild(build);
+        ((TextForBuild) bstackReportAction).setBuildNumber(this.someText);
+        ((TextForBuild) bstackReportAction).generateBrowserStackReport();
+        build.addAction(bstackReportAction);
 
         listener.getLogger().println("Generated Report for BrowserStack");
         return;

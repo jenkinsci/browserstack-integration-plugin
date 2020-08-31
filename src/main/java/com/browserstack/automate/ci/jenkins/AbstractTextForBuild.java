@@ -6,9 +6,9 @@ import hudson.model.Run;
 public abstract class AbstractTextForBuild implements Action {
     private Run<?, ?> build;
 
-    protected String displayName;
+    protected String displayName = "Test Report";
     protected String iconFileName;
-    protected String reportUrl;
+    protected String reportUrl = "testReport";
 
     @Override
     public String getIconFileName() {
@@ -35,14 +35,6 @@ public abstract class AbstractTextForBuild implements Action {
 
     public void setIconFileName(String iconFileName) {
         this.iconFileName = iconFileName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public void setReportUrl(String reportUrl) {
-        this.reportUrl = reportUrl.replaceAll("[:.()|/ ]", "").toLowerCase();
     }
 
 }
