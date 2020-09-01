@@ -68,13 +68,13 @@ public class TextForBuild extends AbstractTextForBuild {
     private void fetchBrowserStackBuilds(BrowserStackClient client) {
         // TODO: fetch the buildIDs using the buildName
         // insert the buildIds in the List browserStackBuilds
-        this.browserStackBuilds.add("3e56e2d36339f9a711e4b8af1bd84f1767e75742");
+        this.browserStackBuilds.add("225e89fdb45eba8a5d6e288be77f894c338c4aed");
     }
 
     private void fetchBrowserStackSessions(BrowserStackClient client) {
         List<Session> browserStackSessions;
         try {
-            browserStackSessions = client.getSessions(this.browserStackBuilds.get(0));
+            browserStackSessions = client.getSessions(this.browserStackBuilds.get(0), 1000);
         } catch (BuildNotFound bnfException) {
             // TODO: add logging
             return;
