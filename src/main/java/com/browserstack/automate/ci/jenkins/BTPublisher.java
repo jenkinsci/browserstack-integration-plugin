@@ -46,10 +46,10 @@ public class BTPublisher extends Recorder implements SimpleBuildStep {
 
         listener.getLogger().println("Generating Generic BrowserStack Reports");
 
-        AbstractTextForBuild bstackReportAction = new TextForBuild(ProjectType.AUTOMATE, "this is the build name");
+        AbstractBrowserStackReportForBuild bstackReportAction = new BrowserStackReportForBuild(ProjectType.AUTOMATE, "this is the build name");
         bstackReportAction.setBuild(build);
-        ((TextForBuild) bstackReportAction).setBuildNumber(this.someText);
-        ((TextForBuild) bstackReportAction).generateBrowserStackReport();
+        ((BrowserStackReportForBuild) bstackReportAction).setBuildNumber(this.someText);
+        ((BrowserStackReportForBuild) bstackReportAction).generateBrowserStackReport();
         build.addAction(bstackReportAction);
 
         listener.getLogger().println("Generated Report for BrowserStack");

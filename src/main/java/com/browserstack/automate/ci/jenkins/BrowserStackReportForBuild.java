@@ -1,38 +1,34 @@
 package com.browserstack.automate.ci.jenkins;
 
-import hudson.model.Action;
-import hudson.model.Run;
 import jenkins.model.Jenkins;
-import jenkins.tasks.SimpleBuildStep;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.exception.BuildNotFound;
-import com.browserstack.automate.exception.SessionNotFound;
-import com.browserstack.automate.model.Build;
 import com.browserstack.automate.model.Session;
 import com.browserstack.client.BrowserStackClient;
 import com.browserstack.client.exception.BrowserStackException;
 
 import org.json.JSONObject;
 
-public class TextForBuild extends AbstractTextForBuild {
+import javax.annotation.Nonnull;
+
+public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
     /*
      * Holds info about the Selenium Test
      */
     private String buildName;
-    private List<String> browserStackBuilds = new ArrayList<String>();
+    private String browserStackBuildId;
     private List<Session> browserStackSessions;
     private List<JSONObject> result;
     private String buildNumber;
     private ProjectType projectType;
 
-    TextForBuild(ProjectType projectType, final String buildName) {
+    BrowserStackReportForBuild(ProjectType projectType, final String buildName) {
         super();
         this.projectType = projectType;
         this.buildName = buildName;
@@ -56,34 +52,33 @@ public class TextForBuild extends AbstractTextForBuild {
         if (projectType.equals(ProjectType.APP_AUTOMATE)) {
             client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
-            System.setProperty("browserstack.automate.api", "https://api.browserstack.com/automate");
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
-        fetchBrowserStackBuilds(client);
-        fetchBrowserStackSessions(client);
+        this.browserStackBuildId = fetchBrowserStackBuild(client);
+        this.browserStackSessions = fetchBrowserStackSessions(client, this.browserStackBuildId);
         generateSessionsCollection();
     }
 
-    private void fetchBrowserStackBuilds(BrowserStackClient client) {
+    static private String fetchBrowserStackBuild(BrowserStackClient client) {
         // TODO: fetch the buildIDs using the buildName
         // insert the buildIds in the List browserStackBuilds
-        this.browserStackBuilds.add("225e89fdb45eba8a5d6e288be77f894c338c4aed");
+         return "225e89fdb45eba8a5d6e288be77f894c338c4aed";
     }
 
-    private void fetchBrowserStackSessions(BrowserStackClient client) {
+    static private List<Session> fetchBrowserStackSessions(BrowserStackClient client, @Nonnull String buildId) {
         List<Session> browserStackSessions;
         try {
-            browserStackSessions = client.getSessions(this.browserStackBuilds.get(0), 1000);
+            browserStackSessions = client.getSessions(buildId, 1000);
         } catch (BuildNotFound bnfException) {
             // TODO: add logging
-            return;
+            browserStackSessions = new ArrayList<Session>();
         } catch (BrowserStackException bsException) {
             // TODO: add logging
-            return;
+            browserStackSessions = new ArrayList<Session>();
         }
 
-        this.browserStackSessions = browserStackSessions; 
+        return browserStackSessions;
     }
 
     private void generateSessionsCollection() {
@@ -98,7 +93,7 @@ public class TextForBuild extends AbstractTextForBuild {
                 sessionJSON.put("name", session.getName());
             }
 
-            if (session.getDevice() == null || session.getDevice() == null) {
+            if (session.getDevice() == null || session.getDevice().isEmpty()) {
                 sessionJSON.put("browser", session.getBrowser());
             } else {
                 sessionJSON.put("browser", session.getDevice());
