@@ -1,10 +1,13 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.model.Build;
 import jenkins.model.Jenkins;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.enums.ProjectType;
@@ -25,27 +28,27 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private String browserStackBuildId;
     private List<Session> browserStackSessions;
     private List<JSONObject> result;
-    private String buildNumber;
     private ProjectType projectType;
+    private static PrintStream logger;
 
-    BrowserStackReportForBuild(ProjectType projectType, final String buildName) {
+    BrowserStackReportForBuild(ProjectType projectType, final String buildName, final PrintStream logger) {
         super();
         this.projectType = projectType;
         this.buildName = buildName;
-        setIconFileName(Jenkins.RESOURCE_PATH + "/plugin/browserstack-integration/images/logo.png");
+        BrowserStackReportForBuild.logger = logger;
     }
 
-    public void generateBrowserStackReport() {
+    public Boolean generateBrowserStackReport() {
         BrowserStackBuildAction browserStackBuildAction = getBuild().getAction(BrowserStackBuildAction.class);
         if (browserStackBuildAction == null) {
-            // TODO: add logging here of failure
-            return;
+            log(logger, "Error: No BrowserStackBuildAction found");
+            return false;
         }
 
         BrowserStackCredentials credentials = browserStackBuildAction.getBrowserStackCredentials();
         if (credentials == null) {
-            // TODO: adding logging here
-            return;
+            log(logger, "Error: BrowserStack credentials could not be fetched");
+            return false;
         }
 
         BrowserStackClient client = null;
@@ -55,36 +58,45 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
-        this.browserStackBuildId = fetchBrowserStackBuild(client);
+        this.browserStackBuildId = fetchBrowserStackBuildId(client, this.buildName);
+        if (this.browserStackBuildId.equals("")) return false;
+
         this.browserStackSessions = fetchBrowserStackSessions(client, this.browserStackBuildId);
-        generateSessionsCollection();
+        this.result = generateSessionsCollection(this.browserStackSessions);
+        if (this.result.size() > 0) return true;
+
+        return false;
     }
 
-    static private String fetchBrowserStackBuild(BrowserStackClient client) {
-        // TODO: fetch the buildIDs using the buildName
-        // insert the buildIds in the List browserStackBuilds
-         return "225e89fdb45eba8a5d6e288be77f894c338c4aed";
-    }
-
-    static private List<Session> fetchBrowserStackSessions(BrowserStackClient client, @Nonnull String buildId) {
-        List<Session> browserStackSessions;
+    private static String fetchBrowserStackBuildId(BrowserStackClient client, String buildName) {
+        Build build = null;
         try {
-            browserStackSessions = client.getSessions(buildId, 1000);
+            build = client.getBuildByName(buildName);
         } catch (BuildNotFound bnfException) {
-            // TODO: add logging
-            browserStackSessions = new ArrayList<Session>();
-        } catch (BrowserStackException bsException) {
-            // TODO: add logging
-            browserStackSessions = new ArrayList<Session>();
+            log(logger, "No build found by name: " + buildName);
+        } catch (BrowserStackException bstackException) {
+            log(logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
+        }
+
+        return build != null ? build.getId() : "";
+    }
+
+    private static List<Session> fetchBrowserStackSessions(BrowserStackClient client, @Nonnull String buildId) {
+        List<Session> browserStackSessions = new ArrayList<Session>();
+        try {
+            browserStackSessions.addAll(client.getSessions(buildId));
+        } catch (BuildNotFound bnfException) {
+            log(logger, "No build found while fetching sessions for the buildId: " + buildId);
+        } catch (BrowserStackException bstackException) {
+            log(logger, "BrowserStackException occurred while fetching sessions: " + bstackException.toString());
         }
 
         return browserStackSessions;
     }
 
-    private void generateSessionsCollection() {
+    private static List<JSONObject> generateSessionsCollection(List<Session> browserStackSessions) {
         List<JSONObject> sessionsCollection = new ArrayList<JSONObject>();
-        for (int i = 0; i < this.browserStackSessions.size(); i++) {
-            Session session = this.browserStackSessions.get(i);
+        for (Session session: browserStackSessions) {
             JSONObject sessionJSON = new JSONObject();
 
             if (session.getName() == null || session.getName().isEmpty()) {
@@ -106,7 +118,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             sessionsCollection.add(sessionJSON);
         }
 
-        this.result = sessionsCollection;
+        return sessionsCollection;
     }
 
     public List<JSONObject> getResult() {
@@ -119,14 +131,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
     public void setBuildName(String buildName) {
         this.buildName = buildName;
-    }
-
-    public String getBuildNumber() {
-        return buildNumber;
-    }
-
-    public void setBuildNumber(String buildNumber) {
-        this.buildNumber = buildNumber;
     }
 
     public ProjectType getProjectType() {

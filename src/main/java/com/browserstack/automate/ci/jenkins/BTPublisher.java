@@ -1,8 +1,11 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.BrowserStackEnvVars;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -25,16 +28,14 @@ import javax.servlet.ServletException;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Map;
 
 public class BTPublisher extends Recorder implements SimpleBuildStep {
-    private static final Log log = LogFactory.getLog(BTPublisher.class);
-
-    private String someText;
+    private PrintStream logger;
 
     @DataBoundConstructor
-    public BTPublisher(String someText) {
-        this.someText = someText;
-    }
+    public BTPublisher() { }
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
@@ -43,16 +44,25 @@ public class BTPublisher extends Recorder implements SimpleBuildStep {
 
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+        this.logger = listener.getLogger();
+        this.logger.println("Generating BrowserStack Test Report");
 
-        listener.getLogger().println("Generating Generic BrowserStack Reports");
+        EnvVars parentEnvs = build.getEnvironment(listener);
+        String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
+        String browserStackAppID = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_APP_ID);
 
-        AbstractBrowserStackReportForBuild bstackReportAction = new BrowserStackReportForBuild(ProjectType.AUTOMATE, "this is the build name");
+        ProjectType product = ProjectType.AUTOMATE;
+        if (browserStackAppID != null && !browserStackAppID.isEmpty()) {
+            product = ProjectType.APP_AUTOMATE;
+        }
+
+        AbstractBrowserStackReportForBuild bstackReportAction =
+            new BrowserStackReportForBuild(product, browserStackBuildName, this.logger);
         bstackReportAction.setBuild(build);
-        ((BrowserStackReportForBuild) bstackReportAction).setBuildNumber(this.someText);
-        ((BrowserStackReportForBuild) bstackReportAction).generateBrowserStackReport();
+        Boolean reportResult = ((BrowserStackReportForBuild) bstackReportAction).generateBrowserStackReport();
         build.addAction(bstackReportAction);
 
-        listener.getLogger().println("Generated Report for BrowserStack");
+        this.logger.println("BrowserStack Report Status: " + (reportResult ? "Generated" : "Failed"));
         return;
     }
 
@@ -75,7 +85,7 @@ public class BTPublisher extends Recorder implements SimpleBuildStep {
          */
         @Override
         public String getDisplayName() {
-            return "BTPublisher";
+            return "BrowserStack Report Publisher";
         }
     }
 }
