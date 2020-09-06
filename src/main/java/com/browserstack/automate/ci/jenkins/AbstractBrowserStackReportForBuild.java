@@ -7,7 +7,7 @@ import jenkins.model.Jenkins;
 public abstract class AbstractBrowserStackReportForBuild implements Action {
     private Run<?, ?> build;
 
-    protected String displayName = "Test Report";
+    protected String displayName = "BrowserStack Test Report";
     protected String iconFileName = Jenkins.RESOURCE_PATH + "/plugin/browserstack-integration/images/logo.png";
     protected String reportUrl = "testReportBrowserStack";
 
