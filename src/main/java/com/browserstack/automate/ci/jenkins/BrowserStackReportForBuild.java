@@ -111,9 +111,17 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
                 sessionJSON.put("browser", session.getDevice());
             }
             sessionJSON.put("os", session.getOs());
-            sessionJSON.put("duration", session.getDuration());
             sessionJSON.put("osVersion", session.getOsVersion());
             sessionJSON.put("status", session.getStatus());
+
+            // Condition which shouldn't occur if the build is not being reused elsewhere.
+            // But if it happens, the following condition will handle the scenario where
+            // duration is null or empty (running session)
+            if (session.getStatus().equals("running")) {
+                sessionJSON.put("duration", "-");
+            } else {
+                sessionJSON.put("duration", session.getDuration());
+            }
             sessionJSON.put("url", session.getBrowserUrl());
             sessionsCollection.add(sessionJSON);
         }
