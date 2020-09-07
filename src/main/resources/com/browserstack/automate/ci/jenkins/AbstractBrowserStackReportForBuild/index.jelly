@@ -55,7 +55,7 @@
         <l:main-panel>
             <div style="border-style: solid;border-width: thin;">
                 <div align="center">
-                <h3>Build Name: ${it.buildName} </h3>
+                    <h3>Build Name: ${it.buildName} </h3>
                 </div>
             </div>
             <div class="table-container">
@@ -63,6 +63,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Status</th>
+                        <th>REST API</th>
                         <th>Browser/Device</th>
                         <th>OS</th>
                         <th>OS Version</th>
@@ -72,6 +73,7 @@
                         <tr>
                             <td><a href="${i.url}" target="_blank">${i.name}</a></td>
                             <td>${i.status}</td>
+                            <td>${i.userMarked}</td>
                             <td>${i.browser}</td>
                             <td>${i.os}</td>
                             <td>${i.osVersion}</td>

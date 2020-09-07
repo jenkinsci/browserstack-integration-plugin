@@ -24,7 +24,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
      * Holds info about the Selenium Test
      */
     private String buildName;
-    private String browserStackBuildId;
+    private Build browserStackBuild;
     private List<Session> browserStackSessions;
     private List<JSONObject> result;
     private ProjectType projectType;
@@ -57,17 +57,17 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
-        this.browserStackBuildId = fetchBrowserStackBuildId(client, this.buildName);
-        if (this.browserStackBuildId.equals("")) return false;
+        this.browserStackBuild = fetchBrowserStackBuild(client, this.buildName);
+        if (this.browserStackBuild == null) return false;
 
-        this.browserStackSessions = fetchBrowserStackSessions(client, this.browserStackBuildId);
+        this.browserStackSessions = fetchBrowserStackSessions(client, this.browserStackBuild.getId());
         this.result = generateSessionsCollection(this.browserStackSessions);
         if (this.result.size() > 0) return true;
 
         return false;
     }
 
-    private static String fetchBrowserStackBuildId(@Nonnull BrowserStackClient client, String buildName) {
+    private static Build fetchBrowserStackBuild(@Nonnull BrowserStackClient client, @Nonnull String buildName) {
         Build build = null;
         try {
             build = client.getBuildByName(buildName);
@@ -77,7 +77,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             log(logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
         }
 
-        return build != null ? build.getId() : "";
+        return build;
     }
 
     private static List<Session> fetchBrowserStackSessions(@Nonnull BrowserStackClient client, @Nonnull String buildId) {
@@ -111,7 +111,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             }
             sessionJSON.put("os", session.getOs());
             sessionJSON.put("osVersion", session.getOsVersion());
-            sessionJSON.put("status", session.getStatus());
+            sessionJSON.put("status", session.getBrowserStackStatus());
+
+            if (session.getBrowserStackStatus().equals(session.getStatus())) {
+                sessionJSON.put("userMarked", "UNMARKED");
+            } else {
+                sessionJSON.put("userMarked", session.getStatus());
+            }
+
 
             // Condition which shouldn't occur if the build is not being reused elsewhere.
             // But if it happens, the following condition will handle the scenario where
@@ -121,7 +128,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             } else {
                 sessionJSON.put("duration", session.getDuration());
             }
-            sessionJSON.put("url", session.getBrowserUrl());
+
+            sessionJSON.put("url", session.getPublicUrl() + "&source=jenkins");
             sessionsCollection.add(sessionJSON);
         }
 
