@@ -5,7 +5,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -16,8 +15,6 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -29,13 +26,12 @@ import com.browserstack.automate.ci.common.enums.ProjectType;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Map;
 
-public class BTPublisher extends Recorder implements SimpleBuildStep {
+public class BrowserStackReportPublisher extends Recorder implements SimpleBuildStep {
     private PrintStream logger;
 
     @DataBoundConstructor
-    public BTPublisher() { }
+    public BrowserStackReportPublisher() { }
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;

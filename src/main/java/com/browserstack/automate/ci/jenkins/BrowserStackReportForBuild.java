@@ -1,7 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.model.Build;
-import jenkins.model.Jenkins;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         return false;
     }
 
-    private static String fetchBrowserStackBuildId(BrowserStackClient client, String buildName) {
+    private static String fetchBrowserStackBuildId(@Nonnull BrowserStackClient client, String buildName) {
         Build build = null;
         try {
             build = client.getBuildByName(buildName);
@@ -81,7 +80,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         return build != null ? build.getId() : "";
     }
 
-    private static List<Session> fetchBrowserStackSessions(BrowserStackClient client, @Nonnull String buildId) {
+    private static List<Session> fetchBrowserStackSessions(@Nonnull BrowserStackClient client, @Nonnull String buildId) {
         List<Session> browserStackSessions = new ArrayList<Session>();
         try {
             browserStackSessions.addAll(client.getSessions(buildId));
