@@ -68,6 +68,7 @@
                         <th>OS</th>
                         <th>OS Version</th>
                         <th>Duration</th>
+                        <th>Created At</th>
                     </tr>
                     <j:forEach items="${it.result}" var="i">
                         <tr>
@@ -78,6 +79,7 @@
                             <td>${i.os}</td>
                             <td>${i.osVersion}</td>
                             <td>${i.duration} s</td>
+                            <td>${i.createdAt.toString()}</td>
                         </tr>
                     </j:forEach>
                 </table>
