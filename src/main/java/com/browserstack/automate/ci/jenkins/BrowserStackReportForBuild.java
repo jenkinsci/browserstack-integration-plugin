@@ -4,6 +4,8 @@ import com.browserstack.automate.model.Build;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
@@ -62,6 +64,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
         this.browserStackSessions = fetchBrowserStackSessions(client, this.browserStackBuild.getId());
         this.result = generateSessionsCollection(this.browserStackSessions);
+        this.result.sort(new SessionsSortingComparator());
         if (this.result.size() > 0) return true;
 
         return false;
@@ -135,6 +138,29 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         }
 
         return sessionsCollection;
+    }
+
+    private static class SessionsSortingComparator implements Comparator<JSONObject> {
+
+        @Override
+        public int compare(JSONObject sessionOne, JSONObject sessionTwo) {
+            // possible values for user_marked: failed, passed and UNMARKED, thus changing all to lowercase
+            String sessionOneUserMarked = sessionOne.getString("userMarked").toLowerCase();
+            String sessionTwoUserMarked = sessionTwo.getString("userMarked").toLowerCase();
+            int userMarkedStatusComparator = sessionOneUserMarked.compareTo(sessionTwoUserMarked);
+
+            Date sessionOneDate = (Date) sessionOne.get("createdAt");
+            Date sessionTwoDate = (Date) sessionTwo.get("createdAt");
+            int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
+
+            // ascending with `user marked status` but descending with `created at`
+            if (userMarkedStatusComparator == 0) {
+                return createdAtComparator == 0
+                        ? userMarkedStatusComparator
+                        : (createdAtComparator > 0 ? -1 : 1);
+            }
+            return userMarkedStatusComparator;
+        }
     }
 
     public List<JSONObject> getResult() {
