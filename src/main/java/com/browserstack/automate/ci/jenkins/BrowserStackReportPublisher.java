@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.BrowserStackEnvVars;
+import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -77,7 +78,7 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
          */
         @Override
         public String getDisplayName() {
-            return "BrowserStack Report Publisher";
+            return Constants.BROWSERSTACK_REPORT_DISPLAY_NAME;
         }
     }
 }
