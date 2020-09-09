@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 public class BrowserStackReportPublisher extends Recorder implements SimpleBuildStep {
-    private PrintStream logger;
 
     @DataBoundConstructor
     public BrowserStackReportPublisher() { }
@@ -40,26 +39,24 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
 
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-        this.logger = listener.getLogger();
-        this.logger.println("Generating BrowserStack Test Report");
+        final PrintStream logger = listener.getLogger();
+        logger.println("Generating BrowserStack Test Report");
 
-        EnvVars parentEnvs = build.getEnvironment(listener);
-        String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
-        String browserStackAppID = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_APP_ID);
+        final EnvVars parentEnvs = build.getEnvironment(listener);
+        final String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
+        final String browserStackAppID = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_APP_ID);
 
         ProjectType product = ProjectType.AUTOMATE;
         if (browserStackAppID != null && !browserStackAppID.isEmpty()) {
             product = ProjectType.APP_AUTOMATE;
         }
 
-        AbstractBrowserStackReportForBuild bstackReportAction =
-            new BrowserStackReportForBuild(product, browserStackBuildName, this.logger);
-        bstackReportAction.setBuild(build);
-        Boolean reportResult = ((BrowserStackReportForBuild) bstackReportAction).generateBrowserStackReport();
+        final AbstractBrowserStackReportForBuild bstackReportAction =
+            new BrowserStackReportForBuild(build, product, browserStackBuildName, logger);
+        final boolean reportResult = ((BrowserStackReportForBuild) bstackReportAction).generateBrowserStackReport();
         build.addAction(bstackReportAction);
 
-        this.logger.println("BrowserStack Report Status: " + (reportResult ? "Generated" : "Failed"));
-        return;
+        logger.println("BrowserStack Report Status: " + (reportResult ? "Generated" : "Failed"));
     }
 
     @Extension

@@ -1,15 +1,15 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.constants.Constants;
 import hudson.model.Action;
 import hudson.model.Run;
-import jenkins.model.Jenkins;
 
 public abstract class AbstractBrowserStackReportForBuild implements Action {
     private Run<?, ?> build;
 
-    protected String displayName = "BrowserStack Test Report";
-    protected String iconFileName = Jenkins.RESOURCE_PATH + "/plugin/browserstack-integration/images/logo.png";
-    protected String reportUrl = "testReportBrowserStack";
+    protected final String displayName = Constants.BROWSERSTACK_REPORT_DISPLAY_NAME;
+    protected final String iconFileName = Constants.BROWSERSTACK_LOGO;
+    protected final String reportUrl = Constants.BROWSERSTACK_REPORT_URL;
 
     @Override
     public String getIconFileName() {
