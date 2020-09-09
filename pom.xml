@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.1.4-SNAPSHOT</version>
+  <version>1.1.5</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -135,18 +135,10 @@
       <version>${junit-quickcheck.version}</version>
     </dependency>
 
-    <!-- <dependency>
-      <groupId>com.browserstack</groupId>
-      <artifactId>automate-client-java</artifactId>
-      <scope>system</scope>
-      <version>0.4</version>
-      <systemPath>/Users/chaugs_rohan/Work/automate-client-java/target/automate-client-java-0.4.jar</systemPath>
-    </dependency> -->
-
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.4</version>
+      <version>0.5</version>
     </dependency>
 
     <dependency>
