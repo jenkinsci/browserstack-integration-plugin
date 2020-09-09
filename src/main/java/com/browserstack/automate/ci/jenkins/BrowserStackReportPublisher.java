@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.BrowserStackEnvVars;
+import com.browserstack.automate.ci.common.enums.ProjectType;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -21,16 +22,14 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
-
-import com.browserstack.automate.ci.common.enums.ProjectType;
-
 import java.io.IOException;
 import java.io.PrintStream;
 
 public class BrowserStackReportPublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundConstructor
-    public BrowserStackReportPublisher() { }
+    public BrowserStackReportPublisher() {
+    }
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
@@ -51,9 +50,9 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
             product = ProjectType.APP_AUTOMATE;
         }
 
-        final AbstractBrowserStackReportForBuild bstackReportAction =
-            new BrowserStackReportForBuild(build, product, browserStackBuildName, logger);
-        final boolean reportResult = ((BrowserStackReportForBuild) bstackReportAction).generateBrowserStackReport();
+        final BrowserStackReportForBuild bstackReportAction =
+                new BrowserStackReportForBuild(build, product, browserStackBuildName, logger);
+        final boolean reportResult = bstackReportAction.generateBrowserStackReport();
         build.addAction(bstackReportAction);
 
         logger.println("BrowserStack Report Status: " + (reportResult ? "Generated" : "Failed"));
@@ -62,7 +61,7 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
-        public FormValidation doCheckPublishText(@AncestorInPath Job<?,?> project, @QueryParameter String value) throws IOException, ServletException {
+        public FormValidation doCheckPublishText(@AncestorInPath Job<?, ?> project, @QueryParameter String value) throws IOException, ServletException {
             return FormValidation.ok();
         }
 

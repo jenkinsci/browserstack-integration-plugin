@@ -1,39 +1,40 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.browserstack.automate.ci.common.Tools;
-import com.browserstack.automate.model.Build;
-
-import java.io.PrintStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
+import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.exception.BuildNotFound;
+import com.browserstack.automate.model.Build;
 import com.browserstack.automate.model.Session;
 import com.browserstack.client.BrowserStackClient;
 import com.browserstack.client.exception.BrowserStackException;
-
 import hudson.model.Run;
 import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 
 public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
+    private static final int RESULT_META_MAX_SIZE = 5;
     /*
      * Holds info about the Selenium Test
      */
     private final String buildName;
-    private Build browserStackBuild;
     private final List<Session> browserStackSessions;
     private final List<JSONObject> result;
     private final List<JSONObject> resultMeta;
     private final JSONObject resultAggregation;
     private final ProjectType projectType;
     private final PrintStream logger;
-    private static final int RESULT_META_MAX_SIZE = 5;
+    private Build browserStackBuild;
 
     public BrowserStackReportForBuild(final Run<?, ?> build, final ProjectType projectType, final String buildName, final PrintStream logger) {
         super();
@@ -161,7 +162,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private void generateAggregationInfo() {
         final int totalSessions = this.result.size();
         int totalErrors = 0;
-        for(JSONObject session: this.result) {
+        for (JSONObject session : this.result) {
             if (session.getString("status").equals("error")
                     || session.getString("userMarked").equals("failed")) {
                 totalErrors++;
@@ -171,6 +172,26 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.resultAggregation.put("totalSessions", totalSessions);
         this.resultAggregation.put("totalErrors", totalErrors);
         this.resultAggregation.put("buildDuration", Tools.durationToHumanReadable(this.browserStackBuild.getDuration()));
+    }
+
+    public List<JSONObject> getResult() {
+        return result;
+    }
+
+    public List<JSONObject> getResultMeta() {
+        return resultMeta;
+    }
+
+    public JSONObject getResultAggregation() {
+        return resultAggregation;
+    }
+
+    public String getBuildName() {
+        return buildName;
+    }
+
+    public ProjectType getProjectType() {
+        return projectType;
     }
 
     private static class SessionsSortingComparator implements Comparator<JSONObject> {
@@ -194,26 +215,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             }
             return userMarkedStatusComparator;
         }
-    }
-
-    public List<JSONObject> getResult() {
-        return result;
-    }
-
-    public List<JSONObject> getResultMeta() {
-        return resultMeta;
-    }
-
-    public JSONObject getResultAggregation() {
-        return resultAggregation;
-    }
-
-    public String getBuildName() {
-        return buildName;
-    }
-
-    public ProjectType getProjectType() {
-        return projectType;
     }
 
 }
