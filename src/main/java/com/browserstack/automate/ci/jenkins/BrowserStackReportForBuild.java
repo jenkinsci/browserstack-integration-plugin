@@ -1,12 +1,10 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.model.Build;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import com.browserstack.appautomate.AppAutomateClient;
@@ -30,6 +28,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private List<Session> browserStackSessions;
     private List<JSONObject> result;
     private List<JSONObject> resultMeta;
+    private JSONObject resultAggregation;
     private ProjectType projectType;
     private static PrintStream logger;
     private static int RESULT_META_MAX_SIZE = 5;
@@ -40,6 +39,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.buildName = buildName;
         this.result = new ArrayList<JSONObject>();
         this.resultMeta = new ArrayList<JSONObject>();
+        this.resultAggregation = new JSONObject();
         BrowserStackReportForBuild.logger = logger;
     }
 
@@ -72,6 +72,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         if (this.result.size() > 0) {
             this.result.sort(new SessionsSortingComparator());
             this.resultMeta.addAll(this.result.subList(0, Math.min(this.result.size(), RESULT_META_MAX_SIZE)));
+            generateAggregationInfo();
             return true;
         }
 
@@ -137,7 +138,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             if (session.getStatus().equals("running")) {
                 sessionJSON.put("duration", "-");
             } else {
-                sessionJSON.put("duration", session.getDuration());
+                sessionJSON.put("duration", Tools.durationToHumanReadable(session.getDuration()));
             }
 
             sessionJSON.put("createdAt", session.getCreatedAt());
@@ -146,6 +147,21 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         }
 
         return sessionsCollection;
+    }
+
+    private void generateAggregationInfo() {
+        int totalSessions = this.result.size();
+        int totalErrors = 0;
+        for(JSONObject session: this.result) {
+            if (session.getString("status").equals("error")
+                    || session.getString("userMarked").equals("failed")) {
+                totalErrors++;
+            }
+        }
+
+        this.resultAggregation.put("totalSessions", totalSessions);
+        this.resultAggregation.put("totalErrors", totalErrors);
+        this.resultAggregation.put("buildDuration", Tools.durationToHumanReadable(this.browserStackBuild.getDuration()));
     }
 
     private static class SessionsSortingComparator implements Comparator<JSONObject> {
@@ -177,6 +193,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
     public List<JSONObject> getResultMeta() {
         return resultMeta;
+    }
+
+    public JSONObject getResultAggregation() {
+        return resultAggregation;
     }
 
     public String getBuildName() {

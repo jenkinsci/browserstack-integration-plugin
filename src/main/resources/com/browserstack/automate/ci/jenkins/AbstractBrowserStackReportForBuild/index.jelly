@@ -67,7 +67,7 @@
                                 <td class="bstack-data">${i.browser}</td>
                                 <td class="bstack-data">${i.os}</td>
                                 <td class="bstack-data">${i.osVersion}</td>
-                                <td class="bstack-data">${i.duration} s</td>
+                                <td class="bstack-data">${i.duration}</td>
                                 <td class="bstack-data">${i.createdAt.toString()}</td>
                             </tr>
                         </j:forEach>
