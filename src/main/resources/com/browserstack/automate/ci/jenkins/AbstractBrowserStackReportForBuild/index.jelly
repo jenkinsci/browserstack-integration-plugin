@@ -1,89 +1,79 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
 	<style>
-		.iframe-container {
-				position: relative;
-				padding-bottom: 56.25%;
-				padding-top: 35px;
-				height: 0;
-				overflow: hidden;
-		}
-		.iframe-container iframe {
-				position: absolute;
-				top:0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-		}
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
 
-		.table-container {
-			overflow-x: auto;
-			width: 100%;
-		}
+        .bstack-table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid black;
+        }
 
-		table {
-			border-collapse: collapse;
-			width: 100%;
-		}
+        .bstack-header {
+            height: 25px;
+            text-align: center;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid black;
+        }
 
-		th {
-			height: 25px;
-			text-align: center;
-			font-size: 14px;
-		}
+        .bstack-data {
+            height: 20px;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid black;
+        }
 
-		tr:nth-child(even) {
+		.bstack-row:nth-child(even) {
 			background-color: #f5f5f5;
-		}
-
-		td {
-			height: 20px;
-			text-align: center;
-		}
-
-		th, td {
-			padding: 10px;
-		}
-
-		table, th, td {
-			border: 1px solid black;
 		}
 
 	</style>
 	<l:layout>
         <st:include it="${it.build}" page="sidepanel.jelly"/>
         <l:main-panel>
-            <div style="border-style: solid;border-width: thin;">
+            <j:if test="${(it.result.size() == 0)}">
                 <div align="center">
-                    <h3>Build Name: ${it.buildName} </h3>
+                    <h3>No BrowserStack Report Available for Build: ${it.buildName}</h3>
                 </div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <tr>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>REST API</th>
-                        <th>Browser/Device</th>
-                        <th>OS</th>
-                        <th>OS Version</th>
-                        <th>Duration</th>
-                        <th>Created At</th>
-                    </tr>
-                    <j:forEach items="${it.result}" var="i">
-                        <tr>
-                            <td><a href="${i.url}" target="_blank">${i.name}</a></td>
-                            <td>${i.status}</td>
-                            <td>${i.userMarked}</td>
-                            <td>${i.browser}</td>
-                            <td>${i.os}</td>
-                            <td>${i.osVersion}</td>
-                            <td>${i.duration} s</td>
-                            <td>${i.createdAt.toString()}</td>
+            </j:if>
+
+            <j:if test="${(it.result.size() > 0)}">
+                <div style="border-style: solid;border-width: thin;">
+                    <div align="center">
+                        <h3>Build Name: ${it.buildName} </h3>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="bstack-table">
+                        <tr class="bstack-row">
+                            <th class="bstack-header">Name</th>
+                            <th class="bstack-header">Status</th>
+                            <th class="bstack-header">REST API</th>
+                            <th class="bstack-header">Browser/Device</th>
+                            <th class="bstack-header">OS</th>
+                            <th class="bstack-header">OS Version</th>
+                            <th class="bstack-header">Duration</th>
+                            <th class="bstack-header">Created At</th>
                         </tr>
-                    </j:forEach>
-                </table>
-            </div>
+                        <j:forEach items="${it.result}" var="i">
+                            <tr class="bstack-row">
+                                <td class="bstack-data"><a href="${i.url}" target="_blank">${i.name}</a></td>
+                                <td class="bstack-data">${i.status}</td>
+                                <td class="bstack-data">${i.userMarked}</td>
+                                <td class="bstack-data">${i.browser}</td>
+                                <td class="bstack-data">${i.os}</td>
+                                <td class="bstack-data">${i.osVersion}</td>
+                                <td class="bstack-data">${i.duration} s</td>
+                                <td class="bstack-data">${i.createdAt.toString()}</td>
+                            </tr>
+                        </j:forEach>
+                    </table>
+                </div>
+            </j:if>
         </l:main-panel>
     </l:layout>
 </j:jelly>

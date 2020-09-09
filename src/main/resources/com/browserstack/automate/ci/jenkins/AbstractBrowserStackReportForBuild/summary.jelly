@@ -1,6 +1,69 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+    <style>
+        .table-container-meta {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .bstack-meta-table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid black;
+        }
+
+        .bstack-meta-header {
+            height: 25px;
+            text-align: center;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        .bstack-meta-data {
+            height: 20px;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        .bstack-meta-row:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+    </style>
     <t:summary icon="/plugin/browserstack-integration/images/logo.png">
-        <a href="${it.urlName}">${it.displayName}</a>
+        <j:if test="${(it.resultMeta.size() == 0)}">
+           No BrowserStack Report Available
+        </j:if>
+        <j:if test="${(it.resultMeta.size() > 0)}">
+            <a href="${it.urlName}"><strong>View Full BrowserStack Report</strong></a>
+            <div class="table-container-meta">
+                <table class="bstack-meta-table">
+                    <tr class="bstack-meta-row">
+                        <th class="bstack-meta-header">Name</th>
+                        <th class="bstack-meta-header">Status</th>
+                        <th class="bstack-meta-header">REST API</th>
+                        <th class="bstack-meta-header">Browser/Device</th>
+                        <th class="bstack-meta-header">OS</th>
+                        <th class="bstack-meta-header">OS Version</th>
+                        <th class="bstack-meta-header">Duration</th>
+                        <th class="bstack-meta-header">Created At</th>
+                    </tr>
+                    <j:forEach items="${it.resultMeta}" var="i">
+                        <tr class="bstack-meta-row">
+                            <td class="bstack-meta-data"><a href="${i.url}" target="_blank">${i.name}</a></td>
+                            <td class="bstack-meta-data">${i.status}</td>
+                            <td class="bstack-meta-data">${i.userMarked}</td>
+                            <td class="bstack-meta-data">${i.browser}</td>
+                            <td class="bstack-meta-data">${i.os}</td>
+                            <td class="bstack-meta-data">${i.osVersion}</td>
+                            <td class="bstack-meta-data">${i.duration} s</td>
+                            <td class="bstack-meta-data">${i.createdAt.toString()}</td>
+                        </tr>
+                    </j:forEach>
+                </table>
+            </div>
+        </j:if>
     </t:summary>
 </j:jelly>

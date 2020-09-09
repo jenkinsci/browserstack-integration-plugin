@@ -29,13 +29,17 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private Build browserStackBuild;
     private List<Session> browserStackSessions;
     private List<JSONObject> result;
+    private List<JSONObject> resultMeta;
     private ProjectType projectType;
     private static PrintStream logger;
+    private static int RESULT_META_MAX_SIZE = 5;
 
     BrowserStackReportForBuild(ProjectType projectType, final String buildName, final PrintStream logger) {
         super();
         this.projectType = projectType;
         this.buildName = buildName;
+        this.result = new ArrayList<JSONObject>();
+        this.resultMeta = new ArrayList<JSONObject>();
         BrowserStackReportForBuild.logger = logger;
     }
 
@@ -63,9 +67,13 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         if (this.browserStackBuild == null) return false;
 
         this.browserStackSessions = fetchBrowserStackSessions(client, this.browserStackBuild.getId());
-        this.result = generateSessionsCollection(this.browserStackSessions);
-        this.result.sort(new SessionsSortingComparator());
-        if (this.result.size() > 0) return true;
+        this.result.addAll(generateSessionsCollection(this.browserStackSessions));
+
+        if (this.result.size() > 0) {
+            this.result.sort(new SessionsSortingComparator());
+            this.resultMeta.addAll(this.result.subList(0, Math.min(this.result.size(), RESULT_META_MAX_SIZE)));
+            return true;
+        }
 
         return false;
     }
@@ -149,12 +157,12 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             String sessionTwoUserMarked = sessionTwo.getString("userMarked").toLowerCase();
             int userMarkedStatusComparator = sessionOneUserMarked.compareTo(sessionTwoUserMarked);
 
-            Date sessionOneDate = (Date) sessionOne.get("createdAt");
-            Date sessionTwoDate = (Date) sessionTwo.get("createdAt");
-            int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
-
             // ascending with `user marked status` but descending with `created at`
             if (userMarkedStatusComparator == 0) {
+                Date sessionOneDate = (Date) sessionOne.get("createdAt");
+                Date sessionTwoDate = (Date) sessionTwo.get("createdAt");
+                int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
+
                 return createdAtComparator == 0
                         ? userMarkedStatusComparator
                         : (createdAtComparator > 0 ? -1 : 1);
@@ -165,6 +173,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
     public List<JSONObject> getResult() {
         return result;
+    }
+
+    public List<JSONObject> getResultMeta() {
+        return resultMeta;
     }
 
     public String getBuildName() {
