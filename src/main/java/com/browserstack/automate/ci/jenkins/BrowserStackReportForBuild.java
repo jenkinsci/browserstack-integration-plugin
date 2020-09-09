@@ -24,9 +24,6 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 
 public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
     private static final int RESULT_META_MAX_SIZE = 5;
-    /*
-     * Holds info about the Selenium Test
-     */
     private final String buildName;
     private final List<Session> browserStackSessions;
     private final List<JSONObject> result;
