@@ -3,6 +3,7 @@ package com.browserstack.automate.ci.jenkins;
 import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.Tools;
+import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.exception.BuildNotFound;
 import com.browserstack.automate.model.Build;
@@ -66,19 +67,19 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
-        this.browserStackBuild = fetchBrowserStackBuild(client, this.buildName);
-        if (this.browserStackBuild != null) {
-            this.browserStackSessions.addAll(fetchBrowserStackSessions(client, this.browserStackBuild.getId()));
+        browserStackBuild = fetchBrowserStackBuild(client, buildName);
+        if (browserStackBuild != null) {
+            browserStackSessions.addAll(fetchBrowserStackSessions(client, browserStackBuild.getId()));
         }
     }
 
     public boolean generateBrowserStackReport() {
-        if (this.result.size() == 0) {
-            this.result.addAll(generateSessionsCollection(this.browserStackSessions));
+        if (result.size() == 0) {
+            result.addAll(generateSessionsCollection(browserStackSessions));
 
-            if (this.result.size() > 0) {
-                this.result.sort(new SessionsSortingComparator());
-                this.resultMeta.addAll(this.result.subList(0, Math.min(this.result.size(), RESULT_META_MAX_SIZE)));
+            if (result.size() > 0) {
+                result.sort(new SessionsSortingComparator());
+                resultMeta.addAll(result.subList(0, Math.min(result.size(), RESULT_META_MAX_SIZE)));
                 generateAggregationInfo();
                 return true;
             }
@@ -92,9 +93,9 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         try {
             build = client.getBuildByName(buildName);
         } catch (BuildNotFound bnfException) {
-            log(this.logger, "No build found by name: " + buildName);
+            log(logger, "No build found by name: " + buildName);
         } catch (BrowserStackException bstackException) {
-            log(this.logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
+            log(logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
         }
 
         return build;
@@ -105,9 +106,9 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         try {
             browserStackSessions.addAll(client.getSessions(buildId));
         } catch (BuildNotFound bnfException) {
-            log(this.logger, "No build found while fetching sessions for the buildId: " + buildId);
+            log(logger, "No build found while fetching sessions for the buildId: " + buildId);
         } catch (BrowserStackException bstackException) {
-            log(this.logger, "BrowserStackException occurred while fetching sessions: " + bstackException.toString());
+            log(logger, "BrowserStackException occurred while fetching sessions: " + bstackException.toString());
         }
 
         return browserStackSessions;
@@ -121,54 +122,54 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         final JSONObject sessionJSON = new JSONObject();
 
         if (session.getName() == null || session.getName().isEmpty()) {
-            sessionJSON.put("name", session.getId());
+            sessionJSON.put(Constants.NAME, session.getId());
         } else {
-            sessionJSON.put("name", session.getName());
+            sessionJSON.put(Constants.NAME, session.getName());
         }
 
         if (session.getDevice() == null || session.getDevice().isEmpty()) {
-            sessionJSON.put("browser", session.getBrowser());
+            sessionJSON.put(Constants.BROWSER, session.getBrowser());
         } else {
-            sessionJSON.put("browser", session.getDevice());
+            sessionJSON.put(Constants.BROWSER, session.getDevice());
         }
-        sessionJSON.put("os", session.getOs());
-        sessionJSON.put("osVersion", session.getOsVersion());
-        sessionJSON.put("status", session.getBrowserStackStatus());
+        sessionJSON.put(Constants.OS, session.getOs());
+        sessionJSON.put(Constants.OS_VERSION, session.getOsVersion());
+        sessionJSON.put(Constants.STATUS, session.getBrowserStackStatus());
 
         if (session.getBrowserStackStatus().equals(session.getStatus())) {
-            sessionJSON.put("userMarked", "UNMARKED");
+            sessionJSON.put(Constants.USER_MARKED, Constants.SessionStatus.UNMARKED);
         } else {
-            sessionJSON.put("userMarked", session.getStatus());
+            sessionJSON.put(Constants.USER_MARKED, session.getStatus());
         }
 
 
         // Condition which shouldn't occur if the build is not being reused elsewhere.
         // But if it happens, the following condition will handle the scenario where
         // duration is null or empty (running session)
-        if ("running".equals(session.getStatus())) {
-            sessionJSON.put("duration", "-");
+        if (Constants.SessionStatus.RUNNING.equals(session.getStatus())) {
+            sessionJSON.put(Constants.DURATION, "-");
         } else {
-            sessionJSON.put("duration", Tools.durationToHumanReadable(session.getDuration()));
+            sessionJSON.put(Constants.DURATION, Tools.durationToHumanReadable(session.getDuration()));
         }
 
-        sessionJSON.put("createdAt", session.getCreatedAt());
-        sessionJSON.put("url", session.getPublicUrl() + "&source=jenkins");
+        sessionJSON.put(Constants.CREATED_AT, session.getCreatedAt());
+        sessionJSON.put(Constants.URL, String.format("%s&source=jenkins", session.getPublicUrl()));
         return sessionJSON;
     }
 
     private void generateAggregationInfo() {
-        final int totalSessions = this.result.size();
+        final int totalSessions = result.size();
         int totalErrors = 0;
-        for (JSONObject session : this.result) {
-            if (session.getString("status").equals("error")
-                    || session.getString("userMarked").equals("failed")) {
+        for (JSONObject session : result) {
+            if (Constants.SessionStatus.ERROR.equals(session.getString(Constants.STATUS))
+                    || Constants.SessionStatus.FAILED.equals(session.getString(Constants.USER_MARKED))) {
                 totalErrors++;
             }
         }
 
-        this.resultAggregation.put("totalSessions", totalSessions);
-        this.resultAggregation.put("totalErrors", totalErrors);
-        this.resultAggregation.put("buildDuration", Tools.durationToHumanReadable(this.browserStackBuild.getDuration()));
+        resultAggregation.put("totalSessions", totalSessions);
+        resultAggregation.put("totalErrors", totalErrors);
+        resultAggregation.put("buildDuration", Tools.durationToHumanReadable(browserStackBuild.getDuration()));
     }
 
     public List<JSONObject> getResult() {
@@ -196,14 +197,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         @Override
         public int compare(JSONObject sessionOne, JSONObject sessionTwo) {
             // possible values for user_marked: failed, passed and UNMARKED, thus changing all to lowercase
-            final String sessionOneUserMarked = sessionOne.getString("userMarked").toLowerCase();
-            final String sessionTwoUserMarked = sessionTwo.getString("userMarked").toLowerCase();
+            final String sessionOneUserMarked = sessionOne.getString(Constants.USER_MARKED).toLowerCase();
+            final String sessionTwoUserMarked = sessionTwo.getString(Constants.USER_MARKED).toLowerCase();
             final int userMarkedStatusComparator = sessionOneUserMarked.compareTo(sessionTwoUserMarked);
 
             // ascending with `user marked status` but descending with `created at`
             if (userMarkedStatusComparator == 0) {
-                final Date sessionOneDate = (Date) sessionOne.get("createdAt");
-                final Date sessionTwoDate = (Date) sessionTwo.get("createdAt");
+                final Date sessionOneDate = (Date) sessionOne.get(Constants.CREATED_AT);
+                final Date sessionTwoDate = (Date) sessionTwo.get(Constants.CREATED_AT);
                 final int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
 
                 return createdAtComparator == 0

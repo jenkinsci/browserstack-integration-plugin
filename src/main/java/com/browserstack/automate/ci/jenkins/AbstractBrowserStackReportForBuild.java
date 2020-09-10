@@ -7,23 +7,19 @@ import hudson.model.Run;
 public abstract class AbstractBrowserStackReportForBuild implements Action {
     private Run<?, ?> build;
 
-    protected final String displayName = Constants.BROWSERSTACK_REPORT_DISPLAY_NAME;
-    protected final String iconFileName = Constants.BROWSERSTACK_LOGO;
-    protected final String reportUrl = Constants.BROWSERSTACK_REPORT_URL;
-
     @Override
     public String getIconFileName() {
-        return iconFileName;
+        return Constants.BROWSERSTACK_LOGO;
     }
 
     @Override
     public String getDisplayName() {
-        return displayName;
+        return Constants.BROWSERSTACK_REPORT_DISPLAY_NAME;
     }
 
     @Override
     public String getUrlName() {
-        return reportUrl;
+        return Constants.BROWSERSTACK_REPORT_URL;
     }
 
     public Run<?, ?> getBuild() {
