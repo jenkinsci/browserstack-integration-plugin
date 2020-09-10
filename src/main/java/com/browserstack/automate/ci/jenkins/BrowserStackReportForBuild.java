@@ -63,7 +63,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         if (projectType == ProjectType.APP_AUTOMATE) {
             client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
-            System.setProperty("browserstack.automate.api", "http://apidev.bsstag.com/automate");
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
