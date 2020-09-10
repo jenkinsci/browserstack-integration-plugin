@@ -44,7 +44,9 @@
             <j:if test="${(it.result.size() > 0)}">
                 <div style="border-style: solid;border-width: thin;">
                     <div align="center">
-                        <h3>Build Name: ${it.buildName} </h3>
+                        <h3>
+                            Build Name: <a href="${it.browserStackBuildBrowserUrl}">${it.buildName}</a>
+                         </h3>
                     </div>
                 </div>
                 <div class="table-container">

@@ -46,7 +46,7 @@
                         <th class="bstack-meta-header">Build Duration</th>
                     </tr>
                     <tr class="bstack-meta-row">
-                        <td class="bstack-meta-data">${it.buildName}</td>
+                        <td class="bstack-meta-data"><a href="${it.browserStackBuildBrowserUrl}">${it.buildName}</a></td>
                         <td class="bstack-meta-data">${it.resultAggregation.totalSessions}</td>
                         <td class="bstack-meta-data">${it.resultAggregation.totalErrors}</td>
                         <td class="bstack-meta-data">${it.resultAggregation.buildDuration}</td>

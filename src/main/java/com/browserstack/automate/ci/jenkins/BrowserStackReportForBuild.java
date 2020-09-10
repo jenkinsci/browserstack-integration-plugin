@@ -15,10 +15,8 @@ import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
@@ -33,6 +31,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final ProjectType projectType;
     private final PrintStream logger;
     private Build browserStackBuild;
+    private String browserStackBuildBrowserUrl;
 
     public BrowserStackReportForBuild(final Run<?, ?> build, final ProjectType projectType, final String buildName, final PrintStream logger) {
         super();
@@ -64,13 +63,25 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         if (projectType == ProjectType.APP_AUTOMATE) {
             client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
+            System.setProperty("browserstack.automate.api", "http://apidev.bsstag.com/automate");
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
         browserStackBuild = fetchBrowserStackBuild(client, buildName);
-        if (browserStackBuild != null) {
-            browserStackSessions.addAll(fetchBrowserStackSessions(client, browserStackBuild.getId()));
-        }
+
+        Optional.ofNullable(browserStackBuild)
+                .ifPresent(browserStackBuild -> {
+                    browserStackSessions.addAll(fetchBrowserStackSessions(client, browserStackBuild.getId()));
+                });
+
+        Optional.ofNullable(browserStackSessions.get(0))
+                .ifPresent(session -> {
+                    String browserUrl = session.getBrowserUrl();
+                    Matcher buildUrlMatcher = Tools.buildUrlPattern.matcher(browserUrl);
+                    if (buildUrlMatcher.matches()) {
+                        browserStackBuildBrowserUrl = buildUrlMatcher.group(1);
+                    }
+                });
     }
 
     public boolean generateBrowserStackReport() {
@@ -182,6 +193,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
     public JSONObject getResultAggregation() {
         return resultAggregation;
+    }
+
+    public String getBrowserStackBuildBrowserUrl() {
+        return browserStackBuildBrowserUrl;
     }
 
     public String getBuildName() {
