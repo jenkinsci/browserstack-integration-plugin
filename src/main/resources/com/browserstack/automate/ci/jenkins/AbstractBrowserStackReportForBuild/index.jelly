@@ -6,10 +6,20 @@
             width: 100%;
         }
 
+        .new-container {
+            margin-top: 10px;
+            padding: 16px 24px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji, sans-serif;
+            font-size: 14px;
+            /* box-sizing: border-box; */
+        }
+
         .bstack-table {
             border-collapse: collapse;
             width: 100%;
-            border: 1px solid black;
+            border: 1px solid #ccc;
         }
 
         .bstack-header {
@@ -17,27 +27,79 @@
             text-align: center;
             font-size: 14px;
             padding: 10px;
-            border: 1px solid black;
+            border: 1px solid #ccc;
         }
 
         .bstack-data {
             height: 20px;
             text-align: center;
             padding: 10px;
-            border: 1px solid black;
+            border: 1px solid #ccc;
+            border-bottom: 0;
+            border-top: 0;
+        }
+
+        .session-name {
+            text-align: left;
         }
 
 		.bstack-row:nth-child(even) {
 			background-color: #f5f5f5;
 		}
 
+		.no-report-para {
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .strong-font-custom {
+            font-weight: 700;
+        }
+
+        .bullet-points {
+            list-style: disc;
+        }
+
+        .bullet-item {
+            color: #333;
+            margin: 8px 0;
+            line-height: 1.5;
+            margin-left: 24px;
+        }
+
+        .titlecase-data {
+            text-transform: capitalize;
+        }
+
+        .error-span {
+            font-family: monospace;
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #aaa;
+            font-weight: 400;
+            font-size: 12px;
+            color: #DD4B4B;
+            border-color: #DD4B4B;
+        }
+
 	</style>
 	<l:layout>
         <st:include it="${it.build}" page="sidepanel.jelly"/>
         <l:main-panel>
             <j:if test="${(it.result.size() == 0)}">
-                <div align="center">
-                    <h3>No BrowserStack Report Available for Build: ${it.buildName}</h3>
+                <div class="new-container">
+                    <div class="report-row">
+                        <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack Report Available</strong></p>
+                        <br/>
+                        <p class="no-report-para">BrowserStack test report could not be generated for this build. Please ensure that:</p>
+                        <br/>
+                        <ul class="bullet-points">
+                            <li class="bullet-item">You have set valid BrowserStack credentials via BrowserStack Plugin.</li>
+                            <li class="bullet-item">You are using ‘BROWSERSTACK_BUILD_NAME’ environment variable to set Automate build name <code>capability[‘build’]</code> in test cases.</li>
+                            <li class="bullet-item">Refer to the <a href="https://www.browserstack.com/docs/automate/selenium/jenkins?ref=jenkins_plugin" target="_blank"> Automate Jenkins documentation</a> for more details.</li>
+                        </ul>
+                    </div>
                 </div>
             </j:if>
 
@@ -45,7 +107,7 @@
                 <div style="border-style: solid;border-width: thin;">
                     <div align="center">
                         <h3>
-                            Build Name: <a href="${it.browserStackBuildBrowserUrl}">${it.buildName}</a>
+                            Build Name: <a href="${it.browserStackBuildBrowserUrl}" target="_blank">${it.buildName}</a>
                          </h3>
                     </div>
                 </div>
@@ -57,18 +119,30 @@
                             <th class="bstack-header">REST API</th>
                             <th class="bstack-header">Browser/Device</th>
                             <th class="bstack-header">OS</th>
-                            <th class="bstack-header">OS Version</th>
                             <th class="bstack-header">Duration</th>
                             <th class="bstack-header">Created At</th>
                         </tr>
                         <j:forEach items="${it.result}" var="i">
                             <tr class="bstack-row">
-                                <td class="bstack-data"><a href="${i.url}" target="_blank">${i.name}</a></td>
-                                <td class="bstack-data">${i.status}</td>
-                                <td class="bstack-data">${i.userMarked}</td>
-                                <td class="bstack-data">${i.browser}</td>
+                                <td class="bstack-data session-name"><a href="${i.url}" target="_blank">${i.name}</a></td>
+                                <td class="bstack-data titlecase-data">
+                                    <j:if test="${(it.errorConst.equalsIgnoreCase(i.status))}">
+                                        <span class="error-span">${i.status}</span>
+                                    </j:if>
+                                    <j:if test="${(i.status != it.errorConst)}">
+                                        <span>${i.status}</span>
+                                    </j:if>
+                                </td>
+                                <td class="bstack-data titlecase-data">
+                                    <j:if test="${(it.failedConst.equalsIgnoreCase(i.userMarked))}">
+                                        <span class="error-span">${i.userMarked}</span>
+                                    </j:if>
+                                    <j:if test="${(i.userMarked != it.failedConst)}">
+                                        <span>${i.userMarked}</span>
+                                    </j:if>
+                                </td>
+                                <td class="bstack-data titlecase-data">${i.browser}</td>
                                 <td class="bstack-data">${i.os}</td>
-                                <td class="bstack-data">${i.osVersion}</td>
                                 <td class="bstack-data">${i.duration}</td>
                                 <td class="bstack-data">${i.createdAt.toString()}</td>
                             </tr>

@@ -35,9 +35,9 @@ public class Tools {
         int days = (int) duration / 24;
 
         if (days == 0) {
-            result = String.format("%02d h %02d m %02d s", hours, minutes, seconds);
+            result = String.format("%02dh %02dm %02ds", hours, minutes, seconds);
         } else {
-            result = String.format("%d d %02d h %02d m %02d s", days, hours, minutes, seconds);
+            result = String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds);
         }
         return result;
     }

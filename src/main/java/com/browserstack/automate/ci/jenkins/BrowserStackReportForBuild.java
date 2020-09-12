@@ -33,6 +33,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private Build browserStackBuild;
     private String browserStackBuildBrowserUrl;
 
+    // to make them available in jelly
+    private final String errorConst = Constants.SessionStatus.ERROR;
+    private final String failedConst = Constants.SessionStatus.FAILED;
+
     public BrowserStackReportForBuild(final Run<?, ?> build, final ProjectType projectType, final String buildName, final PrintStream logger) {
         super();
         setBuild(build);
@@ -73,14 +77,13 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
                     browserStackSessions.addAll(fetchBrowserStackSessions(client, browserStackBuild.getId()));
                 });
 
-        Optional.ofNullable(browserStackSessions.get(0))
-                .ifPresent(session -> {
-                    String browserUrl = session.getBrowserUrl();
-                    Matcher buildUrlMatcher = Tools.buildUrlPattern.matcher(browserUrl);
-                    if (buildUrlMatcher.matches()) {
-                        browserStackBuildBrowserUrl = buildUrlMatcher.group(1);
-                    }
-                });
+        if (browserStackSessions.size() > 0) {
+            String browserUrl = browserStackSessions.get(0).getBrowserUrl();
+            Matcher buildUrlMatcher = Tools.buildUrlPattern.matcher(browserUrl);
+            if (buildUrlMatcher.matches()) {
+                browserStackBuildBrowserUrl = buildUrlMatcher.group(1);
+            }
+        }
     }
 
     public boolean generateBrowserStackReport() {
@@ -142,8 +145,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         } else {
             sessionJSON.put(Constants.BROWSER, session.getDevice());
         }
-        sessionJSON.put(Constants.OS, session.getOs());
-        sessionJSON.put(Constants.OS_VERSION, session.getOsVersion());
+        sessionJSON.put(Constants.OS, String.format("%s %s", session.getOs(), session.getOsVersion()));
         sessionJSON.put(Constants.STATUS, session.getBrowserStackStatus());
 
         if (session.getBrowserStackStatus().equals(session.getStatus())) {
@@ -204,6 +206,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
     public ProjectType getProjectType() {
         return projectType;
+    }
+
+    public String getErrorConst() {
+        return errorConst;
+    }
+
+    public String getFailedConst() {
+        return failedConst;
     }
 
     private static class SessionsSortingComparator implements Comparator<JSONObject> {
