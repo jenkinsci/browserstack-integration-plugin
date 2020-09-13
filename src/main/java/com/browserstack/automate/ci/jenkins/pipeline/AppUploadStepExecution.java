@@ -1,24 +1,16 @@
 package com.browserstack.automate.ci.jenkins.pipeline;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.HashMap;
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.BodyExecution;
-import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
-import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import com.browserstack.automate.ci.common.BrowserStackEnvVars;
 import com.browserstack.automate.ci.common.logger.PluginLogger;
-import com.browserstack.automate.ci.common.uploader.AppUploader;
 import com.browserstack.automate.ci.common.uploader.AppUploaderHelper;
-import com.browserstack.automate.ci.jenkins.BrowserStackBuildAction;
-import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
-import com.browserstack.automate.exception.AppAutomateException;
-import com.browserstack.automate.exception.InvalidFileExtensionException;
+import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.workflow.steps.*;
+
+import java.io.PrintStream;
+import java.util.HashMap;
 
 public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
@@ -46,11 +38,13 @@ public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<
       return null;
     }
 
-    HashMap<String, String> overrides = new HashMap<String, String>();
+    EnvVars overrides = run.getEnvironment(taskListener);
     overrides.put(BrowserStackEnvVars.BROWSERSTACK_APP_ID, appId);
+    HashMap<String, String> overridesMap = new HashMap<>(overrides);
+
     body = getContext().newBodyInvoker()
         .withContext(EnvironmentExpander.merge(getContext().get(EnvironmentExpander.class),
-            new ExpanderImpl(overrides)))
+            new ExpanderImpl(overridesMap)))
         .withCallback(BodyExecutionCallback.wrap(getContext())).start();
     PluginLogger.log(logger, "Environment variable BROWSERSTACK_APP_ID set with value : " + appId);
     return null;

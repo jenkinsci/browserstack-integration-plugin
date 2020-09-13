@@ -51,12 +51,14 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
             product = ProjectType.APP_AUTOMATE;
         }
 
+        logger.println("BrowserStack Project identified as : " + product);
+
         final BrowserStackReportForBuild bstackReportAction =
                 new BrowserStackReportForBuild(build, product, browserStackBuildName, logger);
         final boolean reportResult = bstackReportAction.generateBrowserStackReport();
         build.addAction(bstackReportAction);
 
-        logger.println("BrowserStack Report Status: " + (reportResult ? "Generated" : "Failed"));
+        logger.println("BrowserStack Report Status: " + (reportResult ? Constants.ReportStatus.GENERATED : Constants.ReportStatus.FAILED));
     }
 
     @Extension
