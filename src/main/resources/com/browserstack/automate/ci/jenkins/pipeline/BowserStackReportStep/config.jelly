@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+    <st:include page="config.jelly"/>
+    <f:entry title="Product (automate/app-automate)" field="product">
+        <select>
+            <f:option value="automate">automate</f:option>
+            <f:option value="app-automate">app-automate</f:option>
+        </select>
+    </f:entry>
+</j:jelly>

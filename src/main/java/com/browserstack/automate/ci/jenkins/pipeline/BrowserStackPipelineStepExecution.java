@@ -74,11 +74,14 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
         new BrowserStackBuildWrapperOperations(credentials, false, taskListener.getLogger(),
             localConfig, browserStackLocal);
 
-    HashMap<String, String> overrides = new HashMap<String, String>();
-    buildWrapperOperations.buildEnvVars(overrides);
+    EnvVars overrides = run.getEnvironment(taskListener);
+    HashMap<String, String> overridesMap = new HashMap<String, String>();
+    overridesMap.putAll(overrides);
+    buildWrapperOperations.buildEnvVars(overridesMap);
+
     body = getContext()
         .newBodyInvoker().withContext(credentials).withContext(EnvironmentExpander
-            .merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(overrides)))
+            .merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(overridesMap)))
         .withCallback(new Callback(browserStackLocal)).start();
     return null;
   }

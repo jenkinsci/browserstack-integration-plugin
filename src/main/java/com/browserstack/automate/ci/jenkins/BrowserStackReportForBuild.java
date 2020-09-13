@@ -27,15 +27,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final List<Session> browserStackSessions;
     private final List<JSONObject> result;
     private final List<JSONObject> resultMeta;
-    private final JSONObject resultAggregation;
+    private final Map<String, String> resultAggregation;
     private final ProjectType projectType;
     private final PrintStream logger;
-    private Build browserStackBuild;
-    private String browserStackBuildBrowserUrl;
-
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
     private final String failedConst = Constants.SessionStatus.FAILED;
+    private Build browserStackBuild;
+    private String browserStackBuildBrowserUrl;
 
     public BrowserStackReportForBuild(final Run<?, ?> build, final ProjectType projectType, final String buildName, final PrintStream logger) {
         super();
@@ -44,7 +43,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.browserStackSessions = new ArrayList<>();
         this.result = new ArrayList<>();
         this.resultMeta = new ArrayList<>();
-        this.resultAggregation = new JSONObject();
+        this.resultAggregation = new HashMap<>();
         this.projectType = projectType;
         this.logger = logger;
         fetchBuildAndSessions();
@@ -67,6 +66,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         if (projectType == ProjectType.APP_AUTOMATE) {
             client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
+//            System.setProperty("browserstack.automate.api", "http://apidev.bsstag.com/automate");
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
@@ -165,7 +165,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         }
 
         sessionJSON.put(Constants.CREATED_AT, session.getCreatedAt());
-        sessionJSON.put(Constants.URL, String.format("%s&source=jenkins", session.getPublicUrl()));
+        sessionJSON.put(Constants.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));
         return sessionJSON;
     }
 
@@ -179,8 +179,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             }
         }
 
-        resultAggregation.put("totalSessions", totalSessions);
-        resultAggregation.put("totalErrors", totalErrors);
+        resultAggregation.put("totalSessions", String.valueOf(totalSessions));
+        resultAggregation.put("totalErrors", String.valueOf(totalErrors));
         resultAggregation.put("buildDuration", Tools.durationToHumanReadable(browserStackBuild.getDuration()));
     }
 
@@ -192,7 +192,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         return resultMeta;
     }
 
-    public JSONObject getResultAggregation() {
+    public Map<String, String> getResultAggregation() {
         return resultAggregation;
     }
 
