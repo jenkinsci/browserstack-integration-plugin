@@ -43,11 +43,11 @@
             text-align: left;
         }
 
-		.bstack-row:nth-child(even) {
-			background-color: #f5f5f5;
-		}
+        .bstack-row:nth-child(even) {
+            background-color: #f5f5f5;
+        }
 
-		.no-report-para {
+        .no-report-para {
             line-height: 1.5;
             color: #333;
         }

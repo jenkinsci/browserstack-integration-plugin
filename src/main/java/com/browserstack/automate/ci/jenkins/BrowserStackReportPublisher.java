@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Optional;
 
 public class BrowserStackReportPublisher extends Recorder implements SimpleBuildStep {
 
@@ -43,8 +44,9 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
         logger.println("Generating BrowserStack Test Report");
 
         final EnvVars parentEnvs = build.getEnvironment(listener);
-        final String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
+        String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
         final String browserStackAppID = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_APP_ID);
+        browserStackBuildName = Optional.ofNullable(browserStackBuildName).orElse(parentEnvs.get(Constants.JENKINS_BUILD_TAG));
 
         ProjectType product = ProjectType.AUTOMATE;
         if (browserStackAppID != null && !browserStackAppID.isEmpty()) {

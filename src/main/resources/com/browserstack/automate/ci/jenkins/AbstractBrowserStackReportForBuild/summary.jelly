@@ -57,23 +57,23 @@
         }
 
         .no-report-para {
-        	line-height: 1.5;
-        	color: #333;
+            line-height: 1.5;
+            color: #333;
         }
 
         .strong-font-custom {
-        	font-weight: 700;
+            font-weight: 700;
         }
 
         .bullet-points {
-        	list-style: disc;
+            list-style: disc;
         }
 
         .bullet-item {
-        	color: #333;
-        	margin: 8px 0;
-        	line-height: 1.5;
-        	margin-left: 24px;
+            color: #333;
+            margin: 8px 0;
+            line-height: 1.5;
+            margin-left: 24px;
         }
 
     </style>
