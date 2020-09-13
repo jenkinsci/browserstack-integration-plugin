@@ -4,7 +4,12 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
+
+import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
+import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.analytics.Analytics;
@@ -13,12 +18,6 @@ import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import hudson.EnvVars;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractItem;
-import hudson.model.BuildListener;
-import hudson.model.BuildableItemWithBuildWrappers;
-import hudson.model.Descriptor;
-import hudson.model.Job;
 import hudson.tasks.BuildWrapper;
 import hudson.util.DescribableList;
 
@@ -43,6 +42,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
   public Environment setUp(final AbstractBuild build, final Launcher launcher,
       final BuildListener listener) throws IOException, InterruptedException {
     final PrintStream logger = listener.getLogger();
+    final PluginsTracker tracker = new PluginsTracker();
 
     final BrowserStackCredentials credentials =
         BrowserStackCredentials.getCredentials(build.getProject(), credentialsId);
@@ -56,6 +56,9 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     if (credentials != null) {
       this.username = credentials.getUsername();
       this.accesskey = credentials.getDecryptedAccesskey();
+      tracker.setCredentials(this.username, this.accesskey);
+    } else {
+      tracker.trackOperation(String.format("BStackNoCredentials%s", Constants.NON_PIPELINE), new JSONObject());
     }
 
     AutomateBuildEnvironment buildEnv = new AutomateBuildEnvironment(credentials, launcher, logger);
@@ -69,6 +72,13 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     }
 
     recordBuildStats();
+
+    EnvVars envs = build.getEnvironment(listener);
+
+    JSONObject trackingData = new JSONObject();
+    trackingData.put("local", (this.localConfig != null) ? "true" : "false");
+    trackingData.put("build", envs.get(Constants.JENKINS_BUILD_TAG));
+    tracker.trackOperation(String.format("BuildRun%s", Constants.NON_PIPELINE), trackingData);
     return buildEnv;
   }
 

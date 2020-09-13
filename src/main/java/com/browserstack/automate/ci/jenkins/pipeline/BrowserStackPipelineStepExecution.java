@@ -5,6 +5,10 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Optional;
+
+import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
@@ -20,6 +24,7 @@ import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.json.JSONObject;
 
 public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingStepExecution<Void> {
   private static final long serialVersionUID = -8810137779949881645L;
@@ -43,14 +48,22 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
     TaskListener taskListener = context.get(TaskListener.class);
     Launcher launcher = context.get(Launcher.class);
     PrintStream logger = taskListener.getLogger();
+    PluginsTracker tracker = new PluginsTracker();
 
     BrowserStackCredentials credentials =
         BrowserStackCredentials.getCredentials(run.getParent(), credentialsId);
 
     if (credentials == null) {
       logError(logger, "Credentials id is invalid. Aborting!!!");
+      tracker.trackOperation(String.format("BStackNoCredentials%s", Constants.PIPELINE), new JSONObject());
       return null;
     }
+
+    Optional.ofNullable(credentials.getDecryptedAccesskey())
+            .ifPresent(accessKey -> {
+              tracker.setCredentials(credentials.getUsername(),
+                      credentials.getDecryptedAccesskey());
+            });
 
     BrowserStackBuildAction action = run.getAction(BrowserStackBuildAction.class);
     if (action == null) {
@@ -70,11 +83,17 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
       }
     }
 
+    EnvVars overrides = run.getEnvironment(taskListener);
+
+    JSONObject trackingData = new JSONObject();
+    trackingData.put("local", (this.localConfig != null ? "true" : "false"));
+    trackingData.put("build", overrides.get(Constants.JENKINS_BUILD_TAG));
+    tracker.trackOperation(String.format("BuildRun%s", Constants.PIPELINE), trackingData);
+
     BrowserStackBuildWrapperOperations buildWrapperOperations =
         new BrowserStackBuildWrapperOperations(credentials, false, taskListener.getLogger(),
             localConfig, browserStackLocal);
 
-    EnvVars overrides = run.getEnvironment(taskListener);
     HashMap<String, String> overridesMap = new HashMap<String, String>(overrides);
     buildWrapperOperations.buildEnvVars(overridesMap);
 

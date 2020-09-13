@@ -5,6 +5,7 @@ import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.exception.BuildNotFound;
 import com.browserstack.automate.model.Build;
 import com.browserstack.automate.model.Session;
@@ -30,13 +31,20 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final Map<String, String> resultAggregation;
     private final ProjectType projectType;
     private final PrintStream logger;
+    private final PluginsTracker tracker;
+    private final String pipelineStatus;
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
     private final String failedConst = Constants.SessionStatus.FAILED;
     private Build browserStackBuild;
     private String browserStackBuildBrowserUrl;
 
-    public BrowserStackReportForBuild(final Run<?, ?> build, final ProjectType projectType, final String buildName, final PrintStream logger) {
+    public BrowserStackReportForBuild(final Run<?, ?> build,
+                                      final ProjectType projectType,
+                                      final String buildName,
+                                      final PrintStream logger,
+                                      final PluginsTracker tracker,
+                                      final String pipelineStatus) {
         super();
         setBuild(build);
         this.buildName = buildName;
@@ -46,6 +54,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.resultAggregation = new HashMap<>();
         this.projectType = projectType;
         this.logger = logger;
+        this.tracker = tracker;
+        this.pipelineStatus = pipelineStatus;
         fetchBuildAndSessions();
     }
 
@@ -53,14 +63,18 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         final BrowserStackBuildAction browserStackBuildAction = getBuild().getAction(BrowserStackBuildAction.class);
         if (browserStackBuildAction == null) {
             log(logger, "Error: No BrowserStackBuildAction found");
+            tracker.trackOperation(String.format("GenericReportBuildActionNA%s", pipelineStatus), new JSONObject());
             return;
         }
 
         final BrowserStackCredentials credentials = browserStackBuildAction.getBrowserStackCredentials();
         if (credentials == null) {
             log(logger, "Error: BrowserStack credentials could not be fetched");
+            tracker.trackOperation(String.format("GenericReportNoCredentials%s", pipelineStatus), new JSONObject());
             return;
         }
+
+        tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
 
         BrowserStackClient client;
         if (projectType == ProjectType.APP_AUTOMATE) {

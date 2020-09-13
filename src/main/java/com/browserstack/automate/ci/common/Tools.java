@@ -1,5 +1,7 @@
 package com.browserstack.automate.ci.common;
 
+import org.apache.commons.lang.RandomStringUtils;
+
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -40,5 +42,9 @@ public class Tools {
             result = String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds);
         }
         return result;
+    }
+
+    public static String getUniqueString(boolean letters, boolean numbers) {
+        return RandomStringUtils.random(48, letters, numbers);
     }
 }
