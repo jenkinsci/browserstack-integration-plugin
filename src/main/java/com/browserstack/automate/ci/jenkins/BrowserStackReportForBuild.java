@@ -135,23 +135,23 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         final JSONObject sessionJSON = new JSONObject();
 
         if (session.getName() == null || session.getName().isEmpty()) {
-            sessionJSON.put(Constants.NAME, session.getId());
+            sessionJSON.put(Constants.SessionInfo.NAME, session.getId());
         } else {
-            sessionJSON.put(Constants.NAME, session.getName());
+            sessionJSON.put(Constants.SessionInfo.NAME, session.getName());
         }
 
         if (session.getDevice() == null || session.getDevice().isEmpty()) {
-            sessionJSON.put(Constants.BROWSER, session.getBrowser());
+            sessionJSON.put(Constants.SessionInfo.BROWSER, session.getBrowser());
         } else {
-            sessionJSON.put(Constants.BROWSER, session.getDevice());
+            sessionJSON.put(Constants.SessionInfo.BROWSER, session.getDevice());
         }
-        sessionJSON.put(Constants.OS, String.format("%s %s", session.getOs(), session.getOsVersion()));
-        sessionJSON.put(Constants.STATUS, session.getBrowserStackStatus());
+        sessionJSON.put(Constants.SessionInfo.OS, String.format("%s %s", session.getOs(), session.getOsVersion()));
+        sessionJSON.put(Constants.SessionInfo.STATUS, session.getBrowserStackStatus());
 
         if (session.getBrowserStackStatus().equals(session.getStatus())) {
-            sessionJSON.put(Constants.USER_MARKED, Constants.SessionStatus.UNMARKED);
+            sessionJSON.put(Constants.SessionInfo.USER_MARKED, Constants.SessionStatus.UNMARKED);
         } else {
-            sessionJSON.put(Constants.USER_MARKED, session.getStatus());
+            sessionJSON.put(Constants.SessionInfo.USER_MARKED, session.getStatus());
         }
 
 
@@ -159,13 +159,13 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         // But if it happens, the following condition will handle the scenario where
         // duration is null or empty (running session)
         if (Constants.SessionStatus.RUNNING.equals(session.getStatus())) {
-            sessionJSON.put(Constants.DURATION, "-");
+            sessionJSON.put(Constants.SessionInfo.DURATION, "-");
         } else {
-            sessionJSON.put(Constants.DURATION, Tools.durationToHumanReadable(session.getDuration()));
+            sessionJSON.put(Constants.SessionInfo.DURATION, Tools.durationToHumanReadable(session.getDuration()));
         }
 
-        sessionJSON.put(Constants.CREATED_AT, session.getCreatedAt());
-        sessionJSON.put(Constants.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));
+        sessionJSON.put(Constants.SessionInfo.CREATED_AT, session.getCreatedAt());
+        sessionJSON.put(Constants.SessionInfo.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));
         return sessionJSON;
     }
 
@@ -173,8 +173,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         final int totalSessions = result.size();
         int totalErrors = 0;
         for (JSONObject session : result) {
-            if (Constants.SessionStatus.ERROR.equals(session.getString(Constants.STATUS))
-                    || Constants.SessionStatus.FAILED.equals(session.getString(Constants.USER_MARKED))) {
+            if (Constants.SessionStatus.ERROR.equals(session.getString(Constants.SessionInfo.STATUS))
+                    || Constants.SessionStatus.FAILED.equals(session.getString(Constants.SessionInfo.USER_MARKED))) {
                 totalErrors++;
             }
         }
@@ -221,14 +221,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         @Override
         public int compare(JSONObject sessionOne, JSONObject sessionTwo) {
             // possible values for user_marked: failed, passed and UNMARKED, thus changing all to lowercase
-            final String sessionOneUserMarked = sessionOne.getString(Constants.USER_MARKED).toLowerCase();
-            final String sessionTwoUserMarked = sessionTwo.getString(Constants.USER_MARKED).toLowerCase();
+            final String sessionOneUserMarked = sessionOne.getString(Constants.SessionInfo.USER_MARKED).toLowerCase();
+            final String sessionTwoUserMarked = sessionTwo.getString(Constants.SessionInfo.USER_MARKED).toLowerCase();
             final int userMarkedStatusComparator = sessionOneUserMarked.compareTo(sessionTwoUserMarked);
 
             // ascending with `user marked status` but descending with `created at`
             if (userMarkedStatusComparator == 0) {
-                final Date sessionOneDate = (Date) sessionOne.get(Constants.CREATED_AT);
-                final Date sessionTwoDate = (Date) sessionTwo.get(Constants.CREATED_AT);
+                final Date sessionOneDate = (Date) sessionOne.get(Constants.SessionInfo.CREATED_AT);
+                final Date sessionTwoDate = (Date) sessionTwo.get(Constants.SessionInfo.CREATED_AT);
                 final int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
 
                 return createdAtComparator == 0

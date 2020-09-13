@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.jenkins.pipeline;
 
+import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
@@ -16,25 +17,23 @@ import org.kohsuke.stapler.QueryParameter;
 import java.util.Set;
 
 public class BrowserStackReportStep extends Step {
-    public final ProjectType product;
+    public final ProjectType project;
+    public final String product;
 
     @DataBoundConstructor
     public BrowserStackReportStep(String product) {
-        if (product.toLowerCase() == "app-automate") {
-            this.product = ProjectType.APP_AUTOMATE;
+        if (product != null && product.toLowerCase() == Constants.APP_AUTOMATE) {
+            this.project = ProjectType.APP_AUTOMATE;
+            this.product = Constants.APP_AUTOMATE;
         } else {
-            this.product = ProjectType.AUTOMATE;
+            this.project = ProjectType.AUTOMATE;
+            this.product = Constants.AUTOMATE;
         }
-    }
-
-    @DataBoundConstructor
-    public BrowserStackReportStep() {
-        this.product = ProjectType.AUTOMATE;
     }
 
     @Override
     public StepExecution start(StepContext stepContext) throws Exception {
-        return new BrowserStackReportStepExecution(stepContext, product);
+        return new BrowserStackReportStepExecution(stepContext, project);
     }
 
     @Extension
@@ -47,12 +46,12 @@ public class BrowserStackReportStep extends Step {
 
         @Override
         public String getFunctionName() {
-            return "browserStackReportPublisher";
+            return Constants.BROWSERSTACK_REPORT_PIPELINE_FUNCTION;
         }
 
         @Override
         public String getDisplayName() {
-            return "BrowserStack Pipeline Report";
+            return Constants.BROWSERSTACK_REPORT_DISPLAY_NAME;
         }
 
         public FormValidation doCheckProduct(@QueryParameter String product) {
