@@ -40,8 +40,7 @@ public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<
 
     EnvVars overrides = run.getEnvironment(taskListener);
     overrides.put(BrowserStackEnvVars.BROWSERSTACK_APP_ID, appId);
-    HashMap<String, String> overridesMap = new HashMap<>();
-    overridesMap.putAll(overrides);
+    HashMap<String, String> overridesMap = new HashMap<>(overrides);
 
     body = getContext().newBodyInvoker()
         .withContext(EnvironmentExpander.merge(getContext().get(EnvironmentExpander.class),

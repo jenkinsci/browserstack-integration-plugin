@@ -75,8 +75,7 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
             localConfig, browserStackLocal);
 
     EnvVars overrides = run.getEnvironment(taskListener);
-    HashMap<String, String> overridesMap = new HashMap<String, String>();
-    overridesMap.putAll(overrides);
+    HashMap<String, String> overridesMap = new HashMap<String, String>(overrides);
     buildWrapperOperations.buildEnvVars(overridesMap);
 
     body = getContext()
