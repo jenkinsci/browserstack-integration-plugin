@@ -173,8 +173,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         final int totalSessions = result.size();
         int totalErrors = 0;
         for (JSONObject session : result) {
-            if (Constants.SessionStatus.ERROR.equals(session.getString(Constants.SessionInfo.STATUS))
-                    || Constants.SessionStatus.FAILED.equals(session.getString(Constants.SessionInfo.USER_MARKED))) {
+            if (Constants.SessionStatus.ERROR.equals(session.optString(Constants.SessionInfo.STATUS))
+                    || Constants.SessionStatus.FAILED.equals(session.optString(Constants.SessionInfo.USER_MARKED))) {
                 totalErrors++;
             }
         }
@@ -221,14 +221,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         @Override
         public int compare(JSONObject sessionOne, JSONObject sessionTwo) {
             // possible values for user_marked: failed, passed and UNMARKED, thus changing all to lowercase
-            final String sessionOneUserMarked = sessionOne.getString(Constants.SessionInfo.USER_MARKED).toLowerCase();
-            final String sessionTwoUserMarked = sessionTwo.getString(Constants.SessionInfo.USER_MARKED).toLowerCase();
+            final String sessionOneUserMarked = sessionOne.optString(Constants.SessionInfo.USER_MARKED).toLowerCase();
+            final String sessionTwoUserMarked = sessionTwo.optString(Constants.SessionInfo.USER_MARKED).toLowerCase();
             final int userMarkedStatusComparator = sessionOneUserMarked.compareTo(sessionTwoUserMarked);
 
             // ascending with `user marked status` but descending with `created at`
             if (userMarkedStatusComparator == 0) {
-                final Date sessionOneDate = (Date) sessionOne.get(Constants.SessionInfo.CREATED_AT);
-                final Date sessionTwoDate = (Date) sessionTwo.get(Constants.SessionInfo.CREATED_AT);
+                final Date sessionOneDate = (Date) sessionOne.opt(Constants.SessionInfo.CREATED_AT);
+                final Date sessionTwoDate = (Date) sessionTwo.opt(Constants.SessionInfo.CREATED_AT);
                 final int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
 
                 return createdAtComparator == 0
