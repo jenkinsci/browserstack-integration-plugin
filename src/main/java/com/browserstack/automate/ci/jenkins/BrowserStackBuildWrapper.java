@@ -9,7 +9,6 @@ import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.analytics.Analytics;
