@@ -43,6 +43,10 @@ public class PluginsTracker {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                // closing the response body is important, else it will start leaking
+                if (response != null && response.body() != null) {
+                    response.body().close();
+                }
             }
         });
     }

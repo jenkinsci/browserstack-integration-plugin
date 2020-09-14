@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import mockit.Deencapsulation;
 import mockit.Mock;
 import mockit.MockUp;
@@ -78,9 +79,32 @@ public class AutomateTestDataPublisherTest {
         }
     }
 
+    private static final class MockPluginsTracker extends MockUp<PluginsTracker> {
+        @Mock
+        public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
+            return;
+        }
+
+        @Mock
+        public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
+            return;
+        }
+
+        @Mock
+        public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
+            return;
+        }
+
+        @Mock
+        public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
+            return;
+        }
+    }
+
     @Test
     public void testThatReportsArePresent() throws Exception {
         /* =================== Prepare ================= */
+        new MockPluginsTracker();
         new MockAutomateClient();
 
         addBuildStep();

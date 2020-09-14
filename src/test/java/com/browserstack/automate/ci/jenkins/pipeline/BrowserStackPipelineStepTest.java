@@ -1,5 +1,8 @@
 package com.browserstack.automate.ci.jenkins.pipeline;
 
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
+import mockit.Mock;
+import mockit.MockUp;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -16,8 +19,31 @@ public class BrowserStackPipelineStepTest {
   @Rule
   public JenkinsRule jenkinsRule = new JenkinsRule();
 
+  private static final class MockPluginsTracker extends MockUp<PluginsTracker> {
+    @Mock
+    public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
+      return;
+    }
+
+    @Mock
+    public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
+      return;
+    }
+
+    @Mock
+    public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
+      return;
+    }
+
+    @Mock
+    public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
+      return;
+    }
+  }
+
   @Test
   public void testBrowserStepWithoutLocal() throws Exception {
+    new MockPluginsTracker();
     String credentialsId = TempCredentialIdGenerator.generateTempCredentialId(DUMMY_BSTACK_USERNAME,
         DUMMY_BSTACK_ACCESS_KEY);
 
@@ -36,6 +62,7 @@ public class BrowserStackPipelineStepTest {
 
   @Test
   public void testBrowserStepWithLocal() throws Exception {
+    new MockPluginsTracker();
     String username = System.getenv("BROWSERSTACK_USERNAME");
     String accessKey = System.getenv("BROWSERSTACK_ACCESS_KEY");
     
