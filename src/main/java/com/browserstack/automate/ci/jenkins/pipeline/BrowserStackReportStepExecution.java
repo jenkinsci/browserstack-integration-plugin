@@ -10,7 +10,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.json.JSONObject;
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -37,23 +36,18 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
         String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
         browserStackBuildName = Optional.ofNullable(browserStackBuildName).orElse(parentEnvs.get(Constants.JENKINS_BUILD_TAG));
 
-        JSONObject trackingData = new JSONObject();
-        trackingData.put("build", browserStackBuildName);
-        trackingData.put("product", product.name());
-        tracker.trackOperation(String.format("GenericReportInitiated%s", Constants.PIPELINE), trackingData);
+        tracker.reportGenerationInitialized(browserStackBuildName, product.name(), true);
 
         final BrowserStackReportForBuild bstackReportAction =
-                new BrowserStackReportForBuild(run, product, browserStackBuildName, logger, tracker, Constants.PIPELINE);
+                new BrowserStackReportForBuild(run, product, browserStackBuildName, logger, tracker, true);
         final boolean reportResult = bstackReportAction.generateBrowserStackReport();
         run.addAction(bstackReportAction);
 
-        String reportStatus = reportResult ? Constants.ReportStatus.GENERATED : Constants.ReportStatus.FAILED;
+        String reportStatus = reportResult ? Constants.ReportStatus.SUCCESS : Constants.ReportStatus.FAILED;
         logger.println("BrowserStack Report Status via Pipeline: " + reportStatus);
 
-        JSONObject dataToTrack = new JSONObject();
-        dataToTrack.put("status", reportStatus);
-        dataToTrack.put("product", product.name());
-        tracker.trackOperation(String.format("GenericReportComplete%s", Constants.PIPELINE), dataToTrack);
+        tracker.reportGenerationCompleted(reportStatus, product.name(), true,
+                browserStackBuildName, bstackReportAction.getBrowserStackBuildID());
         return null;
     }
 }

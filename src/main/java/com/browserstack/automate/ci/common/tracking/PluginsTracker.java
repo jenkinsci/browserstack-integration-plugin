@@ -6,11 +6,12 @@ import okhttp3.*;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Optional;
 
 public class PluginsTracker {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private static final String URL = "http://apidev.bsstag.com/ci_plugins/track";
+    private static final String URL = "https://api.browserstack.com/ci_plugins/track";
     private static final OkHttpClient client = new OkHttpClient();
     private final String trackingId;
     private String username;
@@ -51,6 +52,7 @@ public class PluginsTracker {
         requestData.put("source", Constants.JENKINS_CI_PLUGIN);
         requestData.put("team", Constants.AUTOMATE);
         requestData.put("data", data);
+        requestData.put("event_timestamp", Instant.now().getEpochSecond());
         requestData.put("track_operation_type", operationType);
         requestData.put("tracking_id", trackingId);
 
@@ -60,6 +62,40 @@ public class PluginsTracker {
                 .ifPresent(accessKey -> requestData.put("access_key", accessKey));
 
         asyncPostRequestSilent(URL, requestData.toString());
+    }
+
+    public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
+        JSONObject trackingData = new JSONObject();
+        trackingData.put("error", errorMessage);
+        trackingData.put("pipeline", pipelineStatus);
+        trackingData.put("phase", phase);
+        trackOperation(PluginsTrackerEvents.CI_PLUGIN_ERROR, trackingData);
+    }
+
+    public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
+        JSONObject trackingData = new JSONObject();
+        trackingData.put("build_name", buildName);
+        trackingData.put("local", localStatus);
+        trackingData.put("pipeline", pipelineStatus);
+        trackOperation(PluginsTrackerEvents.CI_PLUGIN_INITIALIZED, trackingData);
+    }
+
+    public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
+        JSONObject trackingData = new JSONObject();
+        trackingData.put("build_name", buildName);
+        trackingData.put("product", product);
+        trackingData.put("pipeline", pipelineStatus);
+        trackOperation(PluginsTrackerEvents.CI_PLUGIN_REPORT_GENERATION_STARTED, trackingData);
+    }
+
+    public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
+        JSONObject dataToTrack = new JSONObject();
+        dataToTrack.put("status", status);
+        dataToTrack.put("product", product);
+        dataToTrack.put("pipeline", pipelineStatus);
+        dataToTrack.put("build_name", buildName);
+        dataToTrack.put("build_id", buildId);
+        trackOperation(PluginsTrackerEvents.CI_PLUGIN_REPORT_PUBLISHED, dataToTrack);
     }
 
     public void setCredentials(String username, String accessKey) {

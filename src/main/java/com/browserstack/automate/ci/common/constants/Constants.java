@@ -33,7 +33,7 @@ public class Constants {
 
     // Report
     public static final class ReportStatus {
-        public static final String GENERATED = "Generated";
+        public static final String SUCCESS = "Success";
         public static final String FAILED = "Failed";
     }
 

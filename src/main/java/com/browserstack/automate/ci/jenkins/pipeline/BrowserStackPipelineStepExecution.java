@@ -24,7 +24,6 @@ import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.json.JSONObject;
 
 public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingStepExecution<Void> {
   private static final long serialVersionUID = -8810137779949881645L;
@@ -55,7 +54,7 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
 
     if (credentials == null) {
       logError(logger, "Credentials id is invalid. Aborting!!!");
-      tracker.trackOperation(String.format("BStackNoCredentials%s", Constants.PIPELINE), new JSONObject());
+      tracker.sendError("No Credentials Available", true, "PipelineExecution");
       return null;
     }
 
@@ -79,21 +78,17 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
             launcher,  getContext().get(EnvVars.class));
       } catch (Exception e) {
         taskListener.fatalError(e.getMessage());
+        tracker.sendError(e.getMessage().substring(0, Math.min(100, e.getMessage().length())),
+                true, "LocalInitialization");
         throw new IOException(e.getCause());
       }
     }
-
-    EnvVars overrides = run.getEnvironment(taskListener);
-
-    JSONObject trackingData = new JSONObject();
-    trackingData.put("local", (this.localConfig != null ? "true" : "false"));
-    trackingData.put("build", overrides.get(Constants.JENKINS_BUILD_TAG));
-    tracker.trackOperation(String.format("BuildRun%s", Constants.PIPELINE), trackingData);
 
     BrowserStackBuildWrapperOperations buildWrapperOperations =
         new BrowserStackBuildWrapperOperations(credentials, false, taskListener.getLogger(),
             localConfig, browserStackLocal);
 
+    EnvVars overrides = run.getEnvironment(taskListener);
     HashMap<String, String> overridesMap = new HashMap<String, String>(overrides);
     buildWrapperOperations.buildEnvVars(overridesMap);
 
@@ -101,6 +96,9 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
         .newBodyInvoker().withContext(credentials).withContext(EnvironmentExpander
             .merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(overridesMap)))
         .withCallback(new Callback(browserStackLocal)).start();
+
+    tracker.pluginInitialized(overrides.get(Constants.JENKINS_BUILD_TAG),
+            (this.localConfig != null), true);
     return null;
   }
 

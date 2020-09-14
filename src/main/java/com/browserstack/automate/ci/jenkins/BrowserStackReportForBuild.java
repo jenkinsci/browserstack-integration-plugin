@@ -32,7 +32,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final ProjectType projectType;
     private final PrintStream logger;
     private final PluginsTracker tracker;
-    private final String pipelineStatus;
+    private final boolean pipelineStatus;
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
     private final String failedConst = Constants.SessionStatus.FAILED;
@@ -44,7 +44,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
                                       final String buildName,
                                       final PrintStream logger,
                                       final PluginsTracker tracker,
-                                      final String pipelineStatus) {
+                                      final boolean pipelineStatus) {
         super();
         setBuild(build);
         this.buildName = buildName;
@@ -63,14 +63,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         final BrowserStackBuildAction browserStackBuildAction = getBuild().getAction(BrowserStackBuildAction.class);
         if (browserStackBuildAction == null) {
             log(logger, "Error: No BrowserStackBuildAction found");
-            tracker.trackOperation(String.format("GenericReportBuildActionNA%s", pipelineStatus), new JSONObject());
+            tracker.sendError("BrowserStackBuildAction Not Found", pipelineStatus, "ReportGeneration");
             return;
         }
 
         final BrowserStackCredentials credentials = browserStackBuildAction.getBrowserStackCredentials();
         if (credentials == null) {
             log(logger, "Error: BrowserStack credentials could not be fetched");
-            tracker.trackOperation(String.format("GenericReportNoCredentials%s", pipelineStatus), new JSONObject());
+            tracker.sendError("No Credentials Available", pipelineStatus, "ReportGeneration");
             return;
         }
 
@@ -89,10 +89,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         Optional.ofNullable(browserStackBuild)
                 .ifPresent(browserStackBuild -> {
                     browserStackSessions.addAll(fetchBrowserStackSessions(client, browserStackBuild.getId()));
-                    JSONObject trackingData = new JSONObject();
-                    trackingData.put("build_id", browserStackBuild.getId());
-                    trackingData.put("build", buildName);
-                    tracker.trackOperation(String.format("GenericReportBuildId%s", pipelineStatus), trackingData);
                 });
 
         if (browserStackSessions.size() > 0) {
@@ -227,6 +223,13 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
     public ProjectType getProjectType() {
         return projectType;
+    }
+
+    public String getBrowserStackBuildID() {
+        if (browserStackBuild != null) {
+            return browserStackBuild.getId();
+        }
+        return "NO_BUILD_ID";
     }
 
     public String getErrorConst() {

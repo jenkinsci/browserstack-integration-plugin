@@ -18,7 +18,6 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
-import org.json.JSONObject;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -43,7 +42,8 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         final PrintStream logger = listener.getLogger();
-        PluginsTracker tracker = new PluginsTracker();
+        final PluginsTracker tracker = new PluginsTracker();
+        final boolean pipelineStatus = false;
 
         logger.println("Generating BrowserStack Test Report");
 
@@ -57,23 +57,19 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
             product = ProjectType.APP_AUTOMATE;
         }
 
-        JSONObject trackingData = new JSONObject();
-        trackingData.put("build", browserStackBuildName);
-        trackingData.put("product", product.name());
-        tracker.trackOperation(String.format("GenericReportInitiated%s", Constants.NON_PIPELINE), trackingData);
-
+        tracker.reportGenerationInitialized(browserStackBuildName, product.name(), pipelineStatus);
         logger.println("BrowserStack Project identified as : " + product);
 
         final BrowserStackReportForBuild bstackReportAction =
-                new BrowserStackReportForBuild(build, product, browserStackBuildName, logger, tracker, Constants.NON_PIPELINE);
+                new BrowserStackReportForBuild(build, product, browserStackBuildName, logger, tracker, pipelineStatus);
         final boolean reportResult = bstackReportAction.generateBrowserStackReport();
         build.addAction(bstackReportAction);
 
-        String reportStatus = reportResult ? Constants.ReportStatus.GENERATED : Constants.ReportStatus.FAILED;
+        String reportStatus = reportResult ? Constants.ReportStatus.SUCCESS : Constants.ReportStatus.FAILED;
         logger.println("BrowserStack Report Status: " + reportStatus);
 
-        tracker.trackOperation(String.format("GenericReportComplete%s", Constants.NON_PIPELINE),
-                new JSONObject().put("status", reportStatus));
+        tracker.reportGenerationCompleted(reportStatus, product.name(), pipelineStatus,
+                browserStackBuildName, bstackReportAction.getBrowserStackBuildID());
     }
 
     @Extension
