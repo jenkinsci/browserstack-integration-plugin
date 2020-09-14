@@ -89,6 +89,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         Optional.ofNullable(browserStackBuild)
                 .ifPresent(browserStackBuild -> {
                     browserStackSessions.addAll(fetchBrowserStackSessions(client, browserStackBuild.getId()));
+                    JSONObject trackingData = new JSONObject();
+                    trackingData.put("build_id", browserStackBuild.getId());
+                    trackingData.put("build", buildName);
+                    tracker.trackOperation(String.format("GenericReportBuildId%s", pipelineStatus), trackingData);
                 });
 
         if (browserStackSessions.size() > 0) {

@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.common.tracking;
 
 import com.browserstack.automate.ci.common.Tools;
+import com.browserstack.automate.ci.common.constants.Constants;
 import okhttp3.*;
 import org.json.JSONObject;
 
@@ -9,7 +10,7 @@ import java.util.Optional;
 
 public class PluginsTracker {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private static final String URL = "http://apidev.bsstag.com/plugins/track";
+    private static final String URL = "http://apidev.bsstag.com/ci_plugins/track";
     private static final OkHttpClient client = new OkHttpClient();
     private final String trackingId;
     private String username;
@@ -47,6 +48,7 @@ public class PluginsTracker {
 
     public void trackOperation(String operationType, JSONObject data) {
         JSONObject requestData = new JSONObject();
+        requestData.put("source", Constants.JENKINS_CI_PLUGIN);
         requestData.put("data", data);
         requestData.put("track_operation_type", operationType);
         requestData.put("tracking_id", trackingId);
