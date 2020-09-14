@@ -182,7 +182,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             sessionJSON.put(Constants.SessionInfo.DURATION, Tools.durationToHumanReadable(session.getDuration()));
         }
 
+        String createdAtReadable = String.format("%s %s",
+                Tools.readableDateFormat.format(session.getCreatedAt()), "UTC");
         sessionJSON.put(Constants.SessionInfo.CREATED_AT, session.getCreatedAt());
+        sessionJSON.put(Constants.SessionInfo.CREATED_AT_READABLE, createdAtReadable);
         sessionJSON.put(Constants.SessionInfo.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));
         return sessionJSON;
     }

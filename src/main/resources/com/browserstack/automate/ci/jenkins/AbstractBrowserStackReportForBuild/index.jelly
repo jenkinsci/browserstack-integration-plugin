@@ -144,7 +144,7 @@
                                 <td class="bstack-data titlecase-data">${i.browser}</td>
                                 <td class="bstack-data">${i.os}</td>
                                 <td class="bstack-data">${i.duration}</td>
-                                <td class="bstack-data">${i.createdAt.toString()}</td>
+                                <td class="bstack-data">${i.createdAtReadable}</td>
                             </tr>
                         </j:forEach>
                     </table>

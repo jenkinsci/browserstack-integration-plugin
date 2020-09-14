@@ -24,6 +24,7 @@ public class Constants {
         public static final String USER_MARKED = "userMarked";
         public static final String DURATION = "duration";
         public static final String CREATED_AT = "createdAt";
+        public static final String CREATED_AT_READABLE = "createdAtReadable";
         public static final String URL = "url";
     }
 

@@ -49,6 +49,7 @@ public class PluginsTracker {
     public void trackOperation(String operationType, JSONObject data) {
         JSONObject requestData = new JSONObject();
         requestData.put("source", Constants.JENKINS_CI_PLUGIN);
+        requestData.put("team", Constants.AUTOMATE);
         requestData.put("data", data);
         requestData.put("track_operation_type", operationType);
         requestData.put("tracking_id", trackingId);
