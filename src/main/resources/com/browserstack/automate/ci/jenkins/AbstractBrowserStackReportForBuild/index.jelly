@@ -129,7 +129,7 @@
                                     <j:if test="${(it.errorConst.equalsIgnoreCase(i.status))}">
                                         <span class="error-span">${i.status}</span>
                                     </j:if>
-                                    <j:if test="${(i.status != it.errorConst)}">
+                                    <j:if test="${(it.errorConst.equalsIgnoreCase(i.status) == false)}">
                                         <span>${i.status}</span>
                                     </j:if>
                                 </td>
@@ -137,7 +137,7 @@
                                     <j:if test="${(it.failedConst.equalsIgnoreCase(i.userMarked))}">
                                         <span class="error-span">${i.userMarked}</span>
                                     </j:if>
-                                    <j:if test="${(i.userMarked != it.failedConst)}">
+                                    <j:if test="${(it.failedConst.equalsIgnoreCase(i.userMarked) == false)}">
                                         <span>${i.userMarked}</span>
                                     </j:if>
                                 </td>

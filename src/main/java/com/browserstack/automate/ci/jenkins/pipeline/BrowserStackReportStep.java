@@ -22,7 +22,7 @@ public class BrowserStackReportStep extends Step {
 
     @DataBoundConstructor
     public BrowserStackReportStep(String product) {
-        if (product != null && product.toLowerCase() == Constants.APP_AUTOMATE) {
+        if (Constants.APP_AUTOMATE.equalsIgnoreCase(product)) {
             this.project = ProjectType.APP_AUTOMATE;
             this.product = Constants.APP_AUTOMATE;
         } else {

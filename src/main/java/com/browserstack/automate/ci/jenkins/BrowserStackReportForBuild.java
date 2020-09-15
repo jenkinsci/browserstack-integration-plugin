@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import java.io.PrintStream;
+import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -178,10 +179,16 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             sessionJSON.put(Constants.SessionInfo.DURATION, Tools.durationToHumanReadable(session.getDuration()));
         }
 
-        String createdAtReadable = String.format("%s %s",
-                Tools.readableDateFormat.format(session.getCreatedAt()), "UTC");
-        sessionJSON.put(Constants.SessionInfo.CREATED_AT, session.getCreatedAt());
-        sessionJSON.put(Constants.SessionInfo.CREATED_AT_READABLE, createdAtReadable);
+        try {
+            Date sessionCreatedAt = Tools.SESSION_DATE_FORMAT.parse(session.getCreatedAt());
+            sessionJSON.put(Constants.SessionInfo.CREATED_AT, sessionCreatedAt);
+
+            String createdAtReadable = String.format("%s %s",
+                    Tools.readableDateFormat.format(sessionCreatedAt), "UTC");
+            sessionJSON.put(Constants.SessionInfo.CREATED_AT_READABLE, createdAtReadable);
+        } catch (ParseException ignored) {
+        }
+
         sessionJSON.put(Constants.SessionInfo.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));
         return sessionJSON;
     }
@@ -251,9 +258,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
             // ascending with `user marked status` but descending with `created at`
             if (userMarkedStatusComparator == 0) {
-                final Date sessionOneDate = (Date) sessionOne.opt(Constants.SessionInfo.CREATED_AT);
-                final Date sessionTwoDate = (Date) sessionTwo.opt(Constants.SessionInfo.CREATED_AT);
-                final int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
+                int createdAtComparator = 0;
+
+                if (sessionOne.opt(Constants.SessionInfo.CREATED_AT) != null
+                        && sessionTwo.opt(Constants.SessionInfo.CREATED_AT) != null) {
+                    final Date sessionOneDate = (Date) sessionOne.opt(Constants.SessionInfo.CREATED_AT);
+                    final Date sessionTwoDate = (Date) sessionTwo.opt(Constants.SessionInfo.CREATED_AT);
+                    createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
+                }
 
                 return createdAtComparator == 0
                         ? userMarkedStatusComparator

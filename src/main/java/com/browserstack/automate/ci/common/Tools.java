@@ -2,14 +2,17 @@ package com.browserstack.automate.ci.common;
 
 import org.apache.commons.lang.RandomStringUtils;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Tools {
 
     public static final Pattern buildUrlPattern = Pattern.compile("(https?:\\/\\/[\\w-.]+\\/builds\\/\\w+)\\/sessions\\/\\w+");
     public static final SimpleDateFormat readableDateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
+    public static final DateFormat SESSION_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
     /**
      * Returns a string with only '*' of length equal to the length of the inputStr
