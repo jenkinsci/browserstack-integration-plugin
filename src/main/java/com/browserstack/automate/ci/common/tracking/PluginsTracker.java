@@ -54,6 +54,7 @@ public class PluginsTracker {
     public void trackOperation(String operationType, JSONObject data) {
         JSONObject requestData = new JSONObject();
         requestData.put("source", Constants.JENKINS_CI_PLUGIN);
+        requestData.put("product", Constants.AUTOMATE);
         requestData.put("team", Constants.AUTOMATE);
         requestData.put("data", data);
         requestData.put("event_timestamp", Instant.now().getEpochSecond());
