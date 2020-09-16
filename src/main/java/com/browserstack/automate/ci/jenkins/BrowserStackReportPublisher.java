@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Optional;
 
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+
 public class BrowserStackReportPublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundConstructor
@@ -45,7 +47,7 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
         final PluginsTracker tracker = new PluginsTracker();
         final boolean pipelineStatus = false;
 
-        logger.println("Generating BrowserStack Test Report");
+        log(logger, "Generating BrowserStack Test Report");
 
         final EnvVars parentEnvs = build.getEnvironment(listener);
         String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
@@ -58,7 +60,7 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
         }
 
         tracker.reportGenerationInitialized(browserStackBuildName, product.name(), pipelineStatus);
-        logger.println("BrowserStack Project identified as : " + product.name());
+        log(logger, "BrowserStack Project identified as : " + product.name());
 
         final BrowserStackReportForBuild bstackReportAction =
                 new BrowserStackReportForBuild(build, product, browserStackBuildName, logger, tracker, pipelineStatus);
@@ -66,7 +68,7 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
         build.addAction(bstackReportAction);
 
         String reportStatus = reportResult ? Constants.ReportStatus.SUCCESS : Constants.ReportStatus.FAILED;
-        logger.println("BrowserStack Report Status: " + reportStatus);
+        log(logger, "BrowserStack Report Status: " + reportStatus);
 
         tracker.reportGenerationCompleted(reportStatus, product.name(), pipelineStatus,
                 browserStackBuildName, bstackReportAction.getBrowserStackBuildID());

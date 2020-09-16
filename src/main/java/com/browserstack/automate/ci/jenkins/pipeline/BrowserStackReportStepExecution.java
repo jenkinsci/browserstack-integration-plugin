@@ -14,6 +14,8 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import java.io.PrintStream;
 import java.util.Optional;
 
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+
 public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepExecution {
 
     private final ProjectType product;
@@ -30,7 +32,7 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
         final PrintStream logger = taskListener.getLogger();
         final PluginsTracker tracker = new PluginsTracker();
 
-        logger.println("Generating BrowserStack Test Report via Pipeline for : " + product.name());
+        log(logger, "Generating BrowserStack Test Report via Pipeline for : " + product.name());
 
         final EnvVars parentEnvs = run.getEnvironment(taskListener);
         String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
@@ -44,7 +46,7 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
         run.addAction(bstackReportAction);
 
         String reportStatus = reportResult ? Constants.ReportStatus.SUCCESS : Constants.ReportStatus.FAILED;
-        logger.println("BrowserStack Report Status via Pipeline: " + reportStatus);
+        log(logger, "BrowserStack Report Status via Pipeline: " + reportStatus);
 
         tracker.reportGenerationCompleted(reportStatus, product.name(), true,
                 browserStackBuildName, bstackReportAction.getBrowserStackBuildID());
