@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
     private static final int RESULT_META_MAX_SIZE = 5;
@@ -31,7 +31,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final List<JSONObject> resultMeta;
     private final Map<String, String> resultAggregation;
     private final ProjectType projectType;
-    private final PrintStream logger;
+    private final transient PrintStream logger;
     private final PluginsTracker tracker;
     private final boolean pipelineStatus;
     // to make them available in jelly
@@ -63,14 +63,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private void fetchBuildAndSessions() {
         final BrowserStackBuildAction browserStackBuildAction = getBuild().getAction(BrowserStackBuildAction.class);
         if (browserStackBuildAction == null) {
-            log(logger, "Error: No BrowserStackBuildAction found");
+            logError(logger, "No BrowserStackBuildAction found");
             tracker.sendError("BrowserStackBuildAction Not Found", pipelineStatus, "ReportGeneration");
             return;
         }
 
         final BrowserStackCredentials credentials = browserStackBuildAction.getBrowserStackCredentials();
         if (credentials == null) {
-            log(logger, "Error: BrowserStack credentials could not be fetched");
+            logError(logger, "BrowserStack credentials could not be fetched");
             tracker.sendError("No Credentials Available", pipelineStatus, "ReportGeneration");
             return;
         }
@@ -121,9 +121,9 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         try {
             build = client.getBuildByName(buildName);
         } catch (BuildNotFound bnfException) {
-            log(logger, "No build found by name: " + buildName);
+            logError(logger, "No build found by name: " + buildName);
         } catch (BrowserStackException bstackException) {
-            log(logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
+            logError(logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
         }
 
         return build;
@@ -134,9 +134,9 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         try {
             browserStackSessions.addAll(client.getSessions(buildId));
         } catch (BuildNotFound bnfException) {
-            log(logger, "No build found while fetching sessions for the buildId: " + buildId);
+            logError(logger, "No build found while fetching sessions for the buildId: " + buildId);
         } catch (BrowserStackException bstackException) {
-            log(logger, "BrowserStackException occurred while fetching sessions: " + bstackException.toString());
+            logError(logger, "BrowserStackException occurred while fetching sessions: " + bstackException.toString());
         }
 
         return browserStackSessions;
@@ -187,7 +187,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
                     Tools.READABLE_DATE_FORMAT.format(sessionCreatedAt), "UTC");
             sessionJSON.put(Constants.SessionInfo.CREATED_AT_READABLE, createdAtReadable);
         } catch (ParseException e) {
-            log(logger, String.format("Could not parse Session Creation Date: %s", e.getMessage()));
+            logError(logger, "Could not parse Session Creation Date: " + e.getMessage());
         }
 
         sessionJSON.put(Constants.SessionInfo.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));

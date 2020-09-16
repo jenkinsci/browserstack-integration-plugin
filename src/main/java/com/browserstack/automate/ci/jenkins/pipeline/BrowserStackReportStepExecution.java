@@ -27,10 +27,10 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
     protected Void run() throws Exception {
         Run<?, ?> run = getContext().get(Run.class);
         TaskListener taskListener = getContext().get(TaskListener.class);
-        PrintStream logger = taskListener.getLogger();
+        final PrintStream logger = taskListener.getLogger();
         final PluginsTracker tracker = new PluginsTracker();
 
-        logger.println("Generating BrowserStack Test Report via Pipeline for : " + product);
+        logger.println("Generating BrowserStack Test Report via Pipeline for : " + product.name());
 
         final EnvVars parentEnvs = run.getEnvironment(taskListener);
         String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);

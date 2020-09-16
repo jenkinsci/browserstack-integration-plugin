@@ -5,7 +5,6 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
-import java.util.Optional;
 
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
@@ -58,11 +57,9 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
       return null;
     }
 
-    Optional.ofNullable(credentials.getDecryptedAccesskey())
-            .ifPresent(accessKey -> {
-              tracker.setCredentials(credentials.getUsername(),
-                      credentials.getDecryptedAccesskey());
-            });
+    if (credentials.hasUsername() && credentials.hasAccesskey()) {
+      tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
+    }
 
     BrowserStackBuildAction action = run.getAction(BrowserStackBuildAction.class);
     if (action == null) {

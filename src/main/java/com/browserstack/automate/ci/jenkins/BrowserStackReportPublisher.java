@@ -58,7 +58,7 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
         }
 
         tracker.reportGenerationInitialized(browserStackBuildName, product.name(), pipelineStatus);
-        logger.println("BrowserStack Project identified as : " + product);
+        logger.println("BrowserStack Project identified as : " + product.name());
 
         final BrowserStackReportForBuild bstackReportAction =
                 new BrowserStackReportForBuild(build, product, browserStackBuildName, logger, tracker, pipelineStatus);
