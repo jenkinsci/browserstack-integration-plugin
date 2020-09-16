@@ -1,6 +1,7 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.model.BrowserStackSession;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
@@ -72,6 +73,28 @@ public class AutomateTestActionTest {
 
   }
 
+  private static final class MockPluginsTracker extends MockUp<PluginsTracker> {
+    @Mock
+    public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
+      return;
+    }
+
+    @Mock
+    public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
+      return;
+    }
+
+    @Mock
+    public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
+      return;
+    }
+
+    @Mock
+    public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
+      return;
+    }
+  }
+
   @Before
   public void setUp() throws Exception {
     jenkinsRule.recipeLoadCurrentPlugin();
@@ -83,6 +106,7 @@ public class AutomateTestActionTest {
   public void testAutomateExceptionIsHandled() throws Exception {
     /* =================== Prepare ================= */
     new MockAutomateClientThatThrowsAutomateException();
+    new MockPluginsTracker();
     addBuildStep();
     project.getBuildersList().add(new TouchBuilder());
 
@@ -106,6 +130,7 @@ public class AutomateTestActionTest {
   public void testSessionNotFoundExceptionIsHandled() throws Exception {
     /* =================== Prepare ================= */
     new MockAutomateClientThatThrowsSessionNotFoundException();
+    new MockPluginsTracker();
     addBuildStep();
     project.getBuildersList().add(new TouchBuilder());
 

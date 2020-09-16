@@ -7,6 +7,7 @@ import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -17,12 +18,12 @@ import org.kohsuke.stapler.QueryParameter;
 import java.util.Set;
 
 public class BrowserStackReportStep extends Step {
-    public final ProjectType project;
-    public final String product;
+    public ProjectType project;
+    public String product;
 
     @DataBoundConstructor
     public BrowserStackReportStep(String product) {
-        if (product != null && product.toLowerCase() == Constants.APP_AUTOMATE) {
+        if (Constants.APP_AUTOMATE.equalsIgnoreCase(product)) {
             this.project = ProjectType.APP_AUTOMATE;
             this.product = Constants.APP_AUTOMATE;
         } else {
@@ -52,6 +53,13 @@ public class BrowserStackReportStep extends Step {
         @Override
         public String getDisplayName() {
             return Constants.BROWSERSTACK_REPORT_DISPLAY_NAME;
+        }
+
+        public ListBoxModel doFillProductItems() {
+            ListBoxModel items = new ListBoxModel();
+            items.add("Automate", Constants.AUTOMATE);
+            items.add("App Automate", Constants.APP_AUTOMATE);
+            return items;
         }
 
         public FormValidation doCheckProduct(@QueryParameter String product) {

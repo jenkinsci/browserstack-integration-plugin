@@ -7,6 +7,7 @@ public class Constants {
     public static final String BROWSERSTACK_LOGO = String.format("%s/plugin/browserstack-integration/images/logo.png", Jenkins.RESOURCE_PATH);
     public static final String BROWSERSTACK_REPORT_URL = "testReportBrowserStack";
     public static final String BROWSERSTACK_REPORT_PIPELINE_FUNCTION = "browserStackReportPublisher";
+    public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
     // Product
     public static final String AUTOMATE = "automate";
@@ -23,12 +24,16 @@ public class Constants {
         public static final String USER_MARKED = "userMarked";
         public static final String DURATION = "duration";
         public static final String CREATED_AT = "createdAt";
+        public static final String CREATED_AT_READABLE = "createdAtReadable";
         public static final String URL = "url";
     }
 
+    public static final String PIPELINE = "Pipeline";
+    public static final String NON_PIPELINE = "NonPipeline";
+
     // Report
     public static final class ReportStatus {
-        public static final String GENERATED = "Generated";
+        public static final String SUCCESS = "Success";
         public static final String FAILED = "Failed";
     }
 

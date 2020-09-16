@@ -5,6 +5,7 @@ import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.exception.BuildNotFound;
 import com.browserstack.automate.model.Build;
 import com.browserstack.automate.model.Session;
@@ -15,11 +16,12 @@ import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import java.io.PrintStream;
+import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
     private static final int RESULT_META_MAX_SIZE = 5;
@@ -29,14 +31,21 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final List<JSONObject> resultMeta;
     private final Map<String, String> resultAggregation;
     private final ProjectType projectType;
-    private final PrintStream logger;
+    private final transient PrintStream logger;
+    private final PluginsTracker tracker;
+    private final boolean pipelineStatus;
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
     private final String failedConst = Constants.SessionStatus.FAILED;
     private Build browserStackBuild;
     private String browserStackBuildBrowserUrl;
 
-    public BrowserStackReportForBuild(final Run<?, ?> build, final ProjectType projectType, final String buildName, final PrintStream logger) {
+    public BrowserStackReportForBuild(final Run<?, ?> build,
+                                      final ProjectType projectType,
+                                      final String buildName,
+                                      final PrintStream logger,
+                                      final PluginsTracker tracker,
+                                      final boolean pipelineStatus) {
         super();
         setBuild(build);
         this.buildName = buildName;
@@ -46,21 +55,27 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.resultAggregation = new HashMap<>();
         this.projectType = projectType;
         this.logger = logger;
+        this.tracker = tracker;
+        this.pipelineStatus = pipelineStatus;
         fetchBuildAndSessions();
     }
 
     private void fetchBuildAndSessions() {
         final BrowserStackBuildAction browserStackBuildAction = getBuild().getAction(BrowserStackBuildAction.class);
         if (browserStackBuildAction == null) {
-            log(logger, "Error: No BrowserStackBuildAction found");
+            logError(logger, "No BrowserStackBuildAction found");
+            tracker.sendError("BrowserStackBuildAction Not Found", pipelineStatus, "ReportGeneration");
             return;
         }
 
         final BrowserStackCredentials credentials = browserStackBuildAction.getBrowserStackCredentials();
         if (credentials == null) {
-            log(logger, "Error: BrowserStack credentials could not be fetched");
+            logError(logger, "BrowserStack credentials could not be fetched");
+            tracker.sendError("No Credentials Available", pipelineStatus, "ReportGeneration");
             return;
         }
+
+        tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
 
         BrowserStackClient client;
         if (projectType == ProjectType.APP_AUTOMATE) {
@@ -79,7 +94,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
         if (browserStackSessions.size() > 0) {
             String browserUrl = browserStackSessions.get(0).getBrowserUrl();
-            Matcher buildUrlMatcher = Tools.buildUrlPattern.matcher(browserUrl);
+            Matcher buildUrlMatcher = Tools.BUILD_URL_PATTERN.matcher(browserUrl);
             if (buildUrlMatcher.matches()) {
                 browserStackBuildBrowserUrl = buildUrlMatcher.group(1);
             }
@@ -106,9 +121,9 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         try {
             build = client.getBuildByName(buildName);
         } catch (BuildNotFound bnfException) {
-            log(logger, "No build found by name: " + buildName);
+            logError(logger, "No build found by name: " + buildName);
         } catch (BrowserStackException bstackException) {
-            log(logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
+            logError(logger, "BrowserStackException occurred while fetching build: " + bstackException.toString());
         }
 
         return build;
@@ -119,9 +134,9 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         try {
             browserStackSessions.addAll(client.getSessions(buildId));
         } catch (BuildNotFound bnfException) {
-            log(logger, "No build found while fetching sessions for the buildId: " + buildId);
+            logError(logger, "No build found while fetching sessions for the buildId: " + buildId);
         } catch (BrowserStackException bstackException) {
-            log(logger, "BrowserStackException occurred while fetching sessions: " + bstackException.toString());
+            logError(logger, "BrowserStackException occurred while fetching sessions: " + bstackException.toString());
         }
 
         return browserStackSessions;
@@ -164,7 +179,17 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             sessionJSON.put(Constants.SessionInfo.DURATION, Tools.durationToHumanReadable(session.getDuration()));
         }
 
-        sessionJSON.put(Constants.SessionInfo.CREATED_AT, session.getCreatedAt());
+        try {
+            Date sessionCreatedAt = Tools.SESSION_DATE_FORMAT.parse(session.getCreatedAt());
+            sessionJSON.put(Constants.SessionInfo.CREATED_AT, sessionCreatedAt);
+
+            String createdAtReadable = String.format("%s %s",
+                    Tools.READABLE_DATE_FORMAT.format(sessionCreatedAt), "UTC");
+            sessionJSON.put(Constants.SessionInfo.CREATED_AT_READABLE, createdAtReadable);
+        } catch (ParseException e) {
+            logError(logger, "Could not parse Session Creation Date: " + e.getMessage());
+        }
+
         sessionJSON.put(Constants.SessionInfo.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));
         return sessionJSON;
     }
@@ -208,6 +233,13 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         return projectType;
     }
 
+    public String getBrowserStackBuildID() {
+        if (browserStackBuild != null) {
+            return browserStackBuild.getId();
+        }
+        return "NO_BUILD_ID";
+    }
+
     public String getErrorConst() {
         return errorConst;
     }
@@ -227,9 +259,14 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
             // ascending with `user marked status` but descending with `created at`
             if (userMarkedStatusComparator == 0) {
-                final Date sessionOneDate = (Date) sessionOne.opt(Constants.SessionInfo.CREATED_AT);
-                final Date sessionTwoDate = (Date) sessionTwo.opt(Constants.SessionInfo.CREATED_AT);
-                final int createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
+                int createdAtComparator = 0;
+
+                if (sessionOne.opt(Constants.SessionInfo.CREATED_AT) != null
+                        && sessionTwo.opt(Constants.SessionInfo.CREATED_AT) != null) {
+                    final Date sessionOneDate = (Date) sessionOne.opt(Constants.SessionInfo.CREATED_AT);
+                    final Date sessionTwoDate = (Date) sessionTwo.opt(Constants.SessionInfo.CREATED_AT);
+                    createdAtComparator = sessionOneDate.compareTo(sessionTwoDate);
+                }
 
                 return createdAtComparator == 0
                         ? userMarkedStatusComparator

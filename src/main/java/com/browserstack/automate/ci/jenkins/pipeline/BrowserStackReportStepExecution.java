@@ -3,6 +3,7 @@ package com.browserstack.automate.ci.jenkins.pipeline;
 import com.browserstack.automate.ci.common.BrowserStackEnvVars;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.ci.jenkins.BrowserStackReportForBuild;
 import hudson.EnvVars;
 import hudson.model.Run;
@@ -12,6 +13,8 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import java.io.PrintStream;
 import java.util.Optional;
+
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 
 public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepExecution {
 
@@ -26,20 +29,27 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
     protected Void run() throws Exception {
         Run<?, ?> run = getContext().get(Run.class);
         TaskListener taskListener = getContext().get(TaskListener.class);
-        PrintStream logger = taskListener.getLogger();
+        final PrintStream logger = taskListener.getLogger();
+        final PluginsTracker tracker = new PluginsTracker();
 
-        logger.println("Generating BrowserStack Test Report via Pipeline for : " + product);
+        log(logger, "Generating BrowserStack Test Report via Pipeline for : " + product.name());
 
         final EnvVars parentEnvs = run.getEnvironment(taskListener);
         String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
         browserStackBuildName = Optional.ofNullable(browserStackBuildName).orElse(parentEnvs.get(Constants.JENKINS_BUILD_TAG));
 
+        tracker.reportGenerationInitialized(browserStackBuildName, product.name(), true);
+
         final BrowserStackReportForBuild bstackReportAction =
-                new BrowserStackReportForBuild(run, product, browserStackBuildName, logger);
+                new BrowserStackReportForBuild(run, product, browserStackBuildName, logger, tracker, true);
         final boolean reportResult = bstackReportAction.generateBrowserStackReport();
         run.addAction(bstackReportAction);
 
-        logger.println("BrowserStack Report Status via Pipeline: " + (reportResult ? Constants.ReportStatus.GENERATED : Constants.ReportStatus.FAILED));
+        String reportStatus = reportResult ? Constants.ReportStatus.SUCCESS : Constants.ReportStatus.FAILED;
+        log(logger, "BrowserStack Report Status via Pipeline: " + reportStatus);
+
+        tracker.reportGenerationCompleted(reportStatus, product.name(), true,
+                browserStackBuildName, bstackReportAction.getBrowserStackBuildID());
         return null;
     }
 }

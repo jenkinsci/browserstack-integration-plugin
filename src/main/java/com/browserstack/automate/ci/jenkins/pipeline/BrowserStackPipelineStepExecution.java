@@ -5,6 +5,9 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
+
+import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
@@ -43,13 +46,19 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
     TaskListener taskListener = context.get(TaskListener.class);
     Launcher launcher = context.get(Launcher.class);
     PrintStream logger = taskListener.getLogger();
+    PluginsTracker tracker = new PluginsTracker();
 
     BrowserStackCredentials credentials =
         BrowserStackCredentials.getCredentials(run.getParent(), credentialsId);
 
     if (credentials == null) {
       logError(logger, "Credentials id is invalid. Aborting!!!");
+      tracker.sendError("No Credentials Available", true, "PipelineExecution");
       return null;
+    }
+
+    if (credentials.hasUsername() && credentials.hasAccesskey()) {
+      tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
     }
 
     BrowserStackBuildAction action = run.getAction(BrowserStackBuildAction.class);
@@ -66,6 +75,8 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
             launcher,  getContext().get(EnvVars.class));
       } catch (Exception e) {
         taskListener.fatalError(e.getMessage());
+        tracker.sendError(e.getMessage().substring(0, Math.min(100, e.getMessage().length())),
+                true, "LocalInitialization");
         throw new IOException(e.getCause());
       }
     }
@@ -82,6 +93,9 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
         .newBodyInvoker().withContext(credentials).withContext(EnvironmentExpander
             .merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(overridesMap)))
         .withCallback(new Callback(browserStackLocal)).start();
+
+    tracker.pluginInitialized(overrides.get(Constants.JENKINS_BUILD_TAG),
+            (this.localConfig != null), true);
     return null;
   }
 
