@@ -94,7 +94,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
         if (browserStackSessions.size() > 0) {
             String browserUrl = browserStackSessions.get(0).getBrowserUrl();
-            Matcher buildUrlMatcher = Tools.buildUrlPattern.matcher(browserUrl);
+            Matcher buildUrlMatcher = Tools.BUILD_URL_PATTERN.matcher(browserUrl);
             if (buildUrlMatcher.matches()) {
                 browserStackBuildBrowserUrl = buildUrlMatcher.group(1);
             }
@@ -184,9 +184,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             sessionJSON.put(Constants.SessionInfo.CREATED_AT, sessionCreatedAt);
 
             String createdAtReadable = String.format("%s %s",
-                    Tools.readableDateFormat.format(sessionCreatedAt), "UTC");
+                    Tools.READABLE_DATE_FORMAT.format(sessionCreatedAt), "UTC");
             sessionJSON.put(Constants.SessionInfo.CREATED_AT_READABLE, createdAtReadable);
-        } catch (ParseException ignored) {
+        } catch (ParseException e) {
+            log(logger, String.format("Could not parse Session Creation Date: %s", e.getMessage()));
         }
 
         sessionJSON.put(Constants.SessionInfo.URL, String.format("%s&source=jenkins_plugin", session.getPublicUrl()));

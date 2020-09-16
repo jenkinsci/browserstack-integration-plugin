@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
 
 public class Tools {
 
-    public static final Pattern buildUrlPattern = Pattern.compile("(https?:\\/\\/[\\w-.]+\\/builds\\/\\w+)\\/sessions\\/\\w+");
-    public static final SimpleDateFormat readableDateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
+    public static final Pattern BUILD_URL_PATTERN = Pattern.compile("(https?:\\/\\/[\\w-.]+\\/builds\\/\\w+)\\/sessions\\/\\w+");
+    public static final SimpleDateFormat READABLE_DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy, HH:mm");
     public static final DateFormat SESSION_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
     /**

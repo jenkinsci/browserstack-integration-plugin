@@ -28,7 +28,7 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
         Run<?, ?> run = getContext().get(Run.class);
         TaskListener taskListener = getContext().get(TaskListener.class);
         PrintStream logger = taskListener.getLogger();
-        PluginsTracker tracker = new PluginsTracker();
+        final PluginsTracker tracker = new PluginsTracker();
 
         logger.println("Generating BrowserStack Test Report via Pipeline for : " + product);
 
