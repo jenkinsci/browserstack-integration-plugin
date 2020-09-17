@@ -17,7 +17,13 @@ import org.json.JSONObject;
 import javax.annotation.Nonnull;
 import java.io.PrintStream;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -81,7 +87,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         if (projectType == ProjectType.APP_AUTOMATE) {
             client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
-//            System.setProperty("browserstack.automate.api", "http://apidev.bsstag.com/automate");
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
 
