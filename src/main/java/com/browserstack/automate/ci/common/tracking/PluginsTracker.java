@@ -17,7 +17,8 @@ import java.util.Optional;
 
 public class PluginsTracker {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private static final String URL = "https://api.browserstack.com/ci_plugins/track";
+//    private static final String URL = "https://api.browserstack.com/ci_plugins/track";
+    private static final String URL = "https://apiwtf2.bsstag.com/ci_plugins/track";
     private static final OkHttpClient client = new OkHttpClient();
     private final String trackingId;
     private String username;
