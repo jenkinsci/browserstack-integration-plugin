@@ -136,7 +136,7 @@ public class Analytics {
         if (isEnabled && googleAnalyticsClient != null) {
             if (LOGGER.getLevel() == Level.FINE && request.hitType().equals("event")) {
                 LOGGER.fine("Posting Event :: " + ((EventHit) request).eventCategory()
-                            + "." + ((EventHit) request).eventAction());
+                        + "." + ((EventHit) request).eventAction());
             }
             googleAnalyticsClient.postAsync(request);
         }

@@ -29,167 +29,167 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 
 public class BrowserStackBuildWrapper extends BuildWrapper {
 
-  private static final char CHAR_MASK = '*';
+    private static final char CHAR_MASK = '*';
 
-  private final LocalConfig localConfig;
+    private final LocalConfig localConfig;
 
-  private String credentialsId;
-  private String username;
-  private String accesskey;
+    private String credentialsId;
+    private String username;
+    private String accesskey;
 
-  @DataBoundConstructor
-  public BrowserStackBuildWrapper(String credentialsId, LocalConfig localConfig) {
-    this.credentialsId = credentialsId;
-    this.localConfig = localConfig;
-  }
-
-  @Override
-  public Environment setUp(final AbstractBuild build, final Launcher launcher,
-      final BuildListener listener) throws IOException, InterruptedException {
-    final PrintStream logger = listener.getLogger();
-    final PluginsTracker tracker = new PluginsTracker();
-
-    final BrowserStackCredentials credentials =
-        BrowserStackCredentials.getCredentials(build.getProject(), credentialsId);
-
-    BrowserStackBuildAction action = build.getAction(BrowserStackBuildAction.class);
-    if (action == null) {
-      action = new BrowserStackBuildAction(credentials);
-      build.addAction(action);
+    @DataBoundConstructor
+    public BrowserStackBuildWrapper(String credentialsId, LocalConfig localConfig) {
+        this.credentialsId = credentialsId;
+        this.localConfig = localConfig;
     }
 
-    if (credentials != null) {
-      this.username = credentials.getUsername();
-      this.accesskey = credentials.getDecryptedAccesskey();
-      tracker.setCredentials(this.username, this.accesskey);
-    } else {
-      tracker.sendError("No Credentials Available", false, "PluginInitialization");
+    static BuildWrapperItem<BrowserStackBuildWrapper> findBrowserStackBuildWrapper(
+            final Job<?, ?> job) {
+        BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem =
+                findItemWithBuildWrapper(job, BrowserStackBuildWrapper.class);
+        return (wrapperItem != null) ? wrapperItem : null;
     }
 
-    AutomateBuildEnvironment buildEnv = new AutomateBuildEnvironment(credentials, launcher, logger);
-    if (accesskey != null && this.localConfig != null) {
-      try {
-        buildEnv.startBrowserStackLocal(build.getFullDisplayName(), build.getEnvironment(listener));
-      } catch (Exception e) {
-        listener.fatalError(e.getMessage());
-        tracker.sendError(e.getMessage().substring(0, Math.min(100, e.getMessage().length())),
-                false, "LocalInitialization");
-        throw new IOException(e.getCause());
-      }
+    private static <T extends BuildWrapper> BuildWrapperItem<T> findItemWithBuildWrapper(
+            final AbstractItem buildItem, Class<T> buildWrapperClass) {
+        if (buildItem == null) {
+            return null;
+        }
+
+        if (buildItem instanceof BuildableItemWithBuildWrappers) {
+            BuildableItemWithBuildWrappers buildWrapper = (BuildableItemWithBuildWrappers) buildItem;
+            DescribableList<BuildWrapper, Descriptor<BuildWrapper>> buildWrappersList =
+                    buildWrapper.getBuildWrappersList();
+
+            if (buildWrappersList != null && !buildWrappersList.isEmpty()) {
+                return new BuildWrapperItem<T>(buildWrappersList.get(buildWrapperClass), buildItem);
+            }
+        }
+
+        if (buildItem.getParent() instanceof AbstractItem) {
+            return findItemWithBuildWrapper((AbstractItem) buildItem.getParent(), buildWrapperClass);
+        }
+
+        return null;
     }
 
-    recordBuildStats();
-    EnvVars envs = build.getEnvironment(listener);
-    tracker.pluginInitialized(envs.get(Constants.JENKINS_BUILD_TAG), (this.localConfig != null), false);
+    @Override
+    public Environment setUp(final AbstractBuild build, final Launcher launcher,
+                             final BuildListener listener) throws IOException, InterruptedException {
+        final PrintStream logger = listener.getLogger();
+        final PluginsTracker tracker = new PluginsTracker();
 
-    return buildEnv;
-  }
+        final BrowserStackCredentials credentials =
+                BrowserStackCredentials.getCredentials(build.getProject(), credentialsId);
 
-  @Override
-  public BrowserStackBuildWrapperDescriptor getDescriptor() {
-    return (BrowserStackBuildWrapperDescriptor) super.getDescriptor();
-  }
+        BrowserStackBuildAction action = build.getAction(BrowserStackBuildAction.class);
+        if (action == null) {
+            action = new BrowserStackBuildAction(credentials);
+            build.addAction(action);
+        }
 
-  public LocalConfig getLocalConfig() {
-    return this.localConfig;
-  }
+        if (credentials != null) {
+            this.username = credentials.getUsername();
+            this.accesskey = credentials.getDecryptedAccesskey();
+            tracker.setCredentials(this.username, this.accesskey);
+        } else {
+            tracker.sendError("No Credentials Available", false, "PluginInitialization");
+        }
 
-  public String getCredentialsId() {
-    return credentialsId;
-  }
+        AutomateBuildEnvironment buildEnv = new AutomateBuildEnvironment(credentials, launcher, logger);
+        if (accesskey != null && this.localConfig != null) {
+            try {
+                buildEnv.startBrowserStackLocal(build.getFullDisplayName(), build.getEnvironment(listener));
+            } catch (Exception e) {
+                listener.fatalError(e.getMessage());
+                tracker.sendError(e.getMessage().substring(0, Math.min(100, e.getMessage().length())),
+                        false, "LocalInitialization");
+                throw new IOException(e.getCause());
+            }
+        }
 
-  public void setCredentialsId(String credentialsId) {
-    this.credentialsId = credentialsId;
-  }
+        recordBuildStats();
+        EnvVars envs = build.getEnvironment(listener);
+        tracker.pluginInitialized(envs.get(Constants.JENKINS_BUILD_TAG), (this.localConfig != null), false);
 
-  private void recordBuildStats() {
-    boolean localEnabled = (localConfig != null);
-    boolean localPathSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalPath());
-    boolean localOptionsSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalOptions());
-    Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet);
-  }
-
-  private class AutomateBuildEnvironment extends BuildWrapper.Environment {
-    private static final String ENV_JENKINS_BUILD_TAG = "BUILD_TAG";
-
-    private final BrowserStackCredentials credentials;
-    private final Launcher launcher;
-    private final PrintStream logger;
-    private JenkinsBrowserStackLocal browserstackLocal;
-    private boolean isTearDownPhase;
-
-    AutomateBuildEnvironment(BrowserStackCredentials credentials, Launcher launcher,
-        PrintStream logger) {
-      this.credentials = credentials;
-      this.launcher = launcher;
-      this.logger = logger;
+        return buildEnv;
     }
 
-    public void buildEnvVars(Map<String, String> env) {
-      BrowserStackBuildWrapperOperations buildWrapperOperations =
-          new BrowserStackBuildWrapperOperations(credentials, isTearDownPhase, logger, localConfig,
-              browserstackLocal);
-      buildWrapperOperations.buildEnvVars(env);
-      super.buildEnvVars(env);
+    @Override
+    public BrowserStackBuildWrapperDescriptor getDescriptor() {
+        return (BrowserStackBuildWrapperDescriptor) super.getDescriptor();
     }
 
-    public void startBrowserStackLocal(String buildTag, EnvVars envVars) throws Exception {
-      browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig, buildTag, envVars, logger);
-      log(logger, "Local: Starting BrowserStack Local...");
-      browserstackLocal.start(launcher);
-      log(logger, "Local: Started");
+    public LocalConfig getLocalConfig() {
+        return this.localConfig;
     }
 
-    public boolean tearDown(AbstractBuild build, BuildListener listener)
-        throws IOException, InterruptedException {
-      isTearDownPhase = true;
-      try {
-        BrowserStackLocalUtils.stopBrowserStackLocal(browserstackLocal, launcher, logger);
-      } catch (Exception e) {
-        throw new IOException(e.getCause());
-      }
-      return true;
+    public String getCredentialsId() {
+        return credentialsId;
     }
 
-  }
-
-  static BuildWrapperItem<BrowserStackBuildWrapper> findBrowserStackBuildWrapper(
-      final Job<?, ?> job) {
-    BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem =
-        findItemWithBuildWrapper(job, BrowserStackBuildWrapper.class);
-    return (wrapperItem != null) ? wrapperItem : null;
-  }
-
-  private static <T extends BuildWrapper> BuildWrapperItem<T> findItemWithBuildWrapper(
-      final AbstractItem buildItem, Class<T> buildWrapperClass) {
-    if (buildItem == null) {
-      return null;
+    public void setCredentialsId(String credentialsId) {
+        this.credentialsId = credentialsId;
     }
 
-    if (buildItem instanceof BuildableItemWithBuildWrappers) {
-      BuildableItemWithBuildWrappers buildWrapper = (BuildableItemWithBuildWrappers) buildItem;
-      DescribableList<BuildWrapper, Descriptor<BuildWrapper>> buildWrappersList =
-          buildWrapper.getBuildWrappersList();
-
-      if (buildWrappersList != null && !buildWrappersList.isEmpty()) {
-        return new BuildWrapperItem<T>(buildWrappersList.get(buildWrapperClass), buildItem);
-      }
+    private void recordBuildStats() {
+        boolean localEnabled = (localConfig != null);
+        boolean localPathSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalPath());
+        boolean localOptionsSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalOptions());
+        Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet);
     }
 
-    if (buildItem.getParent() instanceof AbstractItem) {
-      return findItemWithBuildWrapper((AbstractItem) buildItem.getParent(), buildWrapperClass);
+    static class BuildWrapperItem<T> {
+        final T buildWrapper;
+        final AbstractItem buildItem;
+
+        BuildWrapperItem(T buildWrapper, AbstractItem buildItem) {
+            this.buildWrapper = buildWrapper;
+            this.buildItem = buildItem;
+        }
     }
 
-    return null;
-  }
+    private class AutomateBuildEnvironment extends BuildWrapper.Environment {
+        private static final String ENV_JENKINS_BUILD_TAG = "BUILD_TAG";
 
-  static class BuildWrapperItem<T> {
-    final T buildWrapper;
-    final AbstractItem buildItem;
+        private final BrowserStackCredentials credentials;
+        private final Launcher launcher;
+        private final PrintStream logger;
+        private JenkinsBrowserStackLocal browserstackLocal;
+        private boolean isTearDownPhase;
 
-    BuildWrapperItem(T buildWrapper, AbstractItem buildItem) {
-      this.buildWrapper = buildWrapper;
-      this.buildItem = buildItem;
+        AutomateBuildEnvironment(BrowserStackCredentials credentials, Launcher launcher,
+                                 PrintStream logger) {
+            this.credentials = credentials;
+            this.launcher = launcher;
+            this.logger = logger;
+        }
+
+        public void buildEnvVars(Map<String, String> env) {
+            BrowserStackBuildWrapperOperations buildWrapperOperations =
+                    new BrowserStackBuildWrapperOperations(credentials, isTearDownPhase, logger, localConfig,
+                            browserstackLocal);
+            buildWrapperOperations.buildEnvVars(env);
+            super.buildEnvVars(env);
+        }
+
+        public void startBrowserStackLocal(String buildTag, EnvVars envVars) throws Exception {
+            browserstackLocal = new JenkinsBrowserStackLocal(accesskey, localConfig, buildTag, envVars, logger);
+            log(logger, "Local: Starting BrowserStack Local...");
+            browserstackLocal.start(launcher);
+            log(logger, "Local: Started");
+        }
+
+        public boolean tearDown(AbstractBuild build, BuildListener listener)
+                throws IOException, InterruptedException {
+            isTearDownPhase = true;
+            try {
+                BrowserStackLocalUtils.stopBrowserStackLocal(browserstackLocal, launcher, logger);
+            } catch (Exception e) {
+                throw new IOException(e.getCause());
+            }
+            return true;
+        }
+
     }
-  }
 }

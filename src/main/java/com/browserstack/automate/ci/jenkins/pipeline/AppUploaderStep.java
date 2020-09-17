@@ -17,45 +17,45 @@ import java.util.Set;
 
 public class AppUploaderStep extends Step {
 
-  public String appPath;
+    public String appPath;
 
-  @DataBoundConstructor
-  public AppUploaderStep(String appPath) throws Exception {
-    this.appPath = appPath;
-  }
-
-  @Override
-  public StepExecution start(StepContext context) throws Exception {
-    return new AppUploadStepExecution(context, appPath);
-  }
-
-  @Extension
-  public static final class StepDescriptorImpl extends StepDescriptor {
-
-    @Override
-    public Set<? extends Class<?>> getRequiredContext() {
-      return ImmutableSet.of(Run.class, TaskListener.class);
+    @DataBoundConstructor
+    public AppUploaderStep(String appPath) throws Exception {
+        this.appPath = appPath;
     }
 
     @Override
-    public String getFunctionName() {
-      return "browserstackAppUploader";
+    public StepExecution start(StepContext context) throws Exception {
+        return new AppUploadStepExecution(context, appPath);
     }
 
-    @Override
-    public String getDisplayName() {
-      return "BrowserStack App Uploader";
-    }
+    @Extension
+    public static final class StepDescriptorImpl extends StepDescriptor {
 
-    @Override
-    public boolean takesImplicitBlockArgument() {
-      return true;
-    }
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(Run.class, TaskListener.class);
+        }
 
-    public FormValidation doCheckAppPath(@QueryParameter String value) {
-      return AppUploaderHelper.validateAppPath(value);
-    }
+        @Override
+        public String getFunctionName() {
+            return "browserstackAppUploader";
+        }
 
-  }
+        @Override
+        public String getDisplayName() {
+            return "BrowserStack App Uploader";
+        }
+
+        @Override
+        public boolean takesImplicitBlockArgument() {
+            return true;
+        }
+
+        public FormValidation doCheckAppPath(@QueryParameter String value) {
+            return AppUploaderHelper.validateAppPath(value);
+        }
+
+    }
 
 }

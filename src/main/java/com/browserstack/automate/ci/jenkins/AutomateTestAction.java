@@ -28,104 +28,104 @@ import org.kohsuke.stapler.export.Exported;
  */
 public class AutomateTestAction extends TestAction {
 
-  private final CaseResult caseResult;
-  private final BrowserStackSession browserStackSession;
-  private final Run<?, ?> run;
-  private transient BrowserStackException lastException;
+    private final CaseResult caseResult;
+    private final BrowserStackSession browserStackSession;
+    private final Run<?, ?> run;
+    private transient BrowserStackException lastException;
 
-  public AutomateTestAction(Run<?, ?> run, CaseResult caseResult, String sessionStr) {
-    this.run = run;
-    this.caseResult = caseResult;
+    public AutomateTestAction(Run<?, ?> run, CaseResult caseResult, String sessionStr) {
+        this.run = run;
+        this.caseResult = caseResult;
 
-    // Generate BrowserStackSession object from jsonobject
-    Gson gson = new GsonBuilder().create();
-    this.browserStackSession = gson.fromJson(sessionStr, BrowserStackSession.class);
-  }
-
-  @Exported
-  public String getLastError() {
-    return (lastException != null) ? lastException.getMessage() : null;
-  }
-
-  // For testing only.
-  BrowserStackException getLastException() {
-    return this.lastException;
-  }
-
-  @Exported
-  public Session getSession() {
-    if (this.browserStackSession.getSessionId() == null
-        || this.browserStackSession.getSessionId().isEmpty() || run == null) {
-      return null;
+        // Generate BrowserStackSession object from jsonobject
+        Gson gson = new GsonBuilder().create();
+        this.browserStackSession = gson.fromJson(sessionStr, BrowserStackSession.class);
     }
 
-    BrowserStackCredentials credentials = null;
-    BrowserStackBuildAction buildAction = run.getAction(BrowserStackBuildAction.class);
-    if (buildAction != null) {
-      credentials = buildAction.getBrowserStackCredentials();
-    } else {
-      BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem =
-          BrowserStackBuildWrapper.findBrowserStackBuildWrapper(run.getParent());
-      if (wrapperItem == null || wrapperItem.buildWrapper == null) {
+    @Exported
+    public String getLastError() {
+        return (lastException != null) ? lastException.getMessage() : null;
+    }
+
+    // For testing only.
+    BrowserStackException getLastException() {
+        return this.lastException;
+    }
+
+    @Exported
+    public Session getSession() {
+        if (this.browserStackSession.getSessionId() == null
+                || this.browserStackSession.getSessionId().isEmpty() || run == null) {
+            return null;
+        }
+
+        BrowserStackCredentials credentials = null;
+        BrowserStackBuildAction buildAction = run.getAction(BrowserStackBuildAction.class);
+        if (buildAction != null) {
+            credentials = buildAction.getBrowserStackCredentials();
+        } else {
+            BuildWrapperItem<BrowserStackBuildWrapper> wrapperItem =
+                    BrowserStackBuildWrapper.findBrowserStackBuildWrapper(run.getParent());
+            if (wrapperItem == null || wrapperItem.buildWrapper == null) {
+                return null;
+            }
+            credentials = BrowserStackCredentials.getCredentials(wrapperItem.buildItem,
+                    wrapperItem.buildWrapper.getCredentialsId());
+        }
+
+        if (credentials == null) {
+            return null;
+        }
+
+        Session activeSession = getSession(credentials, this.browserStackSession.getProjectType());
+        return activeSession;
+    }
+
+    @JavaScriptMethod
+    public void iframeLoadTime(int time) {
+        Analytics.trackIframeLoad(time);
+    }
+
+    @Override
+    public String annotate(String text) {
+        return text;
+    }
+
+    public String getIconFileName() {
         return null;
-      }
-      credentials = BrowserStackCredentials.getCredentials(wrapperItem.buildItem,
-          wrapperItem.buildWrapper.getCredentialsId());
     }
 
-    if (credentials == null) {
-      return null;
+    public String getDisplayName() {
+        return null;
     }
 
-    Session activeSession = getSession(credentials, this.browserStackSession.getProjectType());
-    return activeSession;
-  }
-
-  @JavaScriptMethod
-  public void iframeLoadTime(int time) {
-    Analytics.trackIframeLoad(time);
-  }
-
-  @Override
-  public String annotate(String text) {
-    return text;
-  }
-
-  public String getIconFileName() {
-    return null;
-  }
-
-  public String getDisplayName() {
-    return null;
-  }
-
-  public String getUrlName() {
-    return null;
-  }
-
-  private Session getSession(BrowserStackCredentials credentials, ProjectType projectType) {
-    Session activeSession = null;
-    BrowserStackClient client = null;
-    if (projectType.equals(ProjectType.APP_AUTOMATE)) {
-      client =
-          new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-    } else {
-      client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
+    public String getUrlName() {
+        return null;
     }
-    try {
-      activeSession = client.getSession(this.browserStackSession.getSessionId());
-      Analytics.trackIframeRequest();
-    } catch (SessionNotFound snfEx) {
-      lastException = snfEx;
-      return null;
-    } catch (BrowserStackException aex) {
-      if (aex instanceof AppAutomateException) {
-        lastException = new AppAutomateException(aex);
-      } else {
-        lastException = new AutomateException(aex);
-      }
-      return null;
+
+    private Session getSession(BrowserStackCredentials credentials, ProjectType projectType) {
+        Session activeSession = null;
+        BrowserStackClient client = null;
+        if (projectType.equals(ProjectType.APP_AUTOMATE)) {
+            client =
+                    new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
+        } else {
+            client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
+        }
+        try {
+            activeSession = client.getSession(this.browserStackSession.getSessionId());
+            Analytics.trackIframeRequest();
+        } catch (SessionNotFound snfEx) {
+            lastException = snfEx;
+            return null;
+        } catch (BrowserStackException aex) {
+            if (aex instanceof AppAutomateException) {
+                lastException = new AppAutomateException(aex);
+            } else {
+                lastException = new AutomateException(aex);
+            }
+            return null;
+        }
+        return activeSession;
     }
-    return activeSession;
-  }
 }

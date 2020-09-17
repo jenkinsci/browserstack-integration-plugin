@@ -8,19 +8,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExpanderImpl extends EnvironmentExpander{
+public class ExpanderImpl extends EnvironmentExpander {
 
-  private static final long serialVersionUID = 1;
-  private final Map<String, String> overrides;
+    private static final long serialVersionUID = 1;
+    private final Map<String, String> overrides;
 
-  ExpanderImpl(HashMap<String, String> overrides) {
-      this.overrides = overrides;
-  }
+    ExpanderImpl(HashMap<String, String> overrides) {
+        this.overrides = overrides;
+    }
 
-  @Override
-  public void expand(@Nonnull EnvVars env) throws IOException, InterruptedException {
-      env.overrideAll(overrides);
-  }
-  
+    @Override
+    public void expand(@Nonnull EnvVars env) throws IOException, InterruptedException {
+        env.overrideAll(overrides);
+    }
+
 
 }

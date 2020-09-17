@@ -65,50 +65,6 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         Analytics.trackInstall();
     }
 
-    @Exported
-    public String getUsername() {
-        return username;
-    }
-
-    public boolean hasUsername() {
-        return StringUtils.isNotBlank(username);
-    }
-
-    @Exported
-    public Secret getAccesskey() {
-        return accesskey;
-    }
-
-    public String getDecryptedAccesskey() {
-        return accesskey.getPlainText();
-    }
-
-    public boolean hasAccesskey() {
-        return (accesskey != null);
-    }
-
-    @NonNull
-    @Exported
-    public String getDescription() {
-        return description;
-    }
-
-    @NonNull
-    @Exported
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public final boolean equals(Object o) {
-        return IdCredentials.Helpers.equals(this, o);
-    }
-
-    @Override
-    public final int hashCode() {
-        return IdCredentials.Helpers.hashCode(this);
-    }
-
     public static FormValidation testAuthentication(final String username, final String accesskey) {
         if (StringUtils.isBlank(username) || StringUtils.isBlank(accesskey)) {
             return FormValidation.ok();
@@ -159,6 +115,50 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
                 new ArrayList<DomainRequirement>());
     }
 
+    @Exported
+    public String getUsername() {
+        return username;
+    }
+
+    public boolean hasUsername() {
+        return StringUtils.isNotBlank(username);
+    }
+
+    @Exported
+    public Secret getAccesskey() {
+        return accesskey;
+    }
+
+    public String getDecryptedAccesskey() {
+        return accesskey.getPlainText();
+    }
+
+    public boolean hasAccesskey() {
+        return (accesskey != null);
+    }
+
+    @NonNull
+    @Exported
+    public String getDescription() {
+        return description;
+    }
+
+    @NonNull
+    @Exported
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        return IdCredentials.Helpers.equals(this, o);
+    }
+
+    @Override
+    public final int hashCode() {
+        return IdCredentials.Helpers.hashCode(this);
+    }
+
     @Extension(ordinal = 1.0D)
     public static class DescriptorImpl extends CredentialsDescriptor {
 
@@ -168,6 +168,30 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
 
         public DescriptorImpl(Class<? extends BaseStandardCredentials> clazz) {
             super(clazz);
+        }
+
+        @CheckForNull
+        private static FormValidation checkForDuplicates(String value, ModelObject context, ModelObject object) {
+            for (CredentialsStore store : CredentialsProvider.lookupStores(object)) {
+                if (!store.hasPermission(CredentialsProvider.VIEW)) {
+                    continue;
+                }
+                ModelObject storeContext = store.getContext();
+                for (Domain domain : store.getDomains()) {
+                    if (CredentialsMatchers.firstOrNull(store.getCredentials(domain), CredentialsMatchers.withId(value))
+                            != null) {
+                        if (storeContext == context) {
+                            return FormValidation.error("This ID is already in use");
+                        } else {
+                            return FormValidation.warning("The ID ‘%s’ is already in use in %s", value,
+                                    storeContext instanceof Item
+                                            ? ((Item) storeContext).getFullDisplayName()
+                                            : storeContext.getDisplayName());
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         public final FormValidation doAuthenticate(@QueryParameter("username") String username,
@@ -194,30 +218,6 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         @SuppressWarnings("unused") // used by stapler
         public boolean isScopeRelevant(ModelObject object) {
             return false;
-        }
-
-        @CheckForNull
-        private static FormValidation checkForDuplicates(String value, ModelObject context, ModelObject object) {
-            for (CredentialsStore store : CredentialsProvider.lookupStores(object)) {
-                if (!store.hasPermission(CredentialsProvider.VIEW)) {
-                    continue;
-                }
-                ModelObject storeContext = store.getContext();
-                for (Domain domain : store.getDomains()) {
-                    if (CredentialsMatchers.firstOrNull(store.getCredentials(domain), CredentialsMatchers.withId(value))
-                            != null) {
-                        if (storeContext == context) {
-                            return FormValidation.error("This ID is already in use");
-                        } else {
-                            return FormValidation.warning("The ID ‘%s’ is already in use in %s", value,
-                                    storeContext instanceof Item
-                                            ? ((Item) storeContext).getFullDisplayName()
-                                            : storeContext.getDisplayName());
-                        }
-                    }
-                }
-            }
-            return null;
         }
 
         public final FormValidation doCheckId(@QueryParameter String value, @AncestorInPath ModelObject context) {
