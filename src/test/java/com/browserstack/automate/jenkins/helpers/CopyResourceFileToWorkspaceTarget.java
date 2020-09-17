@@ -1,8 +1,5 @@
 package com.browserstack.automate.jenkins.helpers;
 
-import org.apache.commons.io.IOUtils;
-import org.jvnet.hudson.test.TestExtension;
-
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -10,6 +7,8 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import org.apache.commons.io.IOUtils;
+import org.jvnet.hudson.test.TestExtension;
 
 import java.io.File;
 import java.io.IOException;

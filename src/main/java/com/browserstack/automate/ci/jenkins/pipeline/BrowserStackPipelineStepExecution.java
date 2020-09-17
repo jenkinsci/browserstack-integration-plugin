@@ -1,19 +1,8 @@
 package com.browserstack.automate.ci.jenkins.pipeline;
 
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
-import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.HashMap;
-
+import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
-import org.jenkinsci.plugins.workflow.steps.BodyExecution;
-import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
-import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.jenkins.BrowserStackBuildAction;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
@@ -23,6 +12,18 @@ import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.jenkinsci.plugins.workflow.steps.BodyExecution;
+import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
+import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.HashMap;
+
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingStepExecution<Void> {
   private static final long serialVersionUID = -8810137779949881645L;

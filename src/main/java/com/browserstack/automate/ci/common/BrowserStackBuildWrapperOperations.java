@@ -1,14 +1,5 @@
 package com.browserstack.automate.ci.common;
 
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Map;
-import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.FileScanner;
-import org.apache.tools.ant.types.FileSet;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
@@ -23,6 +14,17 @@ import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.FileScanner;
+import org.apache.tools.ant.types.FileSet;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Map;
+
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 
 public class BrowserStackBuildWrapperOperations {
   private BrowserStackCredentials credentials;

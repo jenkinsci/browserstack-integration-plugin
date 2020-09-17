@@ -1,11 +1,5 @@
 package com.browserstack.automate.ci.jenkins;
 
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.export.Exported;
-
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.exception.AutomateException;
@@ -34,6 +28,11 @@ import hudson.model.User;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.export.Exported;
 
 import java.util.ArrayList;
 import java.util.List;

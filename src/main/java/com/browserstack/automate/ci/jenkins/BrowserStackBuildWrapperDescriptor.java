@@ -1,31 +1,18 @@
 package com.browserstack.automate.ci.jenkins;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.FileScanner;
-import org.apache.tools.ant.types.FileSet;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
-import hudson.security.ACL;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 @Extension
 public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescriptor {

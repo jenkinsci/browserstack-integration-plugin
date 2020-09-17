@@ -1,20 +1,7 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.browserstack.automate.ci.common.tracking.PluginsTracker;
-import mockit.Deencapsulation;
-import mockit.Mock;
-import mockit.MockUp;
-import mockit.Mocked;
-
-import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TouchBuilder;
-
 import com.browserstack.automate.AutomateClient;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.jenkins.helpers.CopyResourceFileToWorkspaceTarget;
@@ -30,6 +17,17 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.JUnitResultArchiver;
 import hudson.tasks.junit.SuiteResult;
 import hudson.tasks.junit.TestResultAction;
+import mockit.Deencapsulation;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TouchBuilder;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -44,61 +42,32 @@ public class AutomateTestDataPublisherTest {
 
     private static final String DUMMY_BSTACK_USERNAME = "aDummyUsername";
     private static final String DUMMY_BSTACK_ACCESSKEY = "1DummyAccessKey4DummyUser7";
-
-
-    @Mocked
-    private JenkinsBrowserStackLocal mockedJenkinsBrowserStackLocal;
-
-    @Mocked
-    private GoogleAnalytics googleAnalytics;
-
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
-
+    @Mocked
+    private JenkinsBrowserStackLocal mockedJenkinsBrowserStackLocal;
+    @Mocked
+    private GoogleAnalytics googleAnalytics;
     private FreeStyleProject project;
+
+    private static void addCredentials(String id, String username, String accessKey) throws IOException {
+        BrowserStackCredentials credentials = new BrowserStackCredentials(id,
+                "browserstack-credentials-description",
+                username,
+                accessKey);
+        addCredentials(credentials);
+    }
+
+    private static void addCredentials(BrowserStackCredentials credentials) throws IOException {
+        CredentialsStore store = new SystemCredentialsProvider.UserFacingAction().getStore();
+        store.addCredentials(Domain.global(), credentials);
+    }
 
     @Before
     public void setUp() throws Exception {
         jenkinsRule.recipeLoadCurrentPlugin();
         jenkinsRule.configRoundtrip();
         project = jenkinsRule.createFreeStyleProject("browserstack-plugin-test");
-    }
-
-    private static final class MockAutomateClient extends MockUp<AutomateClient> {
-
-        @Mock
-        public void $init(String userName, String accessKey) {
-            Assert.assertEquals("User name not equal to what is set.", DUMMY_BSTACK_USERNAME, userName);
-            Assert.assertEquals("User Access Key not equal to what is set.", DUMMY_BSTACK_ACCESSKEY, accessKey);
-        }
-
-        @Mock
-        public Session getSession(String sessionId) {
-            Session session = new Session(null, sessionId);
-            return session;
-        }
-    }
-
-    private static final class MockPluginsTracker extends MockUp<PluginsTracker> {
-        @Mock
-        public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
-            return;
-        }
-
-        @Mock
-        public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
-            return;
-        }
-
-        @Mock
-        public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
-            return;
-        }
-
-        @Mock
-        public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
-            return;
-        }
     }
 
     @Test
@@ -150,19 +119,42 @@ public class AutomateTestDataPublisherTest {
         project.getBuildWrappersList().add(buildWrapper);
     }
 
-    private static void addCredentials(String id, String username, String accessKey) throws IOException {
-        BrowserStackCredentials credentials = new BrowserStackCredentials(id,
-                                                                         "browserstack-credentials-description",
-                                                                         username,
-                                                                         accessKey);
-        addCredentials(credentials);
+    private static final class MockAutomateClient extends MockUp<AutomateClient> {
+
+        @Mock
+        public void $init(String userName, String accessKey) {
+            Assert.assertEquals("User name not equal to what is set.", DUMMY_BSTACK_USERNAME, userName);
+            Assert.assertEquals("User Access Key not equal to what is set.", DUMMY_BSTACK_ACCESSKEY, accessKey);
+        }
+
+        @Mock
+        public Session getSession(String sessionId) {
+            Session session = new Session(null, sessionId);
+            return session;
+        }
     }
 
-    private static void addCredentials(BrowserStackCredentials credentials) throws IOException {
-        CredentialsStore store = new SystemCredentialsProvider.UserFacingAction().getStore();
-        store.addCredentials(Domain.global(), credentials);
-    }
+    private static final class MockPluginsTracker extends MockUp<PluginsTracker> {
+        @Mock
+        public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
+            return;
+        }
 
+        @Mock
+        public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
+            return;
+        }
+
+        @Mock
+        public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
+            return;
+        }
+
+        @Mock
+        public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
+            return;
+        }
+    }
 
 
 }

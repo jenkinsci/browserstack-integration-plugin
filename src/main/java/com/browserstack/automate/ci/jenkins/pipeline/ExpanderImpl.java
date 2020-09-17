@@ -1,11 +1,12 @@
 package com.browserstack.automate.ci.jenkins.pipeline;
 
+import hudson.EnvVars;
+import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
+
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
-import hudson.EnvVars;
 
 public class ExpanderImpl extends EnvironmentExpander{
 

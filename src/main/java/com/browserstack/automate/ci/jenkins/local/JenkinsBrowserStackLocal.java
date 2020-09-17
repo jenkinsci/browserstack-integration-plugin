@@ -5,10 +5,10 @@ import com.browserstack.local.Local;
 import hudson.EnvVars;
 import hudson.Launcher;
 import jenkins.security.MasterToSlaveCallable;
-import java.io.PrintStream;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;

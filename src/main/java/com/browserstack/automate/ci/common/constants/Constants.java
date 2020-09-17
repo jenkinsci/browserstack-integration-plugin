@@ -28,9 +28,6 @@ public class Constants {
         public static final String URL = "url";
     }
 
-    public static final String PIPELINE = "Pipeline";
-    public static final String NON_PIPELINE = "NonPipeline";
-
     // Report
     public static final class ReportStatus {
         public static final String SUCCESS = "Success";

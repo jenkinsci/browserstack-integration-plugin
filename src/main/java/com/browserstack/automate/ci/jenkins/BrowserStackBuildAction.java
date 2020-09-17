@@ -3,7 +3,7 @@ package com.browserstack.automate.ci.jenkins;
 import hudson.model.Action;
 
 public class BrowserStackBuildAction implements Action {
-  
+
   private BrowserStackCredentials browserStackCredentials;
 
   public BrowserStackBuildAction(BrowserStackCredentials browserStackCredentials) {
@@ -37,5 +37,5 @@ public class BrowserStackBuildAction implements Action {
     return null;
   }
 
-  
+
 }

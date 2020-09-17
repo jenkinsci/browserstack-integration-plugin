@@ -1,7 +1,5 @@
 package com.browserstack.automate.ci.jenkins;
 
-import org.kohsuke.stapler.bind.JavaScriptMethod;
-import org.kohsuke.stapler.export.Exported;
 import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
@@ -19,6 +17,8 @@ import com.google.gson.GsonBuilder;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestAction;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.export.Exported;
 
 /**
  * A {@link TestAction} extension to display the BrowserStack Automate video for the session.

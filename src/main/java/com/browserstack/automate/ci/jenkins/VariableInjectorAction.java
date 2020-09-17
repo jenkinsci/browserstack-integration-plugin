@@ -1,15 +1,14 @@
 package com.browserstack.automate.ci.jenkins;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import javax.annotation.CheckForNull;
-import org.kohsuke.stapler.StaplerProxy;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.EnvironmentContributingAction;
 import hudson.model.Run;
-import jenkins.model.RunAction2;
+
+import javax.annotation.CheckForNull;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *

@@ -1,24 +1,30 @@
 package com.browserstack.automate.ci.jenkins;
 
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Map;
-
-import com.browserstack.automate.ci.common.constants.Constants;
-import com.browserstack.automate.ci.common.tracking.PluginsTracker;
-import hudson.model.*;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.analytics.Analytics;
+import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import hudson.EnvVars;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractItem;
+import hudson.model.BuildListener;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Descriptor;
+import hudson.model.Job;
 import hudson.tasks.BuildWrapper;
 import hudson.util.DescribableList;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Map;
+
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 
 
 public class BrowserStackBuildWrapper extends BuildWrapper {

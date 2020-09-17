@@ -1,13 +1,5 @@
 package com.browserstack.automate.ci.jenkins;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 import com.browserstack.automate.ci.common.BrowserStackEnvVars;
 import com.browserstack.automate.ci.common.logger.PluginLogger;
 import com.browserstack.automate.ci.common.uploader.AppUploaderHelper;
@@ -19,6 +11,15 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AppUploaderBuilder extends Builder {
 
