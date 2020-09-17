@@ -30,11 +30,9 @@ import java.util.stream.Collectors;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
-    private static final int RESULT_META_MAX_SIZE = 5;
     private final String buildName;
-    private final List<Session> browserStackSessions;
-    private final List<JSONObject> result;
-    private final List<JSONObject> resultMeta;
+    private final transient List<Session> browserStackSessions;
+    private final transient List<JSONObject> result;
     private final Map<String, String> resultAggregation;
     private final ProjectType projectType;
     private final transient PrintStream logger;
@@ -43,7 +41,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
     private final String failedConst = Constants.SessionStatus.FAILED;
-    private Build browserStackBuild;
+    private transient Build browserStackBuild;
     private String browserStackBuildBrowserUrl;
 
     public BrowserStackReportForBuild(final Run<?, ?> build,
@@ -57,7 +55,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.buildName = buildName;
         this.browserStackSessions = new ArrayList<>();
         this.result = new ArrayList<>();
-        this.resultMeta = new ArrayList<>();
         this.resultAggregation = new HashMap<>();
         this.projectType = projectType;
         this.logger = logger;
@@ -116,7 +113,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
             if (result.size() > 0) {
                 result.sort(new SessionsSortingComparator());
-                resultMeta.addAll(result.subList(0, Math.min(result.size(), RESULT_META_MAX_SIZE)));
                 generateAggregationInfo();
                 return true;
             }
@@ -220,10 +216,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
     public List<JSONObject> getResult() {
         return result;
-    }
-
-    public List<JSONObject> getResultMeta() {
-        return resultMeta;
     }
 
     public Map<String, String> getResultAggregation() {

@@ -78,7 +78,7 @@
 
     </style>
     <t:summary icon="/plugin/browserstack-integration/images/logo.png">
-        <j:if test="${(it.resultMeta.size() == 0)}">
+        <j:if test="${(it.result.size() == 0)}">
             <div class="new-container">
                 <div class="report-row">
                     <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack Report Available</strong></p>
@@ -93,7 +93,7 @@
                 </div>
             </div>
         </j:if>
-        <j:if test="${(it.resultMeta.size() > 0)}">
+        <j:if test="${(it.result.size() > 0)}">
             <div class="new-container">
                 <div class="report-row">
                     <span class="meta-label">BUILD</span>
