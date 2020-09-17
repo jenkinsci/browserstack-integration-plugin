@@ -9,21 +9,16 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
-import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Optional;
@@ -76,10 +71,6 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
 
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-
-        public FormValidation doCheckPublishText(@AncestorInPath Job<?, ?> project, @QueryParameter String value) throws IOException, ServletException {
-            return FormValidation.ok();
-        }
 
         @Override
         @SuppressWarnings("rawtypes")
