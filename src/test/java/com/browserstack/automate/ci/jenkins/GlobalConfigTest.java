@@ -1,13 +1,12 @@
 package com.browserstack.automate.ci.jenkins;
 
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * @author Shirish Kamath

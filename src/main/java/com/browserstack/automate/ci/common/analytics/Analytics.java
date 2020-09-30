@@ -1,8 +1,5 @@
 package com.browserstack.automate.ci.common.analytics;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-
 import com.brsanthu.googleanalytics.EventHit;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsRequest;
@@ -10,6 +7,8 @@ import com.brsanthu.googleanalytics.TimingHit;
 import hudson.Plugin;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -137,7 +136,7 @@ public class Analytics {
         if (isEnabled && googleAnalyticsClient != null) {
             if (LOGGER.getLevel() == Level.FINE && request.hitType().equals("event")) {
                 LOGGER.fine("Posting Event :: " + ((EventHit) request).eventCategory()
-                            + "." + ((EventHit) request).eventAction());
+                        + "." + ((EventHit) request).eventAction());
             }
             googleAnalyticsClient.postAsync(request);
         }

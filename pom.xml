@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.1.6-SNAPSHOT</version>
+  <version>1.1.6</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -138,13 +138,13 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.4</version>
+      <version>0.5</version>
     </dependency>
 
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>browserstack-local-java</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
 
     <dependency>
@@ -232,6 +232,25 @@
       <artifactId>structs</artifactId>
       <version>1.7</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>3.14.9</version>
+    </dependency>
+
 
     <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
     <dependency>

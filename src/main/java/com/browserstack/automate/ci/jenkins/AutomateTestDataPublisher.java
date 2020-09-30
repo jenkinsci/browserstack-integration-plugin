@@ -1,13 +1,5 @@
 package com.browserstack.automate.ci.jenkins;
 
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
-import static com.browserstack.automate.ci.common.logger.PluginLogger.logDebug;
-
-
-import javax.annotation.Nonnull;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import com.browserstack.automate.ci.common.AutomateTestCase;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import hudson.Extension;
@@ -23,18 +15,21 @@ import hudson.tasks.junit.SuiteResult;
 import hudson.tasks.junit.TestDataPublisher;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AutomateTestDataPublisher extends TestDataPublisher {
-    private static final String TAG = "[BrowserStack]";
-    private static final String REPORT_FILE_PATTERN = "**/browserstack-reports/REPORT-*.xml";
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.logDebug;
 
+public class AutomateTestDataPublisher extends TestDataPublisher {
     @Extension(ordinal = 1000) // JENKINS-12161
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+    private static final String TAG = "[BrowserStack]";
+    private static final String REPORT_FILE_PATTERN = "**/browserstack-reports/REPORT-*.xml";
 
     @DataBoundConstructor
     public AutomateTestDataPublisher() {
@@ -43,12 +38,16 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
         Analytics.trackReportingEvent(true);
     }
 
+    public static String getTestCaseName(CaseResult caseResult) {
+        return caseResult.getClassName() + "." + AutomateTestCase.stripTestParams(caseResult.getDisplayName());
+    }
+
     @Override
     public TestResultAction.Data getTestData(AbstractBuild<?, ?> abstractBuild, Launcher launcher, BuildListener buildListener, TestResult testResult) throws IOException, InterruptedException {
         FilePath filePath = abstractBuild.getWorkspace();
-        if(filePath == null) {
+        if (filePath == null) {
             return null;
-        }else {
+        } else {
             return contributeTestData(abstractBuild, filePath, launcher, buildListener, testResult);
         }
     }
@@ -92,10 +91,6 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
         log(listener.getLogger(), sessionCount + " sessions captured");
         log(listener.getLogger(), "Publishing test results: SUCCESS");
         return automateActionData;
-    }
-
-    public static String getTestCaseName(CaseResult caseResult) {
-        return caseResult.getClassName() + "." + AutomateTestCase.stripTestParams(caseResult.getDisplayName());
     }
 
     private static class DescriptorImpl extends Descriptor<TestDataPublisher> {
