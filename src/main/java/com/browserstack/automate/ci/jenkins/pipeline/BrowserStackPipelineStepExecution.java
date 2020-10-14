@@ -16,7 +16,7 @@ import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -25,7 +25,7 @@ import java.util.HashMap;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
-public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingStepExecution<Void> {
+public class BrowserStackPipelineStepExecution extends StepExecution {
     private static final long serialVersionUID = -8810137779949881645L;
     private String credentialsId;
     private StepContext context;
@@ -42,7 +42,7 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
     }
 
     @Override
-    protected Void run() throws Exception {
+    public boolean start() throws Exception {
         Run run = context.get(Run.class);
         TaskListener taskListener = context.get(TaskListener.class);
         Launcher launcher = context.get(Launcher.class);
@@ -55,7 +55,7 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
         if (credentials == null) {
             logError(logger, "Credentials id is invalid. Aborting!!!");
             tracker.sendError("No Credentials Available", true, "PipelineExecution");
-            return null;
+            return false;
         }
 
         if (credentials.hasUsername() && credentials.hasAccesskey()) {
@@ -97,7 +97,7 @@ public class BrowserStackPipelineStepExecution extends SynchronousNonBlockingSte
 
         tracker.pluginInitialized(overrides.get(Constants.JENKINS_BUILD_TAG),
                 (this.localConfig != null), true);
-        return null;
+        return false;
     }
 
     public void startBrowserStackLocal(String buildTag, PrintStream logger, String accessKey,
