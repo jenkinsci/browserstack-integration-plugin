@@ -55,7 +55,8 @@ public class BrowserStackPipelineStepExecution extends StepExecution {
         if (credentials == null) {
             logError(logger, "Credentials id is invalid. Aborting!!!");
             tracker.sendError("No Credentials Available", true, "PipelineExecution");
-            return false;
+            context.onFailure(new Exception("No Credentials Available"));
+            return true;
         }
 
         if (credentials.hasUsername() && credentials.hasAccesskey()) {
