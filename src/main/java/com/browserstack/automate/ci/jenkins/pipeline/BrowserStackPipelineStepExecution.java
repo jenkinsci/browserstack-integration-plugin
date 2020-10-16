@@ -87,7 +87,9 @@ public class BrowserStackPipelineStepExecution extends StepExecution {
                 new BrowserStackBuildWrapperOperations(credentials, false, taskListener.getLogger(),
                         localConfig, browserStackLocal);
 
+        EnvVars overrides = run.getEnvironment(taskListener);
         HashMap<String, String> overridesMap = new HashMap<String, String>();
+        overridesMap.put(Constants.JENKINS_BUILD_TAG, overrides.get(Constants.JENKINS_BUILD_TAG));
         buildWrapperOperations.buildEnvVars(overridesMap);
 
         body = getContext()
@@ -95,7 +97,6 @@ public class BrowserStackPipelineStepExecution extends StepExecution {
                         .merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(overridesMap)))
                 .withCallback(new Callback(browserStackLocal)).start();
 
-        EnvVars overrides = run.getEnvironment(taskListener);
         tracker.pluginInitialized(overrides.get(Constants.JENKINS_BUILD_TAG),
                 (this.localConfig != null), true);
         return false;
