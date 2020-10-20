@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.1.8-SNAPSHOT</version>
+  <version>1.1.9-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
