@@ -1,7 +1,9 @@
 package com.browserstack.automate.ci.common.tracking;
 
+import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
+import hudson.ProxyConfiguration;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -10,15 +12,18 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.json.JSONObject;
-
+import jenkins.model.Jenkins;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.Optional;
 
 public class PluginsTracker {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private static final String URL = "https://api.browserstack.com/ci_plugins/track";
-    private static final OkHttpClient client = new OkHttpClient();
+    private static OkHttpClient client;
     private final String trackingId;
     private String username;
     private String accessKey;
@@ -27,12 +32,20 @@ public class PluginsTracker {
         this.username = username;
         this.accessKey = accessKey;
         this.trackingId = Tools.getUniqueString(true, true);
+        initializeClient();
     }
 
     public PluginsTracker() {
         this.username = null;
         this.accessKey = null;
         this.trackingId = Tools.getUniqueString(true, true);
+        initializeClient();
+    }
+    
+    public void initializeClient(){
+        this.client = new OkHttpClient.Builder()
+                .proxy(BrowserStackBuildWrapperOperations.getJenkinsProxy())
+                .build();
     }
 
     private static void asyncPostRequestSilent(final String url, final String json) {

@@ -8,12 +8,14 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.FilePath;
+import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.FileScanner;
 import org.apache.tools.ant.types.FileSet;
@@ -21,6 +23,8 @@ import org.apache.tools.ant.types.FileSet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -148,6 +152,16 @@ public class BrowserStackBuildWrapperOperations {
             env.put(BrowserStackEnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
             logEnvVar(BrowserStackEnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
         }
+    }
+
+    public static Proxy getJenkinsProxy(){
+        ProxyConfiguration p = Jenkins.getInstanceOrNull().proxy;
+        String proxyHost = p.name;
+        String noProxyHost = p.noProxyHost;
+        int proxyPort = p.port;
+        String proxyusername = p.getUserName();
+        String proxyPassword = p.getPassword();
+        return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
     }
 
     public void logEnvVar(String key, String value) {
