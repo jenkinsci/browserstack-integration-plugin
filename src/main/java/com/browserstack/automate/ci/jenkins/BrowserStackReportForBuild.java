@@ -5,6 +5,7 @@ import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
+import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.exception.BuildNotFound;
 import com.browserstack.automate.model.Build;
@@ -85,6 +86,9 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
+        }
+        if(JenkinsProxySettings.hasProxy()){
+            client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
         }
 
         browserStackBuild = fetchBrowserStackBuild(client, buildName);

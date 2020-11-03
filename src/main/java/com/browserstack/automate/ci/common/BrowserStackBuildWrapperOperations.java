@@ -154,16 +154,6 @@ public class BrowserStackBuildWrapperOperations {
         }
     }
 
-    public static Proxy getJenkinsProxy(){
-        ProxyConfiguration p = Jenkins.getInstanceOrNull().proxy;
-        String proxyHost = p.name;
-        String noProxyHost = p.noProxyHost;
-        int proxyPort = p.port;
-        String proxyusername = p.getUserName();
-        String proxyPassword = p.getPassword();
-        return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-    }
-
     public void logEnvVar(String key, String value) {
         if (!isTearDownPhase) {
             log(logger, key + "=" + value);
