@@ -44,10 +44,6 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
         final boolean pipelineStatus = false;
 
         log(logger, "Generating BrowserStack Test Report");
-        log(logger, JenkinsProxySettings.getHost());
-        log(logger, JenkinsProxySettings.getPassword());
-        log(logger, JenkinsProxySettings.getUsername());
-        log(logger, Integer.toString(JenkinsProxySettings.getPort()));
 
         final EnvVars parentEnvs = build.getEnvironment(listener);
         String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
