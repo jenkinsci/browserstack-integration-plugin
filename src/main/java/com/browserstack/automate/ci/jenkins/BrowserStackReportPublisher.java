@@ -43,7 +43,7 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
         final PluginsTracker tracker = new PluginsTracker();
         final boolean pipelineStatus = false;
 
-        log(logger, "HAHA be Generating BrowserStack Test Report");
+        log(logger, "Generating BrowserStack Test Report");
         log(logger, JenkinsProxySettings.getHost());
         log(logger, JenkinsProxySettings.getPassword());
         log(logger, JenkinsProxySettings.getUsername());
