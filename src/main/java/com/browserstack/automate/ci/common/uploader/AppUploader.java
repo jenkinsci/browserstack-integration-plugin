@@ -22,7 +22,7 @@ public class AppUploader {
     AppAutomateClient appAutomateClient =
         new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         if(JenkinsProxySettings.hasProxy()){
-         appAutomateClient.setProxyCredentials(JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
+         appAutomateClient.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
         }
     return appAutomateClient.uploadApp(this.appPath).getAppUrl();
   }
