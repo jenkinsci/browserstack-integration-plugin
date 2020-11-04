@@ -88,7 +88,11 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
         if(JenkinsProxySettings.hasProxy()){
-            client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
+            logError(logger, "INSIDE THE SET PROXY");
+            logError(logger, System.getProperty("http.proxyHost"));
+            logError(logger, System.getProperty("http.proxyPort"));
+            logError(logger, "INSIDE THE SET PROXY");
+            client.setProxyCredentials(JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
         }
 
         browserStackBuild = fetchBrowserStackBuild(client, buildName);

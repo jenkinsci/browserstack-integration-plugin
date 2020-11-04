@@ -114,7 +114,7 @@ public class AutomateTestAction extends TestAction {
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
         if(JenkinsProxySettings.hasProxy()){
-            client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
+           client.setProxyCredentials(JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
         }
         try {
             activeSession = client.getSession(this.browserStackSession.getSessionId());
