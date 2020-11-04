@@ -3,7 +3,6 @@ package com.browserstack.automate.ci.jenkins;
 import com.browserstack.automate.ci.common.BrowserStackEnvVars;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
-import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import hudson.EnvVars;
 import hudson.Extension;
