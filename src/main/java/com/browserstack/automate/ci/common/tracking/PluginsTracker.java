@@ -4,20 +4,18 @@ package com.browserstack.automate.ci.common.tracking;
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
-
-
 import okhttp3.Authenticator;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Route;
-import okhttp3.Response;
-import okhttp3.Credentials;
 import okhttp3.RequestBody;
-import okhttp3.Callback;
-import okhttp3.Call;
-
+import okhttp3.Response;
+import okhttp3.Route;
 import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.Proxy;
 import java.time.Instant;
@@ -44,14 +42,14 @@ public class PluginsTracker {
         this.trackingId = Tools.getUniqueString(true, true);
         initializeClient();
     }
-    
-    private void initializeClient(){
 
-        Proxy proxy = JenkinsProxySettings.getJenkinsProxy()!=null ?  JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
-        if(proxy!=Proxy.NO_PROXY){
+    private void initializeClient() {
+
+        Proxy proxy = JenkinsProxySettings.getJenkinsProxy() != null ? JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
+        if (proxy != Proxy.NO_PROXY) {
             String username = JenkinsProxySettings.getUsername();
             String password = JenkinsProxySettings.getPassword();
-            if(username!=null && password!=null){
+            if (username != null && password != null) {
                 Authenticator proxyAuthenticator = new Authenticator() {
                     @Override
                     public Request authenticate(Route route, Response response) throws IOException {
@@ -62,16 +60,14 @@ public class PluginsTracker {
                     }
                 };
                 this.client = new OkHttpClient.Builder().proxy(proxy).proxyAuthenticator(proxyAuthenticator).build();
-            }
-            else {
+            } else {
                 this.client = new OkHttpClient.Builder().proxy(proxy).build();
             }
-        }
-        else {
+        } else {
             this.client = new OkHttpClient.Builder().build();
         }
     }
-    
+
     private static void asyncPostRequestSilent(final String url, final String json) {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
