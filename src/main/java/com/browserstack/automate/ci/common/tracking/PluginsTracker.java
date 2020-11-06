@@ -1,17 +1,25 @@
 package com.browserstack.automate.ci.common.tracking;
 
-import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
+
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
-import hudson.ProxyConfiguration;
-import okhttp3.*;
+
+
+import okhttp3.Authenticator;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Route;
+import okhttp3.Response;
+import okhttp3.Credentials;
+import okhttp3.RequestBody;
+import okhttp3.Callback;
+import okhttp3.Call;
+
 import org.json.JSONObject;
-import jenkins.model.Jenkins;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -37,29 +45,30 @@ public class PluginsTracker {
         initializeClient();
     }
     
-    public void initializeClient(){
+    private void initializeClient(){
 
-        String username = JenkinsProxySettings.getUsername();
-        String password = JenkinsProxySettings.getPassword();
-        Authenticator proxyAuthenticator = new Authenticator() {
-            @Override public Request authenticate(Route route, Response response) throws IOException {
-                String credential = Credentials.basic(username, password);
-                return response.request().newBuilder()
-                        .header("Proxy-Authorization", credential)
-                        .build();
-            }
-        };
         Proxy proxy = JenkinsProxySettings.getJenkinsProxy()!=null ?  JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
-        if(username!=null && password!=null){
-            this.client = new OkHttpClient.Builder()
-                    .proxy(proxy)
-                    .proxyAuthenticator(proxyAuthenticator)
-                    .build();
+        if(proxy!=Proxy.NO_PROXY){
+            String username = JenkinsProxySettings.getUsername();
+            String password = JenkinsProxySettings.getPassword();
+            if(username!=null && password!=null){
+                Authenticator proxyAuthenticator = new Authenticator() {
+                    @Override
+                    public Request authenticate(Route route, Response response) throws IOException {
+                        String credential = Credentials.basic(username, password);
+                        return response.request().newBuilder()
+                                .header("Proxy-Authorization", credential)
+                                .build();
+                    }
+                };
+                this.client = new OkHttpClient.Builder().proxy(proxy).proxyAuthenticator(proxyAuthenticator).build();
+            }
+            else {
+                this.client = new OkHttpClient.Builder().proxy(proxy).build();
+            }
         }
         else {
-            this.client = new OkHttpClient.Builder()
-                    .proxy(proxy)
-                    .build();
+            this.client = new OkHttpClient.Builder().build();
         }
     }
     
