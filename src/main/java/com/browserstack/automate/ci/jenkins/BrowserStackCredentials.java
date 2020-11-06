@@ -73,8 +73,8 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
 
         try {
             AutomateClient client = new AutomateClient(username, accesskey);
-            if(JenkinsProxySettings.hasProxy()){
-               client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
+            if (JenkinsProxySettings.hasProxy()) {
+                client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
             }
             if (client.getAccountUsage() != null) {
                 return FormValidation.ok(OK_VALID_AUTH);

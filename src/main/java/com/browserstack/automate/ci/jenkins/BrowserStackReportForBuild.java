@@ -87,7 +87,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         } else {
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         }
-        if(JenkinsProxySettings.hasProxy()){
+        if (JenkinsProxySettings.hasProxy()) {
             client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
         }
 

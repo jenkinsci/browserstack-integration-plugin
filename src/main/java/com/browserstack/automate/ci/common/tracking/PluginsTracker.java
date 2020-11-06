@@ -43,6 +43,28 @@ public class PluginsTracker {
         initializeClient();
     }
 
+    private static void asyncPostRequestSilent(final String url, final String json) {
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                // closing the response body is important, else it will start leaking
+                if (response != null && response.body() != null) {
+                    response.body().close();
+                }
+            }
+        });
+    }
+
     private void initializeClient() {
 
         Proxy proxy = JenkinsProxySettings.getJenkinsProxy() != null ? JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
@@ -66,28 +88,6 @@ public class PluginsTracker {
         } else {
             this.client = new OkHttpClient.Builder().build();
         }
-    }
-
-    private static void asyncPostRequestSilent(final String url, final String json) {
-        RequestBody body = RequestBody.create(JSON, json);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                // closing the response body is important, else it will start leaking
-                if (response != null && response.body() != null) {
-                    response.body().close();
-                }
-            }
-        });
     }
 
     public void trackOperation(String operationType, JSONObject data) {
