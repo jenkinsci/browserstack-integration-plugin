@@ -6,7 +6,6 @@ import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.jenkins.helpers.CopyResourceFileToWorkspaceTarget;
 import com.browserstack.automate.model.Session;
-import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
@@ -46,8 +45,7 @@ public class AutomateTestDataPublisherTest {
     public JenkinsRule jenkinsRule = new JenkinsRule();
     @Mocked
     private JenkinsBrowserStackLocal mockedJenkinsBrowserStackLocal;
-    @Mocked
-    private GoogleAnalytics googleAnalytics;
+
     private FreeStyleProject project;
 
     private static void addCredentials(String id, String username, String accessKey) throws IOException {

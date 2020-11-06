@@ -8,7 +8,6 @@ import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import com.browserstack.automate.exception.AutomateException;
 import com.browserstack.automate.exception.SessionNotFound;
 import com.browserstack.automate.model.Session;
-import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
@@ -43,8 +42,6 @@ public class AutomateTestActionTest {
     public JenkinsRule jenkinsRule = new JenkinsRule();
     @Mocked
     private JenkinsBrowserStackLocal mockedJenkinsBrowserStackLocal;
-    @Mocked
-    private GoogleAnalytics googleAnalytics;
     @Mocked
     private CaseResult mockedCaseResult;
     private FreeStyleProject project;

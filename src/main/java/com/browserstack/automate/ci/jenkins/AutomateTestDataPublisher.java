@@ -1,7 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.AutomateTestCase;
-import com.browserstack.automate.ci.common.analytics.Analytics;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -31,12 +30,6 @@ public class AutomateTestDataPublisher extends TestDataPublisher {
     private static final String TAG = "[BrowserStack]";
     private static final String REPORT_FILE_PATTERN = "**/browserstack-reports/REPORT-*.xml";
 
-    @DataBoundConstructor
-    public AutomateTestDataPublisher() {
-        // This constructor is only called when the TestDataPublisher is created.
-        // This is only when the user explicitly chooses to enable BrowserStack as an additional Test report.
-        Analytics.trackReportingEvent(true);
-    }
 
     public static String getTestCaseName(CaseResult caseResult) {
         return caseResult.getClassName() + "." + AutomateTestCase.stripTestParams(caseResult.getDisplayName());

@@ -1,7 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
-import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
 import hudson.Extension;
 import hudson.model.AbstractProject;
@@ -20,17 +19,11 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
 
     private String credentialsId;
     private LocalConfig localConfig;
-    // By default usage stats are enabled. But user's can choose to disable through Jenkin's
-    // configuration.
-    private boolean usageStatsEnabled = true;
 
     public BrowserStackBuildWrapperDescriptor() {
         super(BrowserStackBuildWrapper.class);
         load();
 
-        if (usageStatsEnabled) {
-            Analytics.trackInstall();
-        }
     }
 
     private static int compareIntegers(int x, int y) {
@@ -48,9 +41,6 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
             JSONObject config = formData.getJSONObject(NAMESPACE);
             req.bindJSON(this, config);
             save();
-            if (config.has("usageStatsEnabled")) {
-                setEnableUsageStats(config.getBoolean("usageStatsEnabled"));
-            }
         }
 
         return true;
@@ -86,18 +76,4 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
         this.localConfig = localConfig;
     }
 
-    public boolean getEnableUsageStats() {
-        return usageStatsEnabled;
-    }
-
-    public void setEnableUsageStats(boolean usageStatsEnabled) {
-        this.usageStatsEnabled = usageStatsEnabled;
-        Analytics.setEnabled(this.usageStatsEnabled);
-        // We track an install if one has not been done before.
-        // Since a user could have chosen to disable the plugin and then chosen to re-enable it,
-        // before installing a newer version of the plugin.
-        if (this.usageStatsEnabled) {
-            Analytics.trackInstall();
-        }
-    }
 }

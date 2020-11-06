@@ -1,7 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
-import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
@@ -136,7 +135,6 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         boolean localEnabled = (localConfig != null);
         boolean localPathSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalPath());
         boolean localOptionsSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalOptions());
-        Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet);
     }
 
     static class BuildWrapperItem<T> {

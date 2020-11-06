@@ -2,7 +2,6 @@ package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.appautomate.AppAutomateClient;
 import com.browserstack.automate.AutomateClient;
-import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.ci.common.model.BrowserStackSession;
 import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
@@ -82,10 +81,6 @@ public class AutomateTestAction extends TestAction {
         return activeSession;
     }
 
-    @JavaScriptMethod
-    public void iframeLoadTime(int time) {
-        Analytics.trackIframeLoad(time);
-    }
 
     @Override
     public String annotate(String text) {
@@ -118,7 +113,6 @@ public class AutomateTestAction extends TestAction {
         }
         try {
             activeSession = client.getSession(this.browserStackSession.getSessionId());
-            Analytics.trackIframeRequest();
         } catch (SessionNotFound snfEx) {
             lastException = snfEx;
             return null;
