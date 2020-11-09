@@ -8,12 +8,12 @@ import java.net.Proxy;
 
 public class JenkinsProxySettings {
 
-    static final ProxyConfiguration jenkinsProxy = Jenkins.getInstanceOrNull() != null ? Jenkins.getInstanceOrNull().proxy : null;
-    static final String protocol = "https";
-    static final String systemProxyHost = System.getProperty(protocol + ".proxyHost");
-    static final int systemProxyPort = Integer.parseInt(System.getProperty(protocol + ".proxyPort", "0"));
-    static final String systemProxyUser = System.getProperty(protocol + ".proxyUser");
-    static final String systemProxyPassword = System.getProperty(protocol + ".proxyPassword");
+    private static final ProxyConfiguration jenkinsProxy = Jenkins.getInstanceOrNull() != null ? Jenkins.getInstanceOrNull().proxy : null;
+    private static final String protocol = "https";
+    private static final String systemProxyHost = System.getProperty(protocol + ".proxyHost");
+    private static final int systemProxyPort = Integer.parseInt(System.getProperty(protocol + ".proxyPort", "0"));
+    private static final String systemProxyUser = System.getProperty(protocol + ".proxyUser");
+    private static final String systemProxyPassword = System.getProperty(protocol + ".proxyPassword");
 
     public static Proxy getJenkinsProxy() {
         if (hasSystemProxy()) {
