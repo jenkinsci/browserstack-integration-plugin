@@ -67,15 +67,15 @@ public class PluginsTracker {
 
     private void initializeClient() {
 
-        Proxy proxy = JenkinsProxySettings.getJenkinsProxy() != null ? JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
+        final Proxy proxy = JenkinsProxySettings.getJenkinsProxy() != null ? JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
         if (proxy != Proxy.NO_PROXY) {
-            String username = JenkinsProxySettings.getUsername();
-            String password = JenkinsProxySettings.getPassword();
+            final String username = JenkinsProxySettings.getUsername();
+            final String password = JenkinsProxySettings.getPassword();
             if (username != null && password != null) {
                 Authenticator proxyAuthenticator = new Authenticator() {
                     @Override
                     public Request authenticate(Route route, Response response) throws IOException {
-                        String credential = Credentials.basic(username, password);
+                        final String credential = Credentials.basic(username, password);
                         return response.request().newBuilder()
                                 .header("Proxy-Authorization", credential)
                                 .build();

@@ -21,8 +21,8 @@ public class JenkinsProxySettings {
         }
 
         if (jenkinsProxy == null) return null;
-        String proxyHost = jenkinsProxy.name;
-        int proxyPort = jenkinsProxy.port;
+        final String proxyHost = jenkinsProxy.name;
+        final int proxyPort = jenkinsProxy.port;
         return (proxyHost != null && proxyPort != 0) ? new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)) : null;
     }
 
