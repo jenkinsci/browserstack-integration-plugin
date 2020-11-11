@@ -5,6 +5,7 @@ import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.ci.common.model.BrowserStackSession;
+import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
 import com.browserstack.automate.ci.jenkins.BrowserStackBuildWrapper.BuildWrapperItem;
 import com.browserstack.automate.exception.AppAutomateException;
 import com.browserstack.automate.exception.AutomateException;
@@ -111,6 +112,9 @@ public class AutomateTestAction extends TestAction {
                     new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
         } else {
             client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
+        }
+        if (JenkinsProxySettings.hasProxy()) {
+            client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
         }
         try {
             activeSession = client.getSession(this.browserStackSession.getSessionId());

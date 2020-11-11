@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.1.9-SNAPSHOT</version>
+  <version>1.1.10-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -103,6 +103,18 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.brsanthu</groupId>
+      <artifactId>google-analytics-java</artifactId>
+      <version>1.1.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
       <groupId>org.jmockit</groupId>
       <artifactId>jmockit</artifactId>
       <version>1.24</version>
@@ -138,7 +150,7 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.5</version>
+      <version>0.6</version>
     </dependency>
 
     <dependency>
@@ -150,7 +162,7 @@
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
 
     <dependency>
@@ -163,12 +175,6 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
       <version>1.10</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.brsanthu</groupId>
-      <artifactId>google-analytics-java</artifactId>
-      <version>1.1.2</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->

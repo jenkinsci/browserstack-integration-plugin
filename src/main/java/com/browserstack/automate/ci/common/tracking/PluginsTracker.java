@@ -1,24 +1,30 @@
 package com.browserstack.automate.ci.common.tracking;
 
+
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
+import okhttp3.Authenticator;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.Route;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.time.Instant;
 import java.util.Optional;
 
 public class PluginsTracker {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private static final String URL = "https://api.browserstack.com/ci_plugins/track";
-    private static final OkHttpClient client = new OkHttpClient();
+    private static OkHttpClient client;
     private final String trackingId;
     private String username;
     private String accessKey;
@@ -27,12 +33,14 @@ public class PluginsTracker {
         this.username = username;
         this.accessKey = accessKey;
         this.trackingId = Tools.getUniqueString(true, true);
+        initializeClient();
     }
 
     public PluginsTracker() {
         this.username = null;
         this.accessKey = null;
         this.trackingId = Tools.getUniqueString(true, true);
+        initializeClient();
     }
 
     private static void asyncPostRequestSilent(final String url, final String json) {
@@ -55,6 +63,31 @@ public class PluginsTracker {
                 }
             }
         });
+    }
+
+    private void initializeClient() {
+
+        final Proxy proxy = JenkinsProxySettings.getJenkinsProxy() != null ? JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
+        if (proxy != Proxy.NO_PROXY) {
+            final String username = JenkinsProxySettings.getUsername();
+            final String password = JenkinsProxySettings.getPassword();
+            if (username != null && password != null) {
+                Authenticator proxyAuthenticator = new Authenticator() {
+                    @Override
+                    public Request authenticate(Route route, Response response) throws IOException {
+                        final String credential = Credentials.basic(username, password);
+                        return response.request().newBuilder()
+                                .header("Proxy-Authorization", credential)
+                                .build();
+                    }
+                };
+                this.client = new OkHttpClient.Builder().proxy(proxy).proxyAuthenticator(proxyAuthenticator).build();
+            } else {
+                this.client = new OkHttpClient.Builder().proxy(proxy).build();
+            }
+        } else {
+            this.client = new OkHttpClient.Builder().build();
+        }
     }
 
     public void trackOperation(String operationType, JSONObject data) {

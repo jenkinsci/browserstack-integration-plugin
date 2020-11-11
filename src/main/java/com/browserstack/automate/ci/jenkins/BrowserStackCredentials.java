@@ -2,6 +2,7 @@ package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
+import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
 import com.browserstack.automate.exception.AutomateException;
 import com.cloudbees.plugins.credentials.BaseCredentials;
 import com.cloudbees.plugins.credentials.CredentialsDescriptor;
@@ -72,6 +73,9 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
 
         try {
             AutomateClient client = new AutomateClient(username, accesskey);
+            if (JenkinsProxySettings.hasProxy()) {
+                client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
+            }
             if (client.getAccountUsage() != null) {
                 return FormValidation.ok(OK_VALID_AUTH);
             }
