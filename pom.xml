@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>3.5</version>
+    <version>3.4</version>
     <relativePath />
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.1.9-SNAPSHOT</version>
+  <version>1.1.10-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
