@@ -21,7 +21,7 @@ You need the following to use the plugin:
 - Follow [App Automate Jenkins documentation](https://www.browserstack.com/docs/app-automate/appium/integrations/jenkins) to integrate your Appium test suite for native and hybrid mobile app testing in **App Automate**.
 
 # Latest updates
-With the 1.1.7 version of the Jenkins plugin, you can now enable BrowserStack test reporting in Jenkins with all test languages and frameworks.
+With the 1.1.10 version of the Jenkins plugin, you can now enable BrowserStack test reporting in Jenkins with all test languages and frameworks with proxy support.
 
 # Feature requests and bug reports
 Please file feature requests and bug reports to [BrowserStack Support team](https://www.browserstack.com/contact?ref=help#technical-support).
