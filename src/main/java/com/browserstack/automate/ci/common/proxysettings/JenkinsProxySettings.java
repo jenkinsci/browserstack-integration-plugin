@@ -5,61 +5,96 @@ import jenkins.model.Jenkins;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 public class JenkinsProxySettings {
 
     private static final ProxyConfiguration jenkinsProxy = Jenkins.getInstanceOrNull() != null ? Jenkins.getInstanceOrNull().proxy : null;
     private static final String protocol = "https";
-    private static final String systemProxyHost = System.getProperty(protocol + ".proxyHost");
-    private static final int systemProxyPort = Integer.parseInt(System.getProperty(protocol + ".proxyPort", "0"));
-    private static final String systemProxyUser = System.getProperty(protocol + ".proxyUser");
-    private static final String systemProxyPassword = System.getProperty(protocol + ".proxyPassword");
-
-    public static Proxy getJenkinsProxy() {
-        if (hasSystemProxy()) {
-            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(systemProxyHost, systemProxyPort));
+    private static String proxyHost;
+    private static int proxyPort;
+    private static String proxyUser;
+    private static String proxyPassword;
+    static {
+        final String systemProxyHost = System.getProperty(protocol + ".proxyHost");
+        final int systemProxyPort = Integer.parseInt(System.getProperty(protocol + ".proxyPort", "0"));
+        final String systemProxyUser = System.getProperty(protocol + ".proxyUser");
+        final String systemProxyPassword = System.getProperty(protocol + ".proxyPassword");
+        if(systemProxyHost!=null && systemProxyPort!=0){
+            proxyHost = systemProxyHost;
+            proxyPort = systemProxyPort;
+            if(systemProxyUser!=null && systemProxyPassword!=null){
+                proxyUser = systemProxyUser;
+                proxyPassword = systemProxyPassword;
+            }
         }
 
-        if (jenkinsProxy == null) return null;
-        final String proxyHost = jenkinsProxy.name;
-        final int proxyPort = jenkinsProxy.port;
+        if(proxyHost==null && proxyPort==0 && jenkinsProxy!=null){
+            final String host = jenkinsProxy.name;
+            final int port = jenkinsProxy.port;
+            final String user = jenkinsProxy.getUserName();
+            final String password = jenkinsProxy.getPassword();
+            if(host!=null && port!=0){
+                proxyHost = host;
+                proxyPort = port;
+                if(user!=null && password!=null){
+                    proxyUser = user;
+                    proxyPassword = password;
+                }
+            }
+        }
+        if(proxyHost==null && proxyPort==0){
+            String proxyEnv = System.getenv("https_proxy");
+            String authRegex = "(https:\\/\\/)(.+):(.+)@(.+):(\\d+)";
+            String basicRegex = "(https:\\/\\/)(.+):(\\d+)";
+
+            if(proxyEnv!=null && proxyEnv.matches(authRegex)){
+                Pattern r = Pattern.compile(authRegex);
+                Matcher m = r.matcher(proxyEnv);
+                final String envHost = m.group(1);
+                final int envPort = Integer.parseInt(m.group(2));
+                final String envUser = m.group(3);
+                final String envPassword = m.group(4);
+                if(envHost!=null && envPort!=0){
+                    proxyHost = envHost;
+                    proxyPort = envPort;
+                    if(envUser!=null && envPassword!=null){
+                        proxyUser = envUser;
+                        proxyPassword = envPassword;
+                    }
+                }
+            }
+            else if(proxyEnv!=null && proxyEnv.matches(basicRegex)) {
+                Pattern r = Pattern.compile(authRegex);
+                Matcher m = r.matcher(proxyEnv);
+                final String envHost = m.group(1);
+                final int envPort = Integer.parseInt(m.group(2));
+                if(envHost!=null && envPort!=0){
+                    proxyHost = envHost;
+                    proxyPort = envPort;
+                }
+            }
+        }
+    }
+
+    public static Proxy getJenkinsProxy() {
         return (proxyHost != null && proxyPort != 0) ? new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)) : null;
     }
 
     public static String getHost() {
-        if (hasSystemProxy()) {
-            return systemProxyHost;
-        }
-
-        if (jenkinsProxy == null) return null;
-        return jenkinsProxy.name;
+        return proxyHost;
     }
 
     public static int getPort() {
-        if (hasSystemProxy()) {
-            return systemProxyPort;
-        }
-
-        if (jenkinsProxy == null) return 0;
-        return jenkinsProxy.port;
+        return proxyPort;
     }
 
     public static String getUsername() {
-        if (hasSystemProxy() && systemProxyUser != null && systemProxyPassword != null) {
-            return systemProxyUser;
-        }
-
-        if (jenkinsProxy == null) return null;
-        return jenkinsProxy.getUserName();
+        return proxyUser;
     }
 
     public static String getPassword() {
-        if (hasSystemProxy() && systemProxyUser != null && systemProxyPassword != null) {
-            return systemProxyPassword;
-        }
-
-        if (jenkinsProxy == null) return null;
-        return jenkinsProxy.getPassword();
+        return proxyPassword;
     }
 
     public static ProxyConfiguration getProxyConfig() {
@@ -68,10 +103,6 @@ public class JenkinsProxySettings {
 
     public static boolean hasProxy() {
         return getHost() != null && getPort() != 0;
-    }
-
-    public static boolean hasSystemProxy() {
-        return systemProxyHost != null && systemProxyPort != 0;
     }
 
 }
