@@ -64,7 +64,6 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
                     localIdentifier = args[i + 1];
                     if (StringUtils.isNotBlank(localIdentifier)) {
                         localIdentifierOverriden = true;
-                        continue;
                     }
 
                     // skip next, since already processed
@@ -84,11 +83,14 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
 
             arguments.add(args[i]);
         }
+
         if (!localIdentifierOverriden) {
             localIdentifier = UUID.randomUUID().toString() + "-" + buildTag.replaceAll("[^\\w\\-\\.]", "_");
-            arguments.add(localIdPos, localIdentifier);
-            arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
         }
+
+        arguments.add(localIdPos, localIdentifier);
+        arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
+
         return arguments.toArray(new String[]{});
     }
 
