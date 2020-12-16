@@ -30,18 +30,25 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
         Run<?, ?> run = getContext().get(Run.class);
         TaskListener taskListener = getContext().get(TaskListener.class);
         final PrintStream logger = taskListener.getLogger();
-        final PluginsTracker tracker = new PluginsTracker();
+        final EnvVars parentContextEnvVars = getContext().get(EnvVars.class);
+        final EnvVars parentEnvs = run.getEnvironment(taskListener);
+
+        String customProxy = parentContextEnvVars.get("https_proxy");
+        customProxy = Optional.ofNullable(customProxy).orElse(parentContextEnvVars.get("http_proxy"));
+
+        final PluginsTracker tracker = new PluginsTracker(customProxy);
+
+        System.out.println("\ncustomProxy in report generation: " + customProxy);
 
         log(logger, "Generating BrowserStack Test Report via Pipeline for : " + product.name());
 
-        final EnvVars parentEnvs = run.getEnvironment(taskListener);
-        String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
+        String browserStackBuildName = parentContextEnvVars.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
         browserStackBuildName = Optional.ofNullable(browserStackBuildName).orElse(parentEnvs.get(Constants.JENKINS_BUILD_TAG));
 
         tracker.reportGenerationInitialized(browserStackBuildName, product.name(), true);
 
         final BrowserStackReportForBuild bstackReportAction =
-                new BrowserStackReportForBuild(run, product, browserStackBuildName, logger, tracker, true);
+                new BrowserStackReportForBuild(run, product, browserStackBuildName, logger, tracker, true, customProxy);
         final boolean reportResult = bstackReportAction.generateBrowserStackReport();
         run.addAction(bstackReportAction);
 

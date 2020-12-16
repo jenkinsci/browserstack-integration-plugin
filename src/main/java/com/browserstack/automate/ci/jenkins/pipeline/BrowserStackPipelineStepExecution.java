@@ -21,6 +21,7 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
@@ -47,7 +48,14 @@ public class BrowserStackPipelineStepExecution extends StepExecution {
         TaskListener taskListener = context.get(TaskListener.class);
         Launcher launcher = context.get(Launcher.class);
         PrintStream logger = taskListener.getLogger();
-        PluginsTracker tracker = new PluginsTracker();
+        EnvVars parentContextEnvVars = context.get(EnvVars.class);
+
+        String customProxy = parentContextEnvVars.get("https_proxy");
+        customProxy = Optional.ofNullable(customProxy).orElse(parentContextEnvVars.get("http_proxy"));
+
+        final PluginsTracker tracker = new PluginsTracker(customProxy);
+
+        System.out.println("\ncustomProxy: " + customProxy);
 
         BrowserStackCredentials credentials =
                 BrowserStackCredentials.getCredentials(run.getParent(), credentialsId);

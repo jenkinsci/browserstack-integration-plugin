@@ -39,7 +39,7 @@ public class AppUploaderBuilder extends Builder {
                            @Nonnull BuildListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
 
-        String appId = AppUploaderHelper.uploadApp(build, logger, this.buildFilePath);
+        String appId = AppUploaderHelper.uploadApp(build, logger, this.buildFilePath, null);
 
         if (StringUtils.isEmpty(appId)) {
             return false;

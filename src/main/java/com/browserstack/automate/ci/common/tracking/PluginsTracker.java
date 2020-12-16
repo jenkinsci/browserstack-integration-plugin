@@ -16,6 +16,7 @@ import okhttp3.Response;
 import okhttp3.Route;
 import org.json.JSONObject;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.Proxy;
 import java.time.Instant;
@@ -28,17 +29,24 @@ public class PluginsTracker {
     private final String trackingId;
     private String username;
     private String accessKey;
+    private String customProxy;
 
-    public PluginsTracker(final String username, final String accessKey) {
+    public PluginsTracker(final String username, final String accessKey, @Nullable final String customProxy) {
         this.username = username;
         this.accessKey = accessKey;
+        this.customProxy = customProxy;
         this.trackingId = Tools.getUniqueString(true, true);
         initializeClient();
     }
 
     public PluginsTracker() {
+        this(null);
+    }
+
+    public PluginsTracker(@Nullable final String customProxy) {
         this.username = null;
         this.accessKey = null;
+        this.customProxy = customProxy;
         this.trackingId = Tools.getUniqueString(true, true);
         initializeClient();
     }
@@ -67,11 +75,21 @@ public class PluginsTracker {
 
     private void initializeClient() {
 
-        final Proxy proxy = JenkinsProxySettings.getJenkinsProxy() != null ? JenkinsProxySettings.getJenkinsProxy() : Proxy.NO_PROXY;
+        JenkinsProxySettings jenkinsProxy;
+        if (customProxy != null) {
+            System.out.println("Custom Proxy In Plugins Tracker: " + customProxy);
+            jenkinsProxy = new JenkinsProxySettings(customProxy, null);
+        } else {
+            System.out.println("Without Custom Proxy In Plugins Tracker");
+            jenkinsProxy = new JenkinsProxySettings(null);
+        }
+
+        final Proxy proxy = jenkinsProxy.getJenkinsProxy();
         if (proxy != Proxy.NO_PROXY) {
-            final String username = JenkinsProxySettings.getUsername();
-            final String password = JenkinsProxySettings.getPassword();
-            if (username != null && password != null) {
+            System.out.println("Selected some proxy for plugins tracker. " + proxy.toString());
+            if (jenkinsProxy.hasAuth()) {
+                final String username = jenkinsProxy.getUsername();
+                final String password = jenkinsProxy.getPassword();
                 Authenticator proxyAuthenticator = new Authenticator() {
                     @Override
                     public Request authenticate(Route route, Response response) throws IOException {

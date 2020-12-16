@@ -29,7 +29,7 @@ public class AppUploaderHelper {
     return FormValidation.ok();
   }
 
-  public static String uploadApp(Actionable build, PrintStream logger, String appPath) {
+  public static String uploadApp(Actionable build, PrintStream logger, String appPath, final String customProxy) {
     PluginLogger.log(logger, "Starting upload process.");
 
     BrowserStackBuildAction browserStackBuildAction =
@@ -45,7 +45,7 @@ public class AppUploaderHelper {
       return null;
     }
 
-    AppUploader appUploader = new AppUploader(appPath, credentials);
+    AppUploader appUploader = new AppUploader(appPath, credentials, customProxy, logger);
     String appId = "";
     try {
       PluginLogger.log(logger, "Uploading app " + appPath + " to Browserstack.");
