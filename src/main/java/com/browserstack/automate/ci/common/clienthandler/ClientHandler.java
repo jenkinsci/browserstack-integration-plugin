@@ -12,6 +12,16 @@ import java.io.PrintStream;
 
 public class ClientHandler {
 
+    /**
+     * Returns BrowserStackClient based on Project, i.e Automate or App Automate.
+     * Also decides and sets the proxy for the client
+     * @param project ProjectType
+     * @param username Username of BrowserStack
+     * @param accessKey Access Key of BrowserStack
+     * @param customProxy Custom Proxy String
+     * @param logger Logger
+     * @return BrowserStackClient
+     */
     public static BrowserStackClient getBrowserStackClient(@Nonnull final ProjectType project, @Nonnull final String username,
                                                            @Nonnull final String accessKey, @Nullable final String customProxy,
                                                            @Nullable final PrintStream logger) {
@@ -31,6 +41,13 @@ public class ClientHandler {
         return client;
     }
 
+    /**
+     * Initializes BrowserStack client based on project type
+     * @param project ProjectType
+     * @param username Username of BrowserStack
+     * @param accessKey Access Key of BrowserStack
+     * @return BrowserStackClient
+     */
     private static BrowserStackClient decideAndGetClient(@Nonnull final ProjectType project, @Nonnull final String username, @Nonnull final String accessKey) {
         if (project == ProjectType.APP_AUTOMATE) {
             return new AppAutomateClient(username, accessKey);

@@ -37,7 +37,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final ProjectType projectType;
     private final transient PrintStream logger;
     private final String customProxy;
-    private final PluginsTracker tracker;
+    private final transient PluginsTracker tracker;
     private final boolean pipelineStatus;
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
@@ -61,6 +61,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.projectType = projectType;
         this.logger = logger;
         this.customProxy = customProxy;
+        System.out.println("Initialized BrowserStackReportForBuild with customProxy: " + this.customProxy);
         this.tracker = tracker;
         this.pipelineStatus = pipelineStatus;
         fetchBuildAndSessions();

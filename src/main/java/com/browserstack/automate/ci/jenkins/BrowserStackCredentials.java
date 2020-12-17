@@ -2,7 +2,8 @@ package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
-import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
+import com.browserstack.automate.ci.common.clienthandler.ClientHandler;
+import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.exception.AutomateException;
 import com.cloudbees.plugins.credentials.BaseCredentials;
 import com.cloudbees.plugins.credentials.CredentialsDescriptor;
@@ -72,11 +73,8 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         }
 
         try {
-            AutomateClient client = new AutomateClient(username, accesskey);
-            System.out.println("Inside BrowserStackCredentials....");
-//            if (JenkinsProxySettings.hasProxy()) {
-//                client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
-//            }
+            AutomateClient client =
+                    (AutomateClient) ClientHandler.getBrowserStackClient(ProjectType.AUTOMATE, username, accesskey, null, null);
             if (client.getAccountUsage() != null) {
                 return FormValidation.ok(OK_VALID_AUTH);
             }

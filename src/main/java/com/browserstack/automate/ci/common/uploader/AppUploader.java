@@ -13,7 +13,7 @@ public class AppUploader {
 
     String appPath;
     BrowserStackCredentials credentials;
-    private final PrintStream logger;
+    private final transient PrintStream logger;
     private final String customProxy;
 
     public AppUploader(String appPath, BrowserStackCredentials credentials, final String customProxy, final PrintStream logger) {
@@ -36,6 +36,8 @@ public class AppUploader {
         }
 
         if (proxy.hasProxy()) {
+            System.out.println("App upload setting proxy for app automate client...");
+            System.out.println(proxy.getHost() + ":" + proxy.getPort() + "," + proxy.getUsername() + ":" + proxy.getPassword());
             appAutomateClient.setProxy(proxy.getHost(), proxy.getPort(), proxy.getUsername(), proxy.getPassword());
         }
         return appAutomateClient.uploadApp(this.appPath).getAppUrl();

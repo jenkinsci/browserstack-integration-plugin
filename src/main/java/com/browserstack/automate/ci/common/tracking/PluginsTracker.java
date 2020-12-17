@@ -25,7 +25,7 @@ import java.util.Optional;
 public class PluginsTracker {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private static final String URL = "https://api.browserstack.com/ci_plugins/track";
-    private static OkHttpClient client;
+    private transient OkHttpClient client;
     private final String trackingId;
     private String username;
     private String accessKey;
@@ -51,7 +51,7 @@ public class PluginsTracker {
         initializeClient();
     }
 
-    private static void asyncPostRequestSilent(final String url, final String json) {
+    private void asyncPostRequestSilent(final String url, final String json) {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
@@ -86,7 +86,7 @@ public class PluginsTracker {
 
         final Proxy proxy = jenkinsProxy.getJenkinsProxy();
         if (proxy != Proxy.NO_PROXY) {
-            System.out.println("Selected some proxy for plugins tracker. " + proxy.toString());
+            System.out.println("Selected some proxy for plugins tracker. " + proxy.toString() + ". And auth: " + jenkinsProxy.hasAuth());
             if (jenkinsProxy.hasAuth()) {
                 final String username = jenkinsProxy.getUsername();
                 final String password = jenkinsProxy.getPassword();
@@ -99,12 +99,12 @@ public class PluginsTracker {
                                 .build();
                     }
                 };
-                this.client = new OkHttpClient.Builder().proxy(proxy).proxyAuthenticator(proxyAuthenticator).build();
+                client = new OkHttpClient.Builder().proxy(proxy).proxyAuthenticator(proxyAuthenticator).build();
             } else {
-                this.client = new OkHttpClient.Builder().proxy(proxy).build();
+                client = new OkHttpClient.Builder().proxy(proxy).build();
             }
         } else {
-            this.client = new OkHttpClient.Builder().build();
+            client = new OkHttpClient.Builder().build();
         }
     }
 

@@ -152,9 +152,9 @@ public class JenkinsProxySettings {
         if (this.finalProxyHost != null && this.finalProxyPort != 0) {
             this.hasProxy = true;
 
-            String proxyDataToLog = "\nHost: " + this.getHost() + "\nPort: " + this.getPort();
+            String proxyDataToLog = "Host: " + this.getHost() + ", Port: " + this.getPort();
             if (this.hasAuth()) {
-                proxyDataToLog += "\nUsername: " + this.getUsername() + "\nPassword: " + Tools.maskString(this.getPassword());
+                proxyDataToLog += ", Username: " + this.getUsername() + ", Password: " + Tools.maskString(this.getPassword());
             }
 
             if (logger != null) log(logger, "Proxy Selected for BrowserStack Plugin: " + proxyDataToLog);
@@ -178,6 +178,10 @@ public class JenkinsProxySettings {
         return systemHttpsProxyEnv == null ? systemHttpProxyEnv : systemHttpsProxyEnv;
     }
 
+    /**
+     * Returns Jenkins proxy configuration in Proxy object
+     * @return Proxy object
+     */
     public Proxy getJenkinsProxy() {
         if (this.hasProxy()) {
             return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(this.finalProxyHost, this.finalProxyPort));

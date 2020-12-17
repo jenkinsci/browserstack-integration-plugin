@@ -55,7 +55,7 @@ public class BrowserStackPipelineStepExecution extends StepExecution {
 
         final PluginsTracker tracker = new PluginsTracker(customProxy);
 
-        System.out.println("\ncustomProxy: " + customProxy);
+        System.out.println("\ncustomProxy in pipeline execution: " + customProxy);
 
         BrowserStackCredentials credentials =
                 BrowserStackCredentials.getCredentials(run.getParent(), credentialsId);
