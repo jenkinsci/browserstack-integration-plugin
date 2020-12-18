@@ -61,7 +61,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.projectType = projectType;
         this.logger = logger;
         this.customProxy = customProxy;
-        System.out.println("Initialized BrowserStackReportForBuild with customProxy: " + this.customProxy);
         this.tracker = tracker;
         this.pipelineStatus = pipelineStatus;
         fetchBuildAndSessions();

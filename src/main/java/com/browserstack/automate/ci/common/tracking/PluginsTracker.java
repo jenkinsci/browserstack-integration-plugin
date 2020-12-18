@@ -25,8 +25,8 @@ import java.util.Optional;
 public class PluginsTracker {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private static final String URL = "https://api.browserstack.com/ci_plugins/track";
-    private transient OkHttpClient client;
     private final String trackingId;
+    private transient OkHttpClient client;
     private String username;
     private String accessKey;
     private String customProxy;
@@ -77,16 +77,13 @@ public class PluginsTracker {
 
         JenkinsProxySettings jenkinsProxy;
         if (customProxy != null) {
-            System.out.println("Custom Proxy In Plugins Tracker: " + customProxy);
             jenkinsProxy = new JenkinsProxySettings(customProxy, null);
         } else {
-            System.out.println("Without Custom Proxy In Plugins Tracker");
             jenkinsProxy = new JenkinsProxySettings(null);
         }
 
         final Proxy proxy = jenkinsProxy.getJenkinsProxy();
         if (proxy != Proxy.NO_PROXY) {
-            System.out.println("Selected some proxy for plugins tracker. " + proxy.toString() + ". And auth: " + jenkinsProxy.hasAuth());
             if (jenkinsProxy.hasAuth()) {
                 final String username = jenkinsProxy.getUsername();
                 final String password = jenkinsProxy.getPassword();

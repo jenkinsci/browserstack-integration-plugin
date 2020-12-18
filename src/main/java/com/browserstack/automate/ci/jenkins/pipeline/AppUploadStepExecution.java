@@ -40,7 +40,6 @@ public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<
         String customProxy = parentContextEnvVars.get("https_proxy");
         customProxy = Optional.ofNullable(customProxy).orElse(parentContextEnvVars.get("http_proxy"));
 
-        System.out.println("App upload custom proxy: " + customProxy);
         String appId = AppUploaderHelper.uploadApp(run, logger, this.appPath, customProxy);
 
         if (StringUtils.isEmpty(appId)) {

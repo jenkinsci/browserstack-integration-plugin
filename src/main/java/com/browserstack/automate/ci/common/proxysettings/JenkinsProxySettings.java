@@ -13,7 +13,7 @@ import java.net.Proxy;
 import java.net.URL;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
-import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
+import static com.browserstack.automate.ci.common.logger.PluginLogger.logDebug;
 
 public class JenkinsProxySettings {
 
@@ -79,9 +79,8 @@ public class JenkinsProxySettings {
 
             return proxyUrl;
         } catch (Exception e) {
-            // TODO: Change to logDebug
             if (logger != null)
-                logError(logger, String.format("Invalid Proxy String: %s, Proxy Type: %s. Error: %s", proxyString, proxyType, e.toString()));
+                logDebug(logger, String.format("Invalid Proxy String: %s, Proxy Type: %s. Error: %s", proxyString, proxyType, e.toString()));
             return null;
         }
     }
@@ -129,9 +128,6 @@ public class JenkinsProxySettings {
                 this.finalProxyUsername = jarProxyUser;
                 this.finalProxyPassword = jarProxyPassword;
             }
-
-            if (this.finalProxyUsername == null)
-                System.out.println("Username is null in case of JAR proxy...");
         }
 
         // Utilises the proxyUrl set by Env Vars if Jenkins & Jar Proxy are absent
@@ -180,6 +176,7 @@ public class JenkinsProxySettings {
 
     /**
      * Returns Jenkins proxy configuration in Proxy object
+     *
      * @return Proxy object
      */
     public Proxy getJenkinsProxy() {

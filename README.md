@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="https://browserstack.com"><img alt="BrowserStack Logo" src="https://d98b8t1nnulk5.cloudfront.net/production/images/layout/logo-invoice.svg"></a>
+</p>
+
 # Overview
 [BrowserStack](https://browserstack.com) gives instant access to 2000+ real mobile devices and browsers that enables developers to test their websites and mobile applications without requiring to install or maintain an internal lab of virtual machines, devices, or emulators.
 

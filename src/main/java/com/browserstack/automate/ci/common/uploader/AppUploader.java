@@ -36,8 +36,6 @@ public class AppUploader {
         }
 
         if (proxy.hasProxy()) {
-            System.out.println("App upload setting proxy for app automate client...");
-            System.out.println(proxy.getHost() + ":" + proxy.getPort() + "," + proxy.getUsername() + ":" + proxy.getPassword());
             appAutomateClient.setProxy(proxy.getHost(), proxy.getPort(), proxy.getUsername(), proxy.getPassword());
         }
         return appAutomateClient.uploadApp(this.appPath).getAppUrl();

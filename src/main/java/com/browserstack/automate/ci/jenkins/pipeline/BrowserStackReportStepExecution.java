@@ -38,8 +38,6 @@ public class BrowserStackReportStepExecution extends SynchronousNonBlockingStepE
 
         final PluginsTracker tracker = new PluginsTracker(customProxy);
 
-        System.out.println("\ncustomProxy in report generation: " + customProxy);
-
         log(logger, "Generating BrowserStack Test Report via Pipeline for : " + product.name());
 
         String browserStackBuildName = parentContextEnvVars.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
