@@ -82,7 +82,6 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         }
 
         tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
-        log(logger, "Credentials used: " + credentials.getUsername() + ", " + credentials.getDecryptedAccesskey());
 
         BrowserStackClient client =
                 ClientHandler.getBrowserStackClient(projectType, credentials.getUsername(), credentials.getDecryptedAccesskey(), customProxy, logger);
