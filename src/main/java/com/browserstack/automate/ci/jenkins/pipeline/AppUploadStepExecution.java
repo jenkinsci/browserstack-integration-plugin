@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Optional;
 
 public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
@@ -34,8 +35,12 @@ public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<
         Run run = context.get(Run.class);
         TaskListener taskListener = context.get(TaskListener.class);
         PrintStream logger = taskListener.getLogger();
+        EnvVars parentContextEnvVars = context.get(EnvVars.class);
 
-        String appId = AppUploaderHelper.uploadApp(run, logger, this.appPath);
+        String customProxy = parentContextEnvVars.get("https_proxy");
+        customProxy = Optional.ofNullable(customProxy).orElse(parentContextEnvVars.get("http_proxy"));
+
+        String appId = AppUploaderHelper.uploadApp(run, logger, this.appPath, customProxy);
 
         if (StringUtils.isEmpty(appId)) {
             PluginLogger.log(logger, "ERROR : App Id empty. ABORTING!!!");
