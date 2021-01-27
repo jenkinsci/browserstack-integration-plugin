@@ -23,7 +23,7 @@ import java.time.Instant;
 import java.util.Optional;
 
 public class PluginsTracker {
-    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
     private static final String URL = "https://api.browserstack.com/ci_plugins/track";
     private final String trackingId;
     private transient OkHttpClient client;
@@ -52,7 +52,7 @@ public class PluginsTracker {
     }
 
     private void asyncPostRequestSilent(final String url, final String json) {
-        RequestBody body = RequestBody.create(JSON, json);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
