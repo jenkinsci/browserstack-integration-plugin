@@ -5,10 +5,10 @@ import com.browserstack.local.Local;
 import hudson.EnvVars;
 import hudson.Launcher;
 import jenkins.security.MasterToSlaveCallable;
-import java.io.PrintStream;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +39,19 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
         this.arguments = processLocalArguments((localOptions != null) ? localOptions.trim() : "", buildTag);
     }
 
+    private static DaemonAction detectDaemonAction(List<String> command) {
+        if (command.size() > 2) {
+            String action = command.get(2).toLowerCase();
+            if (action.equals("start")) {
+                return DaemonAction.START;
+            } else if (action.equals("stop")) {
+                return DaemonAction.STOP;
+            }
+        }
+
+        return null;
+    }
+
     private String[] processLocalArguments(final String argString, String buildTag) {
         String[] args = argString.split("\\s+");
         int localIdPos = 0;
@@ -51,7 +64,6 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
                     localIdentifier = args[i + 1];
                     if (StringUtils.isNotBlank(localIdentifier)) {
                         localIdentifierOverriden = true;
-                        continue;
                     }
 
                     // skip next, since already processed
@@ -60,22 +72,25 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
 
                 continue;
             }
-            
+
             // inject from environment variable if variable starts with $
             if (args[i].startsWith("$")) {
                 String envVarName = args[i].substring(1);
-            	PluginLogger.log(logger,
-                        "Local: Replacing " + args[i] + " in local options with Environment variable "+ envVarName);
-            	args[i] = envVars.get(envVarName);
+                PluginLogger.log(logger,
+                        "Local: Replacing " + args[i] + " in local options with Environment variable " + envVarName);
+                args[i] = envVars.get(envVarName);
             }
 
             arguments.add(args[i]);
         }
+
         if (!localIdentifierOverriden) {
-          localIdentifier = UUID.randomUUID().toString() + "-" + buildTag.replaceAll("[^\\w\\-\\.]", "_");
-          arguments.add(localIdPos, localIdentifier);
-          arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
+            localIdentifier = UUID.randomUUID().toString() + "-" + buildTag.replaceAll("[^\\w\\-\\.]", "_");
         }
+
+        arguments.add(localIdPos, localIdentifier);
+        arguments.add(localIdPos, "-" + OPTION_LOCAL_IDENTIFIER);
+
         return arguments.toArray(new String[]{});
     }
 
@@ -132,22 +147,9 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
     }
 
     public String[] getArguments() {
-      // using clone()  here because without it findbugs raises EI_EXPOSE_REP.
-      // https://stackoverflow.com/a/1732803/2577465
-      return arguments.clone();
-    }
-
-    private static DaemonAction detectDaemonAction(List<String> command) {
-        if (command.size() > 2) {
-            String action = command.get(2).toLowerCase();
-            if (action.equals("start")) {
-                return DaemonAction.START;
-            } else if (action.equals("stop")) {
-                return DaemonAction.STOP;
-            }
-        }
-
-        return null;
+        // using clone()  here because without it findbugs raises EI_EXPOSE_REP.
+        // https://stackoverflow.com/a/1732803/2577465
+        return arguments.clone();
     }
 
     private enum DaemonAction {

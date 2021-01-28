@@ -1,8 +1,7 @@
 package com.browserstack.automate.ci.common;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.browserstack.automate.ci.common.logger.PluginLogger;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.regex.Matcher;
@@ -48,10 +47,6 @@ public class AutomateTestCase implements Serializable {
         this.testFullPath = (this.packageName.equals(PACKAGE_DEFAULT) ? "" : this.packageName + '.')
                 + this.className + '.' + this.testName;
         this.testHash = null;
-    }
-
-    public boolean hasTestHash() {
-        return (testHash != null && testHash.length() > 0);
     }
 
     public static String stripTestParams(String testCaseName) {
@@ -121,5 +116,9 @@ public class AutomateTestCase implements Serializable {
         }
 
         return null;
+    }
+
+    public boolean hasTestHash() {
+        return (testHash != null && testHash.length() > 0);
     }
 }

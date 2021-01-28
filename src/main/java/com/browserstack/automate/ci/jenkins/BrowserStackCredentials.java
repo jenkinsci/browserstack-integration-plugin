@@ -1,13 +1,9 @@
 package com.browserstack.automate.ci.jenkins;
 
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.export.Exported;
-
 import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
+import com.browserstack.automate.ci.common.clienthandler.ClientHandler;
+import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.exception.AutomateException;
 import com.cloudbees.plugins.credentials.BaseCredentials;
 import com.cloudbees.plugins.credentials.CredentialsDescriptor;
@@ -34,6 +30,11 @@ import hudson.model.User;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.export.Exported;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
     private static final String CREDENTIAL_DISPLAY_NAME = "BrowserStack";
     private static final String OK_VALID_AUTH = "Success";
     private static final String ERR_INVALID_AUTH = "Invalid username or access key!";
+    private static final String ERR_HUB_UNREACHABLE = "Unable to connect to BrowserStack!";
 
     private final String id;
 
@@ -63,6 +65,57 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         this.username = Util.fixNull(username);
         this.accesskey = Secret.fromString(accesskey);
         Analytics.trackInstall();
+    }
+
+    public static FormValidation testAuthentication(final String username, final String accesskey) {
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(accesskey)) {
+            return FormValidation.ok();
+        }
+
+        try {
+            AutomateClient client =
+                    (AutomateClient) ClientHandler.getBrowserStackClient(ProjectType.AUTOMATE, username, accesskey, null, null);
+            if (client.getAccountUsage() != null) {
+                return FormValidation.ok(OK_VALID_AUTH);
+            }
+        } catch (AutomateException e) {
+            if (e.getStatusCode() == 401) {
+                return FormValidation.error(ERR_INVALID_AUTH);
+            } else {
+                return FormValidation.error(e.getMessage());
+            }
+        } catch (Exception e) {
+            return FormValidation.error(e.getMessage());
+        }
+
+        return FormValidation.error(ERR_HUB_UNREACHABLE);
+    }
+
+    public static BrowserStackCredentials getCredentials(final AbstractItem buildItem, final String credentialsId) {
+        List<BrowserStackCredentials> available = availableCredentials(buildItem);
+        if (available.isEmpty()) {
+            return null;
+        }
+
+        CredentialsMatcher matcher;
+        if (credentialsId != null) {
+            matcher = CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsId));
+        } else {
+            matcher = CredentialsMatchers.always();
+        }
+
+        return CredentialsMatchers.firstOrDefault(
+                available,
+                matcher,
+                available.get(0));
+    }
+
+    public static List<BrowserStackCredentials> availableCredentials(final AbstractItem abstractItem) {
+        return CredentialsProvider.lookupCredentials(
+                BrowserStackCredentials.class,
+                abstractItem,
+                null,
+                new ArrayList<DomainRequirement>());
     }
 
     @Exported
@@ -109,54 +162,6 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         return IdCredentials.Helpers.hashCode(this);
     }
 
-    public static FormValidation testAuthentication(final String username, final String accesskey) {
-        if (StringUtils.isBlank(username) || StringUtils.isBlank(accesskey)) {
-            return FormValidation.ok();
-        }
-
-        try {
-            AutomateClient client = new AutomateClient(username, accesskey);
-            if (client.getAccountUsage() != null) {
-                return FormValidation.ok(OK_VALID_AUTH);
-            }
-        } catch (AutomateException e) {
-            if (e.getStatusCode() == 401) {
-                return FormValidation.error(ERR_INVALID_AUTH);
-            }
-        } catch (Exception e) {
-            return FormValidation.error(e.getMessage());
-        }
-
-        return FormValidation.error(ERR_INVALID_AUTH);
-    }
-
-    public static BrowserStackCredentials getCredentials(final AbstractItem buildItem, final String credentialsId) {
-        List<BrowserStackCredentials> available = availableCredentials(buildItem);
-        if (available.isEmpty()) {
-            return null;
-        }
-
-        CredentialsMatcher matcher;
-        if (credentialsId != null) {
-            matcher = CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsId));
-        } else {
-            matcher = CredentialsMatchers.always();
-        }
-
-        return CredentialsMatchers.firstOrDefault(
-                available,
-                matcher,
-                available.get(0));
-    }
-
-    public static List<BrowserStackCredentials> availableCredentials(final AbstractItem abstractItem) {
-        return CredentialsProvider.lookupCredentials(
-                BrowserStackCredentials.class,
-                abstractItem,
-                null,
-                new ArrayList<DomainRequirement>());
-    }
-
     @Extension(ordinal = 1.0D)
     public static class DescriptorImpl extends CredentialsDescriptor {
 
@@ -166,6 +171,30 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
 
         public DescriptorImpl(Class<? extends BaseStandardCredentials> clazz) {
             super(clazz);
+        }
+
+        @CheckForNull
+        private static FormValidation checkForDuplicates(String value, ModelObject context, ModelObject object) {
+            for (CredentialsStore store : CredentialsProvider.lookupStores(object)) {
+                if (!store.hasPermission(CredentialsProvider.VIEW)) {
+                    continue;
+                }
+                ModelObject storeContext = store.getContext();
+                for (Domain domain : store.getDomains()) {
+                    if (CredentialsMatchers.firstOrNull(store.getCredentials(domain), CredentialsMatchers.withId(value))
+                            != null) {
+                        if (storeContext == context) {
+                            return FormValidation.error("This ID is already in use");
+                        } else {
+                            return FormValidation.warning("The ID ‘%s’ is already in use in %s", value,
+                                    storeContext instanceof Item
+                                            ? ((Item) storeContext).getFullDisplayName()
+                                            : storeContext.getDisplayName());
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         public final FormValidation doAuthenticate(@QueryParameter("username") String username,
@@ -192,30 +221,6 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
         @SuppressWarnings("unused") // used by stapler
         public boolean isScopeRelevant(ModelObject object) {
             return false;
-        }
-
-        @CheckForNull
-        private static FormValidation checkForDuplicates(String value, ModelObject context, ModelObject object) {
-            for (CredentialsStore store : CredentialsProvider.lookupStores(object)) {
-                if (!store.hasPermission(CredentialsProvider.VIEW)) {
-                    continue;
-                }
-                ModelObject storeContext = store.getContext();
-                for (Domain domain : store.getDomains()) {
-                    if (CredentialsMatchers.firstOrNull(store.getCredentials(domain), CredentialsMatchers.withId(value))
-                            != null) {
-                        if (storeContext == context) {
-                            return FormValidation.error("This ID is already in use");
-                        } else {
-                            return FormValidation.warning("The ID ‘%s’ is already in use in %s", value,
-                                    storeContext instanceof Item
-                                            ? ((Item) storeContext).getFullDisplayName()
-                                            : storeContext.getDisplayName());
-                        }
-                    }
-                }
-            }
-            return null;
         }
 
         public final FormValidation doCheckId(@QueryParameter String value, @AncestorInPath ModelObject context) {

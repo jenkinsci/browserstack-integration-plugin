@@ -10,12 +10,12 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.1.4-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
   <description>This plugin allows you to integrate with BrowserStack.</description>
-  <url>https://wiki.jenkins-ci.org/display/JENKINS/BrowserStack+Plugin</url>
+  <url>https://github.com/jenkinsci/browserstack-integration-plugin</url>
 
   <developers>
     <developer>
@@ -103,6 +103,18 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.brsanthu</groupId>
+      <artifactId>google-analytics-java</artifactId>
+      <version>1.1.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
       <groupId>org.jmockit</groupId>
       <artifactId>jmockit</artifactId>
       <version>1.24</version>
@@ -138,19 +150,19 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.4</version>
+      <version>0.7</version>
     </dependency>
 
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>browserstack-local-java</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.6</version>
     </dependency>
 
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
 
     <dependency>
@@ -163,12 +175,6 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
       <version>1.10</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.brsanthu</groupId>
-      <artifactId>google-analytics-java</artifactId>
-      <version>1.1.2</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
@@ -233,6 +239,25 @@
       <version>1.7</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>3.14.9</version>
+    </dependency>
+
+
     <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
     <dependency>
       <groupId>commons-io</groupId>
@@ -259,6 +284,19 @@
       </resource>
     </resources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <localCheckout>true</localCheckout>
+          <pushChanges>false</pushChanges>
+          <checkModificationExcludes>
+            <checkModificationExclude>pom.xml</checkModificationExclude>
+          </checkModificationExcludes>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
