@@ -1,6 +1,6 @@
 package com.browserstack.automate.ci.jenkins.pipeline;
 
-import com.browserstack.automate.ci.common.tracking.PluginsTracker;
+//import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.jenkins.helpers.TempCredentialIdGenerator;
 import mockit.Mock;
 import mockit.MockUp;
@@ -21,7 +21,7 @@ public class BrowserStackPipelineStepTest {
 
     @Test
     public void testBrowserStepWithoutLocal() throws Exception {
-        new MockPluginsTracker();
+//        new MockPluginsTracker();
         String credentialsId = TempCredentialIdGenerator.generateTempCredentialId(DUMMY_BSTACK_USERNAME,
                 DUMMY_BSTACK_ACCESS_KEY);
 
@@ -40,7 +40,7 @@ public class BrowserStackPipelineStepTest {
 
     @Test
     public void testBrowserStepWithLocal() throws Exception {
-        new MockPluginsTracker();
+//        new MockPluginsTracker();
         String username = System.getenv("BROWSERSTACK_USERNAME");
         String accessKey = System.getenv("BROWSERSTACK_ACCESS_KEY");
 
@@ -63,27 +63,27 @@ public class BrowserStackPipelineStepTest {
         jenkinsRule.assertLogContains("BROWSERSTACK_LOCAL = true", run);
     }
 
-    private static final class MockPluginsTracker extends MockUp<PluginsTracker> {
-        @Mock
-        public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
-            return;
-        }
-
-        @Mock
-        public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
-            return;
-        }
-
-        @Mock
-        public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
-            return;
-        }
-
-        @Mock
-        public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
-            return;
-        }
-    }
+//    private static final class MockPluginsTracker extends MockUp<PluginsTracker> {
+//        @Mock
+//        public void sendError(String errorMessage, boolean pipelineStatus, String phase) {
+//            return;
+//        }
+//
+//        @Mock
+//        public void pluginInitialized(String buildName, boolean localStatus, boolean pipelineStatus) {
+//            return;
+//        }
+//
+//        @Mock
+//        public void reportGenerationInitialized(String buildName, String product, boolean pipelineStatus) {
+//            return;
+//        }
+//
+//        @Mock
+//        public void reportGenerationCompleted(String status, String product, boolean pipelineStatus, String buildName, String buildId) {
+//            return;
+//        }
+//    }
 
 
 }
