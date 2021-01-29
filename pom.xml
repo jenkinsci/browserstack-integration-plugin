@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>1.2.1-debug-3</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -284,6 +284,74 @@
       </resource>
     </resources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>org</pattern>
+                  <shadedPattern>org.shaded.browserstack</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com</pattern>
+                  <shadedPattern>com.shaded.browserstack</shadedPattern>
+                </relocation>
+                <relocation>  
+                  <pattern>io</pattern> 
+                  <shadedPattern>io.shaded.browserstack</shadedPattern> 
+                </relocation> 
+                <relocation>  
+                  <pattern>hudson</pattern> 
+                  <shadedPattern>hudson.shaded.browserstack</shadedPattern> 
+                </relocation> 
+                <relocation>  
+                  <pattern>javassist</pattern>  
+                  <shadedPattern>javassist.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>javax</pattern>  
+                  <shadedPattern>javax.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>jenkins</pattern>  
+                  <shadedPattern>jenkins.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>lib</pattern>  
+                  <shadedPattern>lib.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>ognl</pattern> 
+                  <shadedPattern>ognl.shaded.browserstack</shadedPattern> 
+                </relocation> 
+                <relocation>  
+                  <pattern>okhttp3</pattern>  
+                  <shadedPattern>okhttp3.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>okio</pattern> 
+                  <shadedPattern>okio.shaded.browserstack</shadedPattern> 
+                </relocation> 
+                <relocation>  
+                  <pattern>ru</pattern> 
+                  <shadedPattern>ru.shaded.browserstack</shadedPattern> 
+                </relocation>
+              </relocations>
+              <!-- This will create a separate hpi file. Comment this if you need only single file -->
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>shadedPlugin</shadedClassifierName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
