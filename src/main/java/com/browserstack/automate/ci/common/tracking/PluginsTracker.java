@@ -3,7 +3,9 @@ package com.browserstack.automate.ci.common.tracking;
 
 import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.common.logger.PluginLogger;
 import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
+import hudson.model.TaskListener;
 import okhttp3.Authenticator;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -14,6 +16,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
@@ -23,13 +26,17 @@ import java.time.Instant;
 import java.util.Optional;
 
 public class PluginsTracker {
-    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
     private static final String URL = "https://api.browserstack.com/ci_plugins/track";
     private final String trackingId;
     private transient OkHttpClient client;
     private String username;
     private String accessKey;
     private String customProxy;
+
+    static {
+        Logger.getLogger(PluginsTracker.class).info("BrowserStack Plugin Tracker Initialized");
+    }
 
     public PluginsTracker(final String username, final String accessKey, @Nullable final String customProxy) {
         this.username = username;
@@ -52,7 +59,7 @@ public class PluginsTracker {
     }
 
     private void asyncPostRequestSilent(final String url, final String json) {
-        RequestBody body = RequestBody.create(JSON, json);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
