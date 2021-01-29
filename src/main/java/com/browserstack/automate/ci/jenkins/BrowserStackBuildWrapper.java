@@ -3,7 +3,7 @@ package com.browserstack.automate.ci.jenkins;
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.common.constants.Constants;
-import com.browserstack.automate.ci.common.tracking.PluginsTracker;
+//import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
@@ -77,7 +77,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     public Environment setUp(final AbstractBuild build, final Launcher launcher,
                              final BuildListener listener) throws IOException, InterruptedException {
         final PrintStream logger = listener.getLogger();
-        final PluginsTracker tracker = new PluginsTracker();
+//        final PluginsTracker tracker = new PluginsTracker();
 
         final BrowserStackCredentials credentials =
                 BrowserStackCredentials.getCredentials(build.getProject(), credentialsId);
@@ -91,9 +91,9 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         if (credentials != null) {
             this.username = credentials.getUsername();
             this.accesskey = credentials.getDecryptedAccesskey();
-            tracker.setCredentials(this.username, this.accesskey);
+//            tracker.setCredentials(this.username, this.accesskey);
         } else {
-            tracker.sendError("No Credentials Available", false, "PluginInitialization");
+//            tracker.sendError("No Credentials Available", false, "PluginInitialization");
         }
 
         AutomateBuildEnvironment buildEnv = new AutomateBuildEnvironment(credentials, launcher, logger);
@@ -102,15 +102,15 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
                 buildEnv.startBrowserStackLocal(build.getFullDisplayName(), build.getEnvironment(listener));
             } catch (Exception e) {
                 listener.fatalError(e.getMessage());
-                tracker.sendError(e.getMessage().substring(0, Math.min(100, e.getMessage().length())),
-                        false, "LocalInitialization");
+//                tracker.sendError(e.getMessage().substring(0, Math.min(100, e.getMessage().length())),
+//                        false, "LocalInitialization");
                 throw new IOException(e.getCause());
             }
         }
 
         recordBuildStats();
         EnvVars envs = build.getEnvironment(listener);
-        tracker.pluginInitialized(envs.get(Constants.JENKINS_BUILD_TAG), (this.localConfig != null), false);
+//        tracker.pluginInitialized(envs.get(Constants.JENKINS_BUILD_TAG), (this.localConfig != null), false);
 
         return buildEnv;
     }

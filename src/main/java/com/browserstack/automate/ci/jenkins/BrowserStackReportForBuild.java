@@ -4,7 +4,7 @@ import com.browserstack.automate.ci.common.Tools;
 import com.browserstack.automate.ci.common.clienthandler.ClientHandler;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
-import com.browserstack.automate.ci.common.tracking.PluginsTracker;
+//import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.exception.BuildNotFound;
 import com.browserstack.automate.model.Build;
 import com.browserstack.automate.model.Session;
@@ -37,7 +37,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final ProjectType projectType;
     private final transient PrintStream logger;
     private final String customProxy;
-    private final transient PluginsTracker tracker;
+//    private final transient PluginsTracker tracker;
     private final boolean pipelineStatus;
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
@@ -49,7 +49,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
                                       final ProjectType projectType,
                                       final String buildName,
                                       final PrintStream logger,
-                                      final PluginsTracker tracker,
+//                                      final PluginsTracker tracker,
                                       final boolean pipelineStatus,
                                       final String customProxy) {
         super();
@@ -61,7 +61,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.projectType = projectType;
         this.logger = logger;
         this.customProxy = customProxy;
-        this.tracker = tracker;
+//        this.tracker = tracker;
         this.pipelineStatus = pipelineStatus;
         fetchBuildAndSessions();
     }
@@ -70,18 +70,18 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         final BrowserStackBuildAction browserStackBuildAction = getBuild().getAction(BrowserStackBuildAction.class);
         if (browserStackBuildAction == null) {
             logError(logger, "No BrowserStackBuildAction found");
-            tracker.sendError("BrowserStackBuildAction Not Found", pipelineStatus, "ReportGeneration");
+//            tracker.sendError("BrowserStackBuildAction Not Found", pipelineStatus, "ReportGeneration");
             return;
         }
 
         final BrowserStackCredentials credentials = browserStackBuildAction.getBrowserStackCredentials();
         if (credentials == null) {
             logError(logger, "BrowserStack credentials could not be fetched");
-            tracker.sendError("No Credentials Available", pipelineStatus, "ReportGeneration");
+//            tracker.sendError("No Credentials Available", pipelineStatus, "ReportGeneration");
             return;
         }
 
-        tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
+//        tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
 
         BrowserStackClient client =
                 ClientHandler.getBrowserStackClient(projectType, credentials.getUsername(), credentials.getDecryptedAccesskey(), customProxy, logger);
