@@ -303,7 +303,47 @@
                 <relocation>
                   <pattern>com</pattern>
                   <shadedPattern>com.shaded.browserstack</shadedPattern>
+                </relocation>
+                <relocation>  
+                  <pattern>io</pattern> 
+                  <shadedPattern>io.shaded.browserstack</shadedPattern> 
                 </relocation> 
+                <relocation>  
+                  <pattern>hudson</pattern> 
+                  <shadedPattern>hudson.shaded.browserstack</shadedPattern> 
+                </relocation> 
+                <relocation>  
+                  <pattern>javassist</pattern>  
+                  <shadedPattern>javassist.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>javax</pattern>  
+                  <shadedPattern>javax.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>jenkins</pattern>  
+                  <shadedPattern>jenkins.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>lib</pattern>  
+                  <shadedPattern>lib.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>ognl</pattern> 
+                  <shadedPattern>ognl.shaded.browserstack</shadedPattern> 
+                </relocation> 
+                <relocation>  
+                  <pattern>okhttp3</pattern>  
+                  <shadedPattern>okhttp3.shaded.browserstack</shadedPattern>  
+                </relocation> 
+                <relocation>  
+                  <pattern>okio</pattern> 
+                  <shadedPattern>okio.shaded.browserstack</shadedPattern> 
+                </relocation> 
+                <relocation>  
+                  <pattern>ru</pattern> 
+                  <shadedPattern>ru.shaded.browserstack</shadedPattern> 
+                </relocation>
               </relocations>
               <!-- This will create a separate hpi file. Comment this if you need only single file -->
               <shadedArtifactAttached>true</shadedArtifactAttached>
