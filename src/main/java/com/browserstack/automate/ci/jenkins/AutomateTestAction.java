@@ -1,11 +1,9 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.browserstack.appautomate.AppAutomateClient;
-import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.analytics.Analytics;
+import com.browserstack.automate.ci.common.clienthandler.ClientHandler;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.ci.common.model.BrowserStackSession;
-import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
 import com.browserstack.automate.ci.jenkins.BrowserStackBuildWrapper.BuildWrapperItem;
 import com.browserstack.automate.exception.AppAutomateException;
 import com.browserstack.automate.exception.AutomateException;
@@ -106,16 +104,8 @@ public class AutomateTestAction extends TestAction {
 
     private Session getSession(BrowserStackCredentials credentials, ProjectType projectType) {
         Session activeSession = null;
-        BrowserStackClient client = null;
-        if (projectType.equals(ProjectType.APP_AUTOMATE)) {
-            client =
-                    new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-        } else {
-            client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-        }
-        if (JenkinsProxySettings.hasProxy()) {
-            client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
-        }
+        BrowserStackClient client = ClientHandler.getBrowserStackClient(projectType, credentials.getUsername(),
+                credentials.getDecryptedAccesskey(), null, null);
         try {
             activeSession = client.getSession(this.browserStackSession.getSessionId());
             Analytics.trackIframeRequest();

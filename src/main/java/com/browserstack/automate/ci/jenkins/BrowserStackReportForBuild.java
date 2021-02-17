@@ -1,11 +1,9 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.browserstack.appautomate.AppAutomateClient;
-import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.ci.common.Tools;
+import com.browserstack.automate.ci.common.clienthandler.ClientHandler;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
-import com.browserstack.automate.ci.common.proxysettings.JenkinsProxySettings;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.exception.BuildNotFound;
 import com.browserstack.automate.model.Build;
@@ -28,6 +26,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
+import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
@@ -37,7 +36,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final Map<String, String> resultAggregation;
     private final ProjectType projectType;
     private final transient PrintStream logger;
-    private final PluginsTracker tracker;
+    private final String customProxy;
+    private final transient PluginsTracker tracker;
     private final boolean pipelineStatus;
     // to make them available in jelly
     private final String errorConst = Constants.SessionStatus.ERROR;
@@ -50,7 +50,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
                                       final String buildName,
                                       final PrintStream logger,
                                       final PluginsTracker tracker,
-                                      final boolean pipelineStatus) {
+                                      final boolean pipelineStatus,
+                                      final String customProxy) {
         super();
         setBuild(build);
         this.buildName = buildName;
@@ -59,6 +60,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         this.resultAggregation = new HashMap<>();
         this.projectType = projectType;
         this.logger = logger;
+        this.customProxy = customProxy;
         this.tracker = tracker;
         this.pipelineStatus = pipelineStatus;
         fetchBuildAndSessions();
@@ -81,15 +83,8 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
         tracker.setCredentials(credentials.getUsername(), credentials.getDecryptedAccesskey());
 
-        BrowserStackClient client;
-        if (projectType == ProjectType.APP_AUTOMATE) {
-            client = new AppAutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-        } else {
-            client = new AutomateClient(credentials.getUsername(), credentials.getDecryptedAccesskey());
-        }
-        if (JenkinsProxySettings.hasProxy()) {
-            client.setProxy(JenkinsProxySettings.getHost(), JenkinsProxySettings.getPort(), JenkinsProxySettings.getUsername(), JenkinsProxySettings.getPassword());
-        }
+        BrowserStackClient client =
+                ClientHandler.getBrowserStackClient(projectType, credentials.getUsername(), credentials.getDecryptedAccesskey(), customProxy, logger);
 
         browserStackBuild = fetchBrowserStackBuild(client, buildName);
 

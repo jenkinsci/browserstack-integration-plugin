@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.1.10-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -150,13 +150,13 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.6</version>
+      <version>0.7</version>
     </dependency>
 
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>browserstack-local-java</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.6</version>
     </dependency>
 
     <dependency>
