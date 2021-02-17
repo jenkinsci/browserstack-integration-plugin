@@ -124,7 +124,8 @@ public class AutomateTestActionTest {
         localConfig.setLocalOptions("-force");
 
         BrowserStackBuildWrapper buildWrapper =
-                new BrowserStackBuildWrapper(credentialsId, localConfig);
+                new BrowserStackBuildWrapper(credentialsId);
+        buildWrapper.setLocalConfig(localConfig);
         project.getBuildWrappersList().add(buildWrapper);
     }
 
