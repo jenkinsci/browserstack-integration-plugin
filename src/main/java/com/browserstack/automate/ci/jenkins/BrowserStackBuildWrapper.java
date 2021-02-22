@@ -19,6 +19,7 @@ import hudson.tasks.BuildWrapper;
 import hudson.util.DescribableList;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -31,15 +32,19 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     private static final char CHAR_MASK = '*';
 
-    private final LocalConfig localConfig;
+    private LocalConfig localConfig;
 
     private String credentialsId;
     private String username;
     private String accesskey;
 
     @DataBoundConstructor
-    public BrowserStackBuildWrapper(String credentialsId, LocalConfig localConfig) {
+    public BrowserStackBuildWrapper(String credentialsId) {
         this.credentialsId = credentialsId;
+    }
+
+    @DataBoundSetter
+    public void setLocalConfig(LocalConfig localConfig) {
         this.localConfig = localConfig;
     }
 

@@ -115,7 +115,8 @@ public class AutomateTestDataPublisherTest {
         LocalConfig localConfig = new LocalConfig();
         localConfig.setLocalOptions("-force");
 
-        BrowserStackBuildWrapper buildWrapper = new BrowserStackBuildWrapper(credentialsId, localConfig);
+        BrowserStackBuildWrapper buildWrapper = new BrowserStackBuildWrapper(credentialsId);
+        buildWrapper.setLocalConfig(localConfig);
         project.getBuildWrappersList().add(buildWrapper);
     }
 
