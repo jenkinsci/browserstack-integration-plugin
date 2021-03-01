@@ -9,7 +9,6 @@ public class Constants {
     public static final String BROWSERSTACK_REPORT_URL = "testReportBrowserStack";
     public static final String BROWSERSTACK_CYPRESS_REPORT_URL = "testReportBrowserStackCypress";
     public static final String BROWSERSTACK_REPORT_PIPELINE_FUNCTION = "browserStackReportPublisher";
-    public static final String BROWSERSTACK_CYPRESS_REPORT_PIPELINE_FUNCTION = "browserStackReportPublisher";
     public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
     // Product
