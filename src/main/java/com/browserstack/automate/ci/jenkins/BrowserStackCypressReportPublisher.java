@@ -46,13 +46,9 @@ public class BrowserStackCypressReportPublisher extends Recorder implements Simp
 
         final EnvVars parentEnvs = build.getEnvironment(listener);
         String browserStackBuildName = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME);
-        final String browserStackAppID = parentEnvs.get(BrowserStackEnvVars.BROWSERSTACK_APP_ID);
         browserStackBuildName = Optional.ofNullable(browserStackBuildName).orElse(parentEnvs.get(Constants.JENKINS_BUILD_TAG));
         final String jenkinsFolder = parentEnvs.get("WORKSPACE");
         ProjectType product = ProjectType.AUTOMATE;
-        if (browserStackAppID != null && !browserStackAppID.isEmpty()) {
-            product = ProjectType.APP_AUTOMATE;
-        }
 
         tracker.reportGenerationInitialized(browserStackBuildName, product.name(), pipelineStatus);
         log(logger, "BrowserStack Cypress Project identified as : " + product.name());

@@ -53,10 +53,10 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
             report = new JSONObject(jsonTxt);
         } catch (FileNotFoundException e) {
             logError(logger, "No BrowserStackBuildAction found");
-            tracker.sendError("BrowserStack Cypress Report Not Found", pipelineStatus, "ReportGeneration");
+            tracker.sendError("BrowserStack Cypress Report Not Found", pipelineStatus, "CypressReportGeneration");
         } catch (IOException e) {
             logError(logger, "There was a problem while reading report files");
-            tracker.sendError(e.toString(), pipelineStatus, "ReportGeneration");
+            tracker.sendError(e.toString(), pipelineStatus, "CypressReportGeneration");
         }
         return report;
     }
@@ -69,12 +69,18 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
                 return false;
             }
 
-            String buildNameWithBuildNumber = matrix.getString("build_name");
+            String buildNameWithBuildNumber = matrix.optString("build_name");
             String buildNameWithoutBuildNumber = buildNameWithBuildNumber.substring(0, buildNameWithBuildNumber.lastIndexOf(": "));
+
+            if (buildNameWithoutBuildNumber == null) {
+                logError(logger, "BrowserStack Cypress Report not generated, result json may have been corrupted. Please retry.");
+                tracker.sendError("Report not generated", pipelineStatus, "CypressReportGeneration");
+                return false;
+            }
 
             if (!buildNameWithoutBuildNumber.equalsIgnoreCase(this.buildName)) {
                 logError(logger, "BrowserStack Cypress Report not generated, build name mismatch.");
-                tracker.sendError("Report not generated", pipelineStatus, "ReportGeneration");
+                tracker.sendError("Report not generated", pipelineStatus, "CypressReportGeneration");
                 return false;
             }
 

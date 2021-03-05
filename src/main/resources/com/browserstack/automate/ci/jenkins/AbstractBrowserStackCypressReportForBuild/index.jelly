@@ -166,9 +166,16 @@
                                 <span class='spec-path'>
                                     ${specs.path}
                                 </span>
-                                <span class='spec-stats spec-stats-failed'>
-                                    ${specs.failed}/${specs.total} FAILED
-                                </span>
+                                <j:if test="${(specs.failed > 0)}">
+                                    <span class='spec-stats spec-stats-failed'>
+                                        ${specs.failed}/${specs.total} FAILED
+                                    </span>
+                                </j:if>
+                                <j:if test="${(specs.failed == 0)}">
+                                    <span class='spec-stats spec-stats-passed'>
+                                        ${specs.passed}/${specs.total} PASSED
+                                    </span>
+                                </j:if>
                             </div>
 
                             <div class='spec-sessions'>
