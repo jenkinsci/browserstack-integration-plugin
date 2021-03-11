@@ -4,8 +4,10 @@ import jenkins.model.Jenkins;
 
 public class Constants {
     public static final String BROWSERSTACK_REPORT_DISPLAY_NAME = "BrowserStack Test Report";
+    public static final String BROWSERSTACK_CYPRESS_REPORT_DISPLAY_NAME = "BrowserStack Cypress Test Report";
     public static final String BROWSERSTACK_LOGO = String.format("%s/plugin/browserstack-integration/images/logo.png", Jenkins.RESOURCE_PATH);
     public static final String BROWSERSTACK_REPORT_URL = "testReportBrowserStack";
+    public static final String BROWSERSTACK_CYPRESS_REPORT_URL = "testReportBrowserStackCypress";
     public static final String BROWSERSTACK_REPORT_PIPELINE_FUNCTION = "browserStackReportPublisher";
     public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
@@ -40,5 +42,6 @@ public class Constants {
         public static final String ERROR = "error";
         public static final String FAILED = "failed";
         public static final String UNMARKED = "unmarked";
+        public static final String PASSED = "passed";
     }
 }
