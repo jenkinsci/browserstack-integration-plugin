@@ -18,7 +18,7 @@ public class AppUploaderHelper {
       return FormValidation.error("Please enter absolute path to your app.");
     }
     File file = new File(appPath);
-    if (!file.exists()) {
+    if (!file.exists() || !file.getAbsoluteFile().exists()) {
       return FormValidation.error("File not found : " + appPath);
     }
 
