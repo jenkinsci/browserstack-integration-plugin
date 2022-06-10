@@ -52,7 +52,7 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
             String jsonTxt = IOUtils.toString(is, "UTF-8");
             report = new JSONObject(jsonTxt);
         } catch (FileNotFoundException e) {
-            logError(logger, "No BrowserStackBuildAction found");
+            logError(logger, "Cypress report not found at " + reportJSONPath);
             tracker.sendError("BrowserStack Cypress Report Not Found", pipelineStatus, "CypressReportGeneration");
         } catch (IOException e) {
             logError(logger, "There was a problem while reading report files");
@@ -70,7 +70,9 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
             }
 
             String buildNameWithBuildNumber = matrix.optString("build_name");
-            String buildNameWithoutBuildNumber = buildNameWithBuildNumber.substring(0, buildNameWithBuildNumber.lastIndexOf(": "));
+            int indexOfBuildNumberSeparator = buildNameWithBuildNumber.lastIndexOf(": ") == -1 ? buildNameWithBuildNumber.length()
+                    : buildNameWithBuildNumber.lastIndexOf(": ");
+            String buildNameWithoutBuildNumber = buildNameWithBuildNumber.substring(0, indexOfBuildNumberSeparator);
 
             if (buildNameWithoutBuildNumber == null) {
                 logError(logger, "BrowserStack Cypress Report not generated, result json may have been corrupted. Please retry.");
