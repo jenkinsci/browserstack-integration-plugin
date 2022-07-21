@@ -52,7 +52,6 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
             JSONObject matrix = null;
             try {
                 String fileContent = workspace.act(new BrowserStackCypressReportFileCallable(jenkinsFolder));
-                logError(logger, "FileContent:" + fileContent);
                 matrix = new JSONObject(fileContent);
             } catch (FileNotFoundException e) {
                 logError(logger, "Cypress report not found at " + jenkinsFolder);
