@@ -3,13 +3,17 @@ package com.browserstack.automate.ci.jenkins;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.common.enums.ProjectType;
 import com.browserstack.automate.ci.common.tracking.PluginsTracker;
+import hudson.FilePath;
 import hudson.model.Run;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.annotation.Nonnull;
 import java.io.*;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
@@ -37,35 +41,31 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
         this.result = new JSONObject();
         this.resultAggregation = new HashMap<>();
         this.projectType = projectType;
-        this.logger = logger;
+        BrowserStackCypressReportForBuild.logger = logger;
         this.tracker = tracker;
         this.pipelineStatus = pipelineStatus;
     }
 
-
-    public JSONObject getCypressMatrix(String filepath) {
-        JSONObject report = null;
-        final String reportJSONPath = filepath + "/results/browserstack-cypress-report.json";
-
-        try {
-            InputStream is = new FileInputStream(reportJSONPath);
-            String jsonTxt = IOUtils.toString(is, "UTF-8");
-            report = new JSONObject(jsonTxt);
-        } catch (FileNotFoundException e) {
-            logError(logger, "Cypress report not found at " + reportJSONPath);
-            tracker.sendError("BrowserStack Cypress Report Not Found", pipelineStatus, "CypressReportGeneration");
-        } catch (IOException e) {
-            logError(logger, "There was a problem while reading report files");
-            tracker.sendError(e.toString(), pipelineStatus, "CypressReportGeneration");
-        }
-        return report;
-    }
-
-    public boolean generateBrowserStackCypressReport(String workspace) {
+    public boolean generateBrowserStackCypressReport(@Nonnull FilePath workspace, String jenkinsFolder) {
         if (result.length() == 0) {
-            JSONObject matrix = getCypressMatrix(workspace);
 
-            if(matrix == null) {
+            JSONObject matrix = null;
+            try {
+                String fileContent = workspace.act(new BrowserStackCypressReportFileCallable(jenkinsFolder));
+                logError(logger, "FileContent:" + fileContent);
+                matrix = new JSONObject(fileContent);
+            } catch (FileNotFoundException e) {
+                logError(logger, "Cypress report not found at " + jenkinsFolder);
+                tracker.sendError("BrowserStack Cypress Report Not Found", pipelineStatus, "CypressReportGeneration");
+            } catch (IOException e) {
+                logError(logger, "There was a problem while reading report files");
+                tracker.sendError(e.toString(), pipelineStatus, "CypressReportGeneration");
+            } catch (InterruptedException e) {
+                logError(logger, "Process was interrupted while retrieving the report");
+                tracker.sendError(e.toString(), pipelineStatus, "CypressReportGeneration");
+            }
+
+            if (matrix == null) {
                 return false;
             }
 
@@ -81,7 +81,7 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
             }
 
             if (!buildNameWithoutBuildNumber.equalsIgnoreCase(this.buildName)) {
-                logError(logger, "BrowserStack Cypress Report not generated, build name mismatch.");
+                logError(logger, "BrowserStack Cypress Report not generated, build name mismatch. Expected build name:" + this.buildName + ", got:" + buildNameWithBuildNumber);
                 tracker.sendError("Report not generated", pipelineStatus, "CypressReportGeneration");
                 return false;
             }
@@ -134,7 +134,7 @@ public class BrowserStackCypressReportForBuild extends AbstractBrowserStackCypre
 
         JSONArray specs = result.getJSONArray("specs");
 
-        for(int i = 0; i < specs.length(); i++){
+        for (int i = 0; i < specs.length(); i++) {
             JSONObject spec = specs.getJSONObject(i);
             totalSpecs += spec.getInt("total");
             totalErrors += spec.getInt("failed");
