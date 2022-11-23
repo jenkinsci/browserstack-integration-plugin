@@ -1,0 +1,23 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:section title="CORS Filter">
+        <f:entry title="Is Enabled" field="enabled">
+            <f:checkbox/>
+        </f:entry>
+        <f:entry title="Access-Control-Allow-Origins" field="allowedOrigins">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Access-Control-Allow-Methods" field="allowedMethods">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Access-Control-Allow-Headers" field="allowedHeaders">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Access-Control-Expose-Headers" field="exposedHeaders">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Access-Control-Max-Age" field="maxAge">
+            <f:number/>
+        </f:entry>
+    </f:section>
+</j:jelly>

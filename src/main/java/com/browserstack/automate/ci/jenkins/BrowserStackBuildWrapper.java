@@ -7,6 +7,7 @@ import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
+import com.browserstack.automate.ci.jenkins.testops.TestOpsConfig;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -33,6 +34,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     private static final char CHAR_MASK = '*';
 
     private LocalConfig localConfig;
+    private TestOpsConfig testOpsConfig;
 
     private String credentialsId;
     private String username;
@@ -47,6 +49,9 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     public void setLocalConfig(LocalConfig localConfig) {
         this.localConfig = localConfig;
     }
+
+    @DataBoundSetter
+    public void setTestOpsConfig(TestOpsConfig testOpsConfig) { this.testOpsConfig = testOpsConfig; }
 
     static BuildWrapperItem<BrowserStackBuildWrapper> findBrowserStackBuildWrapper(
             final Job<?, ?> job) {
@@ -129,6 +134,10 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         return this.localConfig;
     }
 
+    public TestOpsConfig getTestOpsConfig() {
+        return this.testOpsConfig;
+    }
+
     public String getCredentialsId() {
         return credentialsId;
     }
@@ -173,7 +182,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         public void buildEnvVars(Map<String, String> env) {
             BrowserStackBuildWrapperOperations buildWrapperOperations =
                     new BrowserStackBuildWrapperOperations(credentials, isTearDownPhase, logger, localConfig,
-                            browserstackLocal);
+                            browserstackLocal, testOpsConfig);
             buildWrapperOperations.buildEnvVars(env);
             super.buildEnvVars(env);
         }
