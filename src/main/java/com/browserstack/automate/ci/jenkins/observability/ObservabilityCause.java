@@ -1,4 +1,4 @@
-package com.browserstack.automate.ci.jenkins.testops;
+package com.browserstack.automate.ci.jenkins.observability;
 
 import hudson.model.Cause;
 import net.sf.json.JSONObject;
@@ -9,14 +9,14 @@ import static com.browserstack.automate.ci.common.BrowserStackEnvVars.BROWSERSTA
 import static com.browserstack.automate.ci.common.BrowserStackEnvVars.BROWSERSTACK_RERUN_TESTS;
 
 /**
- * Indicates that a build was started because of one or more TestOps params.
+ * Indicates that a build was started because of one or more Observability params.
  */
-public class TestOpsCause extends Cause {
+public class ObservabilityCause extends Cause {
     private JSONObject params;
     private String tests;
     private String reRun;
 
-    public TestOpsCause(@Nonnull JSONObject params) {
+    public ObservabilityCause(@Nonnull JSONObject params) {
         this.tests = params.getString(BROWSERSTACK_RERUN_TESTS);
         this.reRun = params.getString(BROWSERSTACK_RERUN);
         this.params = params;
@@ -38,6 +38,6 @@ public class TestOpsCause extends Cause {
     /** {@inheritDoc} */
     @Override
     public String getShortDescription() {
-        return "TestOps Params: " + params.toString();
+        return "Observability Params: " + params.toString();
     }
 }

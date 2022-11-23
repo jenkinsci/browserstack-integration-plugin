@@ -3,7 +3,7 @@ package com.browserstack.automate.ci.common;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
-import com.browserstack.automate.ci.jenkins.testops.TestOpsConfig;
+import com.browserstack.automate.ci.jenkins.observability.ObservabilityConfig;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -34,18 +34,18 @@ public class BrowserStackBuildWrapperOperations {
     private PrintStream logger;
     private LocalConfig localConfig;
     private JenkinsBrowserStackLocal browserstackLocal;
-    private TestOpsConfig testOpsConfig;
+    private ObservabilityConfig observabilityConfig;
 
     public BrowserStackBuildWrapperOperations(BrowserStackCredentials credentials,
                                               boolean isTearDownPhase, PrintStream logger, LocalConfig localConfig,
-                                              JenkinsBrowserStackLocal browserStackLocal, TestOpsConfig testOpsConfig) {
+                                              JenkinsBrowserStackLocal browserStackLocal, ObservabilityConfig observabilityConfig) {
         super();
         this.credentials = credentials;
         this.isTearDownPhase = isTearDownPhase;
         this.logger = logger;
         this.localConfig = localConfig;
         this.browserstackLocal = browserStackLocal;
-        this.testOpsConfig = testOpsConfig;
+        this.observabilityConfig = observabilityConfig;
     }
 
     public static ListBoxModel doFillCredentialsIdItems(Item context) {
@@ -153,7 +153,7 @@ public class BrowserStackBuildWrapperOperations {
         }
 
         String tests =
-                (testOpsConfig != null) ? testOpsConfig.getTests() : "";
+                (observabilityConfig != null) ? observabilityConfig.getTests() : "";
 
         if (StringUtils.isNotBlank(tests)) {
             env.put(BrowserStackEnvVars.BROWSERSTACK_RERUN_TESTS, tests);
@@ -161,7 +161,7 @@ public class BrowserStackBuildWrapperOperations {
         }
 
         String reRun =
-                (testOpsConfig != null) ? testOpsConfig.getReRun() : "";
+                (observabilityConfig != null) ? observabilityConfig.getReRun() : "";
 
         if (StringUtils.isNotBlank(reRun)) {
             env.put(BrowserStackEnvVars.BROWSERSTACK_RERUN, reRun);

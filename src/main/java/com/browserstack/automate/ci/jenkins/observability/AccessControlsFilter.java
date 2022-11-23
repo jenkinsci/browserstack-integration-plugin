@@ -1,4 +1,4 @@
-package com.browserstack.automate.ci.jenkins.testops;
+package com.browserstack.automate.ci.jenkins.observability;
 
 import com.google.inject.Injector;
 import hudson.Extension;

@@ -1,18 +1,18 @@
-package com.browserstack.automate.ci.jenkins.testops;
+package com.browserstack.automate.ci.jenkins.observability;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
 
-public class TestOpsConfig implements Serializable {
+public class ObservabilityConfig implements Serializable {
     private String tests;
     private String reRun;
 
-    public TestOpsConfig() {
+    public ObservabilityConfig() {
     }
 
     @DataBoundConstructor
-    public TestOpsConfig(String tests, String reRun) {
+    public ObservabilityConfig(String tests, String reRun) {
         this.tests = tests;
         this.reRun = reRun;
     }
@@ -38,7 +38,7 @@ public class TestOpsConfig implements Serializable {
         if ((o == null) || (getClass() != o.getClass())) {
             return false;
         }
-        TestOpsConfig that = (TestOpsConfig) o;
+        ObservabilityConfig that = (ObservabilityConfig) o;
         if (this.tests != null ? !this.tests.equals(that.tests) : that.tests != null) return false;
         return this.reRun != null ? this.reRun.equals(that.reRun) : that.reRun == null;
     }

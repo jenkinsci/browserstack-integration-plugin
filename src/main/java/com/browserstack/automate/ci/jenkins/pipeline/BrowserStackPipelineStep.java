@@ -2,7 +2,7 @@ package com.browserstack.automate.ci.jenkins.pipeline;
 
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
-import com.browserstack.automate.ci.jenkins.testops.TestOpsConfig;
+import com.browserstack.automate.ci.jenkins.observability.ObservabilityConfig;
 import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
 import hudson.Launcher;
@@ -27,7 +27,7 @@ public class BrowserStackPipelineStep extends Step {
 
     public String credentialsId;
     public LocalConfig localConfig;
-    public TestOpsConfig testOpsConfig;
+    public ObservabilityConfig observabilityConfig;
 
     @DataBoundConstructor
     public BrowserStackPipelineStep(String credentialsId) {
@@ -40,13 +40,13 @@ public class BrowserStackPipelineStep extends Step {
     }
 
     @DataBoundSetter
-    public void setTestOpsConfig(TestOpsConfig testOpsConfig) {
-        this.testOpsConfig = testOpsConfig;
+    public void setObservabilityConfig(ObservabilityConfig observabilityConfig) {
+        this.observabilityConfig = observabilityConfig;
     }
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new BrowserStackPipelineStepExecution(context, credentialsId, localConfig, testOpsConfig);
+        return new BrowserStackPipelineStepExecution(context, credentialsId, localConfig, observabilityConfig);
     }
 
     @Extension
