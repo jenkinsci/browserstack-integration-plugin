@@ -1,4 +1,4 @@
-package com.browserstack.automate.ci.jenkins.testops;
+package com.browserstack.automate.ci.jenkins.observability;
 
 import hudson.Extension;
 import hudson.model.Action;
@@ -10,10 +10,10 @@ import jenkins.model.TransientActionFactory;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 /**
- * Attaches the {@link BuildWithTestOpsConfigAction} action to all {@link WorkflowJob} instances.
+ * Attaches the {@link BuildWithObservabilityConfigAction} action to all {@link WorkflowJob} instances.
  */
 @Extension(optional = true)
-public class BuildWithTestOpsConfigActionWorkflowFactory extends TransientActionFactory<WorkflowJob> {
+public class BuildWithObservabilityConfigActionWorkflowFactory extends TransientActionFactory<WorkflowJob> {
     @Override
     public Class<WorkflowJob> type() {
         return WorkflowJob.class;
@@ -22,6 +22,6 @@ public class BuildWithTestOpsConfigActionWorkflowFactory extends TransientAction
     @Nonnull
     @Override
     public Collection<? extends Action> createFor(@Nonnull WorkflowJob job) {
-        return Collections.singleton(new BuildWithTestOpsConfigAction(job));
+        return Collections.singleton(new BuildWithObservabilityConfigAction(job));
     }
 }

@@ -1,4 +1,4 @@
-package com.browserstack.automate.ci.jenkins.testops;
+package com.browserstack.automate.ci.jenkins.observability;
 
 import hudson.EnvVars;
 import hudson.Extension;
@@ -13,13 +13,13 @@ import static com.browserstack.automate.ci.common.BrowserStackEnvVars.BROWSERSTA
 import static com.browserstack.automate.ci.common.BrowserStackEnvVars.BROWSERSTACK_RERUN_TESTS;
 
 @Extension
-public class TestOpsEnvironmentContributor extends EnvironmentContributor {
+public class ObservabilityEnvironmentContributor extends EnvironmentContributor {
 
     @Override
     public void buildEnvironmentFor(@Nonnull Run r, @Nonnull EnvVars envs, @Nonnull TaskListener listener)
             throws IOException, InterruptedException {
 
-        TestOpsCause cause = (TestOpsCause) r.getCause(TestOpsCause.class);
+        ObservabilityCause cause = (ObservabilityCause) r.getCause(ObservabilityCause.class);
         if (cause != null) {
             envs.put(BROWSERSTACK_RERUN_TESTS, cause.getTests());
             envs.put(BROWSERSTACK_RERUN, cause.getReRun());

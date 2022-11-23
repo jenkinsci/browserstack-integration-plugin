@@ -1,4 +1,4 @@
-package com.browserstack.automate.ci.jenkins.testops;
+package com.browserstack.automate.ci.jenkins.observability;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,13 +37,13 @@ import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static javax.servlet.http.HttpServletResponse.SC_CREATED;
 
 @ExportedBean
-public class BuildWithTestOpsConfigAction<
+public class BuildWithObservabilityConfigAction<
         JobT extends Job<JobT, RunT> & ParameterizedJobMixIn.ParameterizedJob,
         RunT extends Run<JobT, RunT> & Queue.Executable>
         implements Action {
 
     /** The form parameter that holds the Eiffel links. */
-    public static final String FORM_PARAM_TESTOPS = "testopsParams";
+    public static final String FORM_PARAM_OBSERVABILITY = "testopsParams";
 
     /** The form parameter that holds the build parameters. */
     public static final String FORM_PARAM_PARAMETERS = "parameter";
@@ -57,7 +57,7 @@ public class BuildWithTestOpsConfigAction<
     private final JobT job;
     private String params;
 
-    public BuildWithTestOpsConfigAction(JobT job) {
+    public BuildWithObservabilityConfigAction(JobT job) {
         this.job = job;
     }
 
@@ -99,9 +99,9 @@ public class BuildWithTestOpsConfigAction<
             }
 
             List<Cause> causes = new ArrayList<>(Arrays.asList(getCallerCause(req)));
-            TestOpsCause testOpsCause = getTestOpsCause(formData);
-            if (testOpsCause != null) {
-                causes.add(testOpsCause);
+            ObservabilityCause observabilityCause = getObservabilityCause(formData);
+            if (observabilityCause != null) {
+                causes.add(observabilityCause);
             }
             actions.add(new CauseAction(causes));
         }
@@ -118,22 +118,22 @@ public class BuildWithTestOpsConfigAction<
     }
 
     /**
-     * Parses the posted form and transforms the supplied list of TestOps params
-     * into an {@link TestOpsCause}. The JSON object in the form value must have a
-     * {@link #FORM_PARAM_TESTOPS} key that contains the array of TestOps params.
+     * Parses the posted form and transforms the supplied list of Observability params
+     * into an {@link ObservabilityCause}. The JSON object in the form value must have a
+     * {@link #FORM_PARAM_OBSERVABILITY} key that contains the array of Observability params.
      * The array may be empty in which case null is returned.
      */
     @CheckForNull
-    private TestOpsCause getTestOpsCause(final JSONObject formData) {
+    private ObservabilityCause getObservabilityCause(final JSONObject formData) {
         // This mixing of different parsed JSON representation isn't great, but the StaplerRequest
         // provides us a JSONObject and we want to use Jackson for the events themselves.
         try {
-            JSONObject testOpsParams = formData.getJSONObject(FORM_PARAM_TESTOPS);
-            return testOpsParams.isEmpty() ? null : new TestOpsCause(testOpsParams);
+            JSONObject observabilityParams = formData.getJSONObject(FORM_PARAM_OBSERVABILITY);
+            return observabilityParams.isEmpty() ? null : new ObservabilityCause(observabilityParams);
         }
         catch (JSONException e) {
             throw new IllegalArgumentException(String.format(
-                    "URL parameter '%s' did not contain a JSON array", FORM_PARAM_TESTOPS), e);
+                    "URL parameter '%s' did not contain a JSON array", FORM_PARAM_OBSERVABILITY), e);
         }
     }
 

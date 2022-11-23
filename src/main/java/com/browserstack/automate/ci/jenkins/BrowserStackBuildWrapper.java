@@ -7,7 +7,7 @@ import com.browserstack.automate.ci.common.tracking.PluginsTracker;
 import com.browserstack.automate.ci.jenkins.local.BrowserStackLocalUtils;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
-import com.browserstack.automate.ci.jenkins.testops.TestOpsConfig;
+import com.browserstack.automate.ci.jenkins.observability.ObservabilityConfig;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -34,7 +34,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     private static final char CHAR_MASK = '*';
 
     private LocalConfig localConfig;
-    private TestOpsConfig testOpsConfig;
+    private ObservabilityConfig observabilityConfig;
 
     private String credentialsId;
     private String username;
@@ -51,7 +51,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
     }
 
     @DataBoundSetter
-    public void setTestOpsConfig(TestOpsConfig testOpsConfig) { this.testOpsConfig = testOpsConfig; }
+    public void setObservabilityConfig(ObservabilityConfig observabilityConfig) { this.observabilityConfig = observabilityConfig; }
 
     static BuildWrapperItem<BrowserStackBuildWrapper> findBrowserStackBuildWrapper(
             final Job<?, ?> job) {
@@ -134,8 +134,8 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         return this.localConfig;
     }
 
-    public TestOpsConfig getTestOpsConfig() {
-        return this.testOpsConfig;
+    public ObservabilityConfig getObservabilityConfig() {
+        return this.observabilityConfig;
     }
 
     public String getCredentialsId() {
@@ -182,7 +182,7 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
         public void buildEnvVars(Map<String, String> env) {
             BrowserStackBuildWrapperOperations buildWrapperOperations =
                     new BrowserStackBuildWrapperOperations(credentials, isTearDownPhase, logger, localConfig,
-                            browserstackLocal, testOpsConfig);
+                            browserstackLocal, observabilityConfig);
             buildWrapperOperations.buildEnvVars(env);
             super.buildEnvVars(env);
         }
