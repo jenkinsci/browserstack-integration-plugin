@@ -3,6 +3,7 @@ package com.browserstack.automate.ci.common;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
+import com.browserstack.automate.ci.jenkins.testops.TestOpsConfig;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -33,16 +34,18 @@ public class BrowserStackBuildWrapperOperations {
     private PrintStream logger;
     private LocalConfig localConfig;
     private JenkinsBrowserStackLocal browserstackLocal;
+    private TestOpsConfig testOpsConfig;
 
     public BrowserStackBuildWrapperOperations(BrowserStackCredentials credentials,
                                               boolean isTearDownPhase, PrintStream logger, LocalConfig localConfig,
-                                              JenkinsBrowserStackLocal browserStackLocal) {
+                                              JenkinsBrowserStackLocal browserStackLocal, TestOpsConfig testOpsConfig) {
         super();
         this.credentials = credentials;
         this.isTearDownPhase = isTearDownPhase;
         this.logger = logger;
         this.localConfig = localConfig;
         this.browserstackLocal = browserStackLocal;
+        this.testOpsConfig = testOpsConfig;
     }
 
     public static ListBoxModel doFillCredentialsIdItems(Item context) {
@@ -147,6 +150,22 @@ public class BrowserStackBuildWrapperOperations {
         if (StringUtils.isNotBlank(localIdentifier)) {
             env.put(BrowserStackEnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
             logEnvVar(BrowserStackEnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
+        }
+
+        String tests =
+                (testOpsConfig != null) ? testOpsConfig.getTests() : "";
+
+        if (StringUtils.isNotBlank(tests)) {
+            env.put(BrowserStackEnvVars.BROWSERSTACK_RERUN_TESTS, tests);
+            logEnvVar(BrowserStackEnvVars.BROWSERSTACK_RERUN_TESTS, tests);
+        }
+
+        String reRun =
+                (testOpsConfig != null) ? testOpsConfig.getReRun() : "";
+
+        if (StringUtils.isNotBlank(reRun)) {
+            env.put(BrowserStackEnvVars.BROWSERSTACK_RERUN, reRun);
+            logEnvVar(BrowserStackEnvVars.BROWSERSTACK_RERUN, reRun);
         }
     }
 
