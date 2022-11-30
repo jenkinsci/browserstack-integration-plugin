@@ -63,11 +63,10 @@ public class AccessControlsFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        String origin = req.getHeader("Origin");
         HttpServletResponse resp = (HttpServletResponse) response;
 
         resp.addHeader("Access-Control-Allow-Credentials", "true");
-        resp.addHeader("Access-Control-Allow-Origin", "*");
+        resp.addHeader("Access-Control-Allow-Origin", "https://observability.browserstack.com");
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT");
         resp.addHeader("Access-Control-Allow-Headers", "*");
         resp.addHeader("Access-Control-Expose-Headers", "*");
