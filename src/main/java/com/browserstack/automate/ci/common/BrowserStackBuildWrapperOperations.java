@@ -140,7 +140,7 @@ public class BrowserStackBuildWrapperOperations {
             logEnvVar(BrowserStackEnvVars.BROWSERSTACK_BUILD_NAME, buildTag);
 
             // Maintaining this to verify if above env vars were set by plugin
-            env.put("BROWSERSTACK_BUILD_NAME_PLUGIN", "true");
+            env.put("BROWSERSTACK_PLUGIN_INVOKED", "true");
         }
 
         String isLocalEnabled = localConfig != null ? "true" : "false";
