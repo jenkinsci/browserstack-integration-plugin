@@ -68,7 +68,7 @@ public class AccessControlsFilter implements Filter {
         resp.addHeader("Access-Control-Allow-Credentials", "true");
         resp.addHeader("Access-Control-Allow-Origin", "https://observability.browserstack.com");
         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT");
-        resp.addHeader("Access-Control-Allow-Headers", "*");
+        resp.addHeader("Access-Control-Allow-Headers", "Content-Type, Origin, X-Requested-With, Accept, Authorization");
         resp.addHeader("Access-Control-Expose-Headers", "*");
         resp.addHeader("Access-Control-Max-Age", "999");
 
