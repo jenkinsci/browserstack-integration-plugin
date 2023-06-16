@@ -150,7 +150,7 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.7</version>
+      <version>0.11</version>
     </dependency>
 
     <dependency>
