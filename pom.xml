@@ -150,7 +150,7 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.11</version>
+      <version>0.7</version>
     </dependency>
 
     <dependency>
@@ -285,6 +285,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
       <version>5.3.18</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20230227</version>
     </dependency>
   </dependencies>
 
