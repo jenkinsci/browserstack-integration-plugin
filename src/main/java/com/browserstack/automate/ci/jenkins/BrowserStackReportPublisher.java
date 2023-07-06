@@ -11,6 +11,7 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -22,10 +23,12 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 
 public class BrowserStackReportPublisher extends Recorder implements SimpleBuildStep {
+    private static final Logger LOGGER = Logger.getLogger(BrowserStackReportPublisher.class.getName());
 
     @DataBoundConstructor
     public BrowserStackReportPublisher() {
@@ -64,6 +67,12 @@ public class BrowserStackReportPublisher extends Recorder implements SimpleBuild
 
         String reportStatus = reportResult ? Constants.ReportStatus.SUCCESS : Constants.ReportStatus.FAILED;
         log(logger, "BrowserStack Report Status: " + reportStatus);
+
+        LOGGER.info(String.format("Archiving artifacts for pattern %s", Constants.BROWSERSTACK_REPORT_PATH_PATTERN));
+        ArtifactArchiver artifactArchiver = new ArtifactArchiver(Constants.BROWSERSTACK_REPORT_PATH_PATTERN);
+        artifactArchiver.setAllowEmptyArchive(true);
+        artifactArchiver.perform(build, workspace, parentEnvs, launcher, listener);
+        LOGGER.info(String.format("Succesfully archived artifacts for pattern %s", artifactArchiver.getArtifacts()));
 
         tracker.reportGenerationCompleted(reportStatus, product.name(), pipelineStatus,
                 browserStackBuildName, bstackReportAction.getBrowserStackBuildID());

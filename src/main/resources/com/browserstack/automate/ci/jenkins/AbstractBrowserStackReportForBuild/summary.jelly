@@ -78,7 +78,7 @@
 
     </style>
     <t:summary icon="/plugin/browserstack-integration/images/logo.png">
-        <j:if test="${(it.result.size() == 0)}">
+        <j:if test="${(it.result.result.size() == 0)}">
             <div class="new-container">
                 <div class="report-row">
                     <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack Report Available</strong></p>
@@ -93,16 +93,16 @@
                 </div>
             </div>
         </j:if>
-        <j:if test="${(it.result.size() > 0)}">
+        <j:if test="${(it.result.result.size() > 0)}">
             <div class="new-container">
                 <div class="report-row">
                     <span class="meta-label">BUILD</span>
-                    <h1 class="build-meta">${it.buildName}<span class="duration">${it.resultAggregation.buildDuration}</span></h1>
+                    <h1 class="build-meta">${it.buildName}<span class="duration">${it.result.resultAggregation.buildDuration}</span></h1>
                 </div>
 
                 <div class="report-row">
                     <span class="meta-label">TOTAL SESSIONS</span>
-                    <h1 class="build-meta">${it.resultAggregation.totalSessions}<span class="build-errors">${it.resultAggregation.totalErrors} ERRORS</span></h1>
+                    <h1 class="build-meta">${it.result.resultAggregation.totalSessions}<span class="build-errors">${it.result.resultAggregation.totalErrors} ERRORS</span></h1>
                 </div>
                 <div class="report-row cta">
                     <a href="${it.urlName}">View full BrowserStack Report</a>

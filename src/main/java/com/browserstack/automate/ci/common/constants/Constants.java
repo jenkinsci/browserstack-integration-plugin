@@ -9,6 +9,7 @@ public class Constants {
     public static final String BROWSERSTACK_REPORT_URL = "testReportBrowserStack";
     public static final String BROWSERSTACK_CYPRESS_REPORT_URL = "testReportBrowserStackCypress";
     public static final String BROWSERSTACK_REPORT_PIPELINE_FUNCTION = "browserStackReportPublisher";
+    public static final String BROWSERSTACK_REPORT_PATH_PATTERN = "**/browserstack-artifacts/*";
     public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
     // Product
@@ -20,6 +21,9 @@ public class Constants {
     // Session related info
     public static final class SessionInfo {
         public static final String NAME = "name";
+        public static final String BROWSERSTACK_BUILD_NAME = "buildName";
+        public static final String BROWSERSTACK_BUILD_URL = "buildUrl";
+        public static final String BROWSERSTACK_BUILD_DURATION = "buildDuration";
         public static final String BROWSER = "browser";
         public static final String OS = "os";
         public static final String STATUS = "status";
