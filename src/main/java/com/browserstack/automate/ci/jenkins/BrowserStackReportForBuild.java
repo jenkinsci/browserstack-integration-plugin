@@ -10,30 +10,35 @@ import com.browserstack.automate.model.Build;
 import com.browserstack.automate.model.Session;
 import com.browserstack.client.BrowserStackClient;
 import com.browserstack.client.exception.BrowserStackException;
+
+import hudson.FilePath;
 import hudson.model.Run;
+
+import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBuild {
     private final String buildName;
     private final transient List<Session> browserStackSessions;
-    private final transient List<JSONObject> result;
-    private final Map<String, String> resultAggregation;
+    private transient List<JSONObject> result;
+    private Map<String, String> resultAggregation;
     private final ProjectType projectType;
     private final transient PrintStream logger;
     private final String customProxy;
@@ -44,6 +49,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
     private final String failedConst = Constants.SessionStatus.FAILED;
     private transient Build browserStackBuild;
     private String browserStackBuildBrowserUrl;
+    private static final Logger LOGGER = Logger.getLogger(BrowserStackReportForBuild.class.getName());
 
     public BrowserStackReportForBuild(final Run<?, ?> build,
                                       final ProjectType projectType,
@@ -109,6 +115,7 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
             if (result.size() > 0) {
                 result.sort(new SessionsSortingComparator());
                 generateAggregationInfo();
+                writeBuildResultToFile(getBuild());
                 return true;
             }
             return false;
@@ -154,6 +161,10 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
         } else {
             sessionJSON.put(Constants.SessionInfo.NAME, session.getName());
         }
+
+        sessionJSON.put(Constants.SessionInfo.BROWSERSTACK_BUILD_NAME, buildName);
+        sessionJSON.put(Constants.SessionInfo.BROWSERSTACK_BUILD_URL, browserStackBuildBrowserUrl);
+        sessionJSON.put(Constants.SessionInfo.BROWSERSTACK_BUILD_DURATION, String.valueOf(browserStackBuild.getDuration()));
 
         if (session.getDevice() == null || session.getDevice().isEmpty()) {
             sessionJSON.put(Constants.SessionInfo.BROWSER, session.getBrowser());
@@ -206,10 +217,121 @@ public class BrowserStackReportForBuild extends AbstractBrowserStackReportForBui
 
         resultAggregation.put("totalSessions", String.valueOf(totalSessions));
         resultAggregation.put("totalErrors", String.valueOf(totalErrors));
-        resultAggregation.put("buildDuration", Tools.durationToHumanReadable(browserStackBuild.getDuration()));
+        if (browserStackBuild == null && result.get(0).get(Constants.SessionInfo.BROWSERSTACK_BUILD_DURATION) != null) {
+            resultAggregation.put("buildDuration", Tools.durationToHumanReadable(Long.parseLong(String.valueOf(result.get(0).get(Constants.SessionInfo.BROWSERSTACK_BUILD_DURATION)))));
+        } else {
+            resultAggregation.put("buildDuration", Tools.durationToHumanReadable(browserStackBuild.getDuration()));
+        }
     }
 
-    public List<JSONObject> getResult() {
+    private String fetchBuildInfo(List<JSONObject> resultList) {
+        String buildName = "";
+        if (resultList.size() > 0) {
+            JSONObject resultObject = resultList.get(0);
+            browserStackBuildBrowserUrl = String.valueOf(resultObject.get(Constants.SessionInfo.BROWSERSTACK_BUILD_URL));
+            buildName = String.valueOf(resultObject.get(Constants.SessionInfo.BROWSERSTACK_BUILD_NAME));
+        }
+        return buildName;
+    }
+
+    private void writeBuildResultToFile(Run<?, ?> build) {
+        LOGGER.info("Writing Build results to File");
+        try {
+            FilePath bstackDir = Tools.getBrowserStackReportDir(build, "browserstack-reports");
+            bstackDir.mkdirs();
+            FilePath dstFile = bstackDir.child("buildResults.json");
+            dstFile.write(getBrowserStackResult().toString(), null);
+        } catch (Exception e) {
+            LOGGER.warning(String.format("Write Build result to File Failed - %s", Tools.getStackTraceAsString(e)));
+        }
+    }
+
+    private List<JSONObject> parseStoredBuildResult(Run<?, ?> build) {
+        List<JSONObject> bstackResultList = new ArrayList<>(); 
+        try {
+            FilePath bstackDir = Tools.getBrowserStackReportDir(build, "browserstack-reports");
+            FilePath[] paths = null;
+
+            try {
+                paths = bstackDir.list("buildResults*.json");
+            } catch (Exception e) {
+                // do nothing
+            }
+
+            if (paths != null) {
+                for (FilePath path : paths) {
+                    File file = new File(path.getRemote());
+                    
+                    if (!file.isFile()) {
+                        continue; // move to next file
+                    } else {
+                    }
+
+                    try {
+                        InputStream inputStream = new FileInputStream(file);
+                        String jsonArrayTxt = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                        try {  
+                            JSONArray parsedResult = new JSONArray(jsonArrayTxt);
+                            for (int i = 0; i < parsedResult.length(); i++) {
+                                JSONObject jsonobject = parsedResult.getJSONObject(i);
+                                bstackResultList.add(jsonobject);
+                            }
+                        } catch (Exception e) {
+                            LOGGER.warning(String.format("Reading BrowserStack Results from file failed - %s", Tools.getStackTraceAsString(e)));
+                        }
+                        inputStream.close();
+                        return bstackResultList;
+                    } catch (Exception e) {
+                        LOGGER.warning(String.format("Converting BrowserStack Results to Text failed - %s", Tools.getStackTraceAsString(e)));
+                    }
+                }
+            }
+            return bstackResultList;
+        } catch (Exception e) {
+            LOGGER.warning(String.format("Parse stored build result %s", Tools.getStackTraceAsString(e)));
+            return bstackResultList;
+        }
+    }
+
+    @Override
+    public int getFailCount() {
+        return 0;
+    }
+
+    @Override
+    public int getTotalCount() {
+        return 0;
+    }
+
+    @Override
+    public BrowserStackResult getResult() {
+        BrowserStackResult bstackResult = new BrowserStackResult(buildName, browserStackBuildBrowserUrl, result, resultAggregation);
+        bstackResult.setRun(getBuild());
+        if (result == null) {
+            List<JSONObject> resultList = parseStoredBuildResult(super.run);
+            try {
+                if (resultList != null && resultList.size() > 0) {
+                    LOGGER.fine(String.format("Parse successful %s", resultList));
+                    result = resultList;
+                    resultAggregation = new HashMap<>();
+                    generateAggregationInfo();
+                    String browserstackbuildName = fetchBuildInfo(resultList);
+                    bstackResult = new BrowserStackResult(browserstackbuildName, browserStackBuildBrowserUrl, resultList, resultAggregation);
+                    bstackResult.setRun(super.run);
+                }
+            } catch (Exception e) {
+                LOGGER.warning(String.format("Fetching results failed - %s", Tools.getStackTraceAsString(e)));
+            }
+        }
+        try {
+            super.run.save();
+        } catch (IOException e) {
+            // do nothing
+        }
+        return bstackResult;
+    }
+
+    public List<JSONObject> getBrowserStackResult() {
         return result;
     }
 

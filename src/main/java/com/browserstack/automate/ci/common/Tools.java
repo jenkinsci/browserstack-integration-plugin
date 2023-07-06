@@ -2,6 +2,12 @@ package com.browserstack.automate.ci.common;
 
 import org.apache.commons.lang.RandomStringUtils;
 
+import hudson.FilePath;
+import hudson.model.Run;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -59,5 +65,20 @@ public class Tools {
 
     public static String getUniqueString(boolean letters, boolean numbers) {
         return RandomStringUtils.random(48, letters, numbers);
+    }
+
+    /** Gets the directory to store report files */
+    public static FilePath getBrowserStackReportDir(Run<?, ?> build, String dirName) {
+        return new FilePath(new File(build.getRootDir(), dirName));
+    }
+
+    public static String getStackTraceAsString(Throwable throwable) {
+        try {
+            StringWriter stringWriter = new StringWriter();
+            throwable.printStackTrace(new PrintWriter(stringWriter));
+            return stringWriter.toString();
+        } catch(Throwable e) {
+            return throwable != null ? throwable.toString() : "";
+        }
     }
 }

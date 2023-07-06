@@ -87,7 +87,7 @@
 	<l:layout>
         <st:include it="${it.build}" page="sidepanel.jelly"/>
         <l:main-panel>
-            <j:if test="${(it.result.size() == 0)}">
+            <j:if test="${(it.result.result.size() == 0)}">
                 <div class="new-container">
                     <div class="report-row">
                         <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack Report Available</strong></p>
@@ -103,7 +103,7 @@
                 </div>
             </j:if>
 
-            <j:if test="${(it.result.size() > 0)}">
+            <j:if test="${(it.result.result.size() > 0)}">
                 <div style="border-style: solid;border-width: thin;">
                     <div align="center">
                         <h3>
@@ -122,7 +122,7 @@
                             <th class="bstack-header">Duration</th>
                             <th class="bstack-header">Created At</th>
                         </tr>
-                        <j:forEach items="${it.result}" var="i">
+                        <j:forEach items="${it.result.result}" var="i">
                             <tr class="bstack-row">
                                 <td class="bstack-data session-name"><a href="${i.url}" target="_blank">${i.name}</a></td>
                                 <td class="bstack-data titlecase-data">

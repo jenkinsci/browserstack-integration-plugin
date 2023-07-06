@@ -1,11 +1,11 @@
 package com.browserstack.automate.ci.jenkins;
 
 import com.browserstack.automate.ci.common.constants.Constants;
-import hudson.model.Action;
 import hudson.model.Run;
-
-public abstract class AbstractBrowserStackReportForBuild implements Action {
+import hudson.tasks.test.AbstractTestResultAction;
+public abstract class AbstractBrowserStackReportForBuild extends AbstractTestResultAction {
     private Run<?, ?> build;
+
 
     @Override
     public String getIconFileName() {
