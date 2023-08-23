@@ -144,8 +144,11 @@ public class BrowserStackBuildWrapperOperations {
         }
 
         String isLocalEnabled = localConfig != null ? "true" : "false";
-        env.put(BrowserStackEnvVars.BROWSERSTACK_LOCAL, "" + isLocalEnabled);
-        logEnvVar(BrowserStackEnvVars.BROWSERSTACK_LOCAL, isLocalEnabled);
+
+        if (isLocalEnabled.equals("true")) {
+            env.put(BrowserStackEnvVars.BROWSERSTACK_LOCAL, "" + isLocalEnabled);
+            logEnvVar(BrowserStackEnvVars.BROWSERSTACK_LOCAL, isLocalEnabled);
+        }
 
         String localIdentifier =
                 (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
