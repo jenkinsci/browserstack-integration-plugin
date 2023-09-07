@@ -116,8 +116,8 @@ public class BrowserStackBuildWrapperOperations {
             if (credentials.hasUsername()) {
                 String username = credentials.getUsername();
 
-                env.put(BrowserStackEnvVars.BROWSERSTACK_USER, username + "-jenkins");
-                env.put(BrowserStackEnvVars.BROWSERSTACK_USERNAME, username + "-jenkins");
+                env.put(BrowserStackEnvVars.BROWSERSTACK_USER, username);
+                env.put(BrowserStackEnvVars.BROWSERSTACK_USERNAME, username);
                 logEnvVar(BrowserStackEnvVars.BROWSERSTACK_USERNAME, username);
             }
 
