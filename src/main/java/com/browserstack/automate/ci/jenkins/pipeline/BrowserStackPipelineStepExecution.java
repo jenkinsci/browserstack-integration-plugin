@@ -99,6 +99,14 @@ public class BrowserStackPipelineStepExecution extends StepExecution {
         EnvVars overrides = run.getEnvironment(taskListener);
         HashMap<String, String> overridesMap = new HashMap<String, String>();
         overridesMap.put(Constants.JENKINS_BUILD_TAG, overrides.get(Constants.JENKINS_BUILD_TAG));
+        if(parentContextEnvVars.containsKey(Constants.AUTOMATE_API_ENV_KEY)){
+            log(logger, "Setting Automate API URL to "+parentContextEnvVars.get(Constants.AUTOMATE_API_ENV_KEY));
+            System.setProperty(Constants.AUTOMATE_API_ENV_KEY, parentContextEnvVars.get(Constants.AUTOMATE_API_ENV_KEY));
+        }
+        if(parentContextEnvVars.containsKey(Constants.APP_AUTOMATE_API_ENV_KEY)){
+            log(logger, "Setting App Automate API URL to "+parentContextEnvVars.get(Constants.APP_AUTOMATE_API_ENV_KEY));
+            System.setProperty(Constants.APP_AUTOMATE_API_ENV_KEY, parentContextEnvVars.get(Constants.APP_AUTOMATE_API_ENV_KEY));
+        }
         buildWrapperOperations.buildEnvVars(overridesMap);
 
         body = getContext()
