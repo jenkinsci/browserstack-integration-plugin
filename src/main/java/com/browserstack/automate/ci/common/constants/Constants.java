@@ -17,6 +17,8 @@ public class Constants {
     public static final String APP_AUTOMATE = "app-automate";
     public static final String AUTOMATE_API_ENV_KEY = "browserstack.automate.api";
     public static final String APP_AUTOMATE_API_ENV_KEY = "browserstack.app-automate.api";
+    public static final String AUTOMATE_API_JENKINS_KEY = "BROWSERSTACK_AUTOMATE_API_URL";
+    public static final String APP_AUTOMATE_API_JENKINS_KEY = "BROWSERSTACK_APPAUTOMATE_API_URL";
 
     public static final String JENKINS_BUILD_TAG = "BUILD_TAG";
 
