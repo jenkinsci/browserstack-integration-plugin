@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.2.17-SNAPSHOT</version>
+  <version>1.2.17</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -34,7 +34,7 @@
     <connection>scm:git:ssh://github.com/jenkinsci/browserstack-integration-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/browserstack-integration-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/browserstack-integration-plugin</url>
-    <tag>HEAD</tag>
+    <tag>browserstack-integration-1.2.17</tag>
   </scm>
 
   <!-- Adding a distribution management section here to override the now 
@@ -150,9 +150,9 @@
     <dependency>
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
-      <version>0.12</version>
-      <scope>system</scope>
-      <systemPath>/Users/hariharan/hari-automate-client/automate-client-java/target/automate-client-java-0.12.jar</systemPath>
+      <version>0.7</version>
+      <!-- <scope>system</scope>
+      <systemPath>/Users/hariharan/hari-automate-client/automate-client-java/target/automate-client-java-0.12.jar</systemPath> -->
     </dependency>
 
     <dependency>
