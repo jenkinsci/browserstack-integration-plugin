@@ -151,8 +151,6 @@
       <groupId>com.browserstack</groupId>
       <artifactId>automate-client-java</artifactId>
       <version>0.7</version>
-      <!-- <scope>system</scope>
-      <systemPath>/Users/hariharan/hari-automate-client/automate-client-java/target/automate-client-java-0.12.jar</systemPath> -->
     </dependency>
 
     <dependency>

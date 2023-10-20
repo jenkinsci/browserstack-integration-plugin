@@ -130,12 +130,13 @@ public class BrowserStackBuildWrapperOperations {
             }
         }
 
-        if ( env.get(BrowserStackEnvVars.GRR_JENKINS_KEY) != null && !env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).isEmpty() && Constants.GRR_AUTO_REGION_VS_APIURL.containsKey(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()) ) {
-            logEnvVar(BrowserStackEnvVars.GRR_JENKINS_KEY, env.get(BrowserStackEnvVars.GRR_JENKINS_KEY));
-            System.setProperty(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY, Constants.GRR_AUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
-            System.setProperty(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY, Constants.GRR_APPAUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
-            logEnvVar(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_AUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
-            logEnvVar(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_APPAUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
+        String grr_region = env.get(BrowserStackEnvVars.GRR_JENKINS_KEY);
+        if ( grr_region != null && Constants.GRR_AUTO_REGION_VS_APIURL.containsKey(grr_region.toLowerCase()) ) {
+            logEnvVar(BrowserStackEnvVars.GRR_JENKINS_KEY, grr_region);
+            System.setProperty(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY, Constants.GRR_AUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
+            System.setProperty(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY, Constants.GRR_APPAUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
+            logEnvVar(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_AUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
+            logEnvVar(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_APPAUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
         }
 
         String buildTag = env.get(ENV_JENKINS_BUILD_TAG);
