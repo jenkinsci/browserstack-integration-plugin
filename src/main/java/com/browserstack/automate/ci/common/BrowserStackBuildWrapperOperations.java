@@ -1,5 +1,6 @@
 package com.browserstack.automate.ci.common;
 
+import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.browserstack.automate.ci.jenkins.local.JenkinsBrowserStackLocal;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
@@ -127,6 +128,14 @@ public class BrowserStackBuildWrapperOperations {
                 env.put(BrowserStackEnvVars.BROWSERSTACK_ACCESS_KEY, accesskey);
                 logEnvVar(BrowserStackEnvVars.BROWSERSTACK_ACCESS_KEY, Tools.maskString(accesskey));
             }
+        }
+
+        if ( env.get(BrowserStackEnvVars.GRR_JENKINS_KEY) != null && !env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).isEmpty() && Constants.GRR_AUTO_REGION_VS_APIURL.containsKey(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()) ) {
+            logEnvVar(BrowserStackEnvVars.GRR_JENKINS_KEY, env.get(BrowserStackEnvVars.GRR_JENKINS_KEY));
+            System.setProperty(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY, Constants.GRR_AUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
+            System.setProperty(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY, Constants.GRR_APPAUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
+            logEnvVar(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_AUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
+            logEnvVar(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_APPAUTO_REGION_VS_APIURL.get(env.get(BrowserStackEnvVars.GRR_JENKINS_KEY).toLowerCase()));
         }
 
         String buildTag = env.get(ENV_JENKINS_BUILD_TAG);

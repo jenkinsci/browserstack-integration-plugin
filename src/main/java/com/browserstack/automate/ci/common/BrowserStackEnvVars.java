@@ -12,4 +12,7 @@ public interface BrowserStackEnvVars {
     String BROWSERSTACK_APP_ID = "BROWSERSTACK_APP_ID";
     String BROWSERSTACK_RERUN = "BROWSERSTACK_RERUN";
     String BROWSERSTACK_RERUN_TESTS = "BROWSERSTACK_RERUN_TESTS";
+    String GRR_JENKINS_KEY = "BROWSERSTACK_GRR_REGION";
+    String AUTOMATE_API_ENV_KEY = "browserstack.automate.api";
+    String APP_AUTOMATE_API_ENV_KEY = "browserstack.app-automate.api";
 }

@@ -1,5 +1,8 @@
 package com.browserstack.automate.ci.common.constants;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import jenkins.model.Jenkins;
 
 public class Constants {
@@ -15,10 +18,16 @@ public class Constants {
     // Product
     public static final String AUTOMATE = "automate";
     public static final String APP_AUTOMATE = "app-automate";
-    public static final String AUTOMATE_API_ENV_KEY = "browserstack.automate.api";
-    public static final String APP_AUTOMATE_API_ENV_KEY = "browserstack.app-automate.api";
-    public static final String AUTOMATE_API_JENKINS_KEY = "BROWSERSTACK_AUTOMATE_API_URL";
-    public static final String APP_AUTOMATE_API_JENKINS_KEY = "BROWSERSTACK_APPAUTOMATE_API_URL";
+
+    //GRR REGION vs API URL mapping for Automate
+    public static Map<String, String> GRR_AUTO_REGION_VS_APIURL = new HashMap<String, String>();
+    public static Map<String, String> GRR_APPAUTO_REGION_VS_APIURL = new HashMap<String, String>();
+    static {
+        GRR_AUTO_REGION_VS_APIURL.put("eu","https://api-eu-only.browserstack.com/automate");
+        GRR_AUTO_REGION_VS_APIURL.put("us","https://api-us-only.browserstack.com/automate");
+        GRR_APPAUTO_REGION_VS_APIURL.put("eu","https://api-eu-only.browserstack.com/app-automate");
+        GRR_APPAUTO_REGION_VS_APIURL.put("us","https://api-us-only.browserstack.com/app-automate");
+    }
 
     public static final String JENKINS_BUILD_TAG = "BUILD_TAG";
 
