@@ -131,12 +131,15 @@ public class BrowserStackBuildWrapperOperations {
         }
 
         String grr_region = env.get(BrowserStackEnvVars.GRR_JENKINS_KEY);
-        if ( grr_region != null && Constants.GRR_AUTO_REGION_VS_APIURL.containsKey(grr_region.toLowerCase()) ) {
+        if ( grr_region != null ) {
             logEnvVar(BrowserStackEnvVars.GRR_JENKINS_KEY, grr_region);
-            System.setProperty(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY, Constants.GRR_AUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
-            System.setProperty(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY, Constants.GRR_APPAUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
-            logEnvVar(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_AUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
-            logEnvVar(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY.toUpperCase(), Constants.GRR_APPAUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
+            if ( Constants.GRR_AUTO_REGION_VS_APIURL.containsKey(grr_region.toLowerCase()) ) {
+                setSystemProperty(BrowserStackEnvVars.AUTOMATE_API_ENV_KEY, Constants.GRR_AUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
+                setSystemProperty(BrowserStackEnvVars.APP_AUTOMATE_API_ENV_KEY, Constants.GRR_APPAUTO_REGION_VS_APIURL.get(grr_region.toLowerCase()));
+            }
+            else {
+                log(logger, "Invalid GRR REGION passed. Supported values are US, EU. Skipping GRR Region for this job.");
+            }
         }
 
         String buildTag = env.get(ENV_JENKINS_BUILD_TAG);
@@ -190,4 +193,12 @@ public class BrowserStackBuildWrapperOperations {
             log(logger, key + "=" + value);
         }
     }
+
+    public void setSystemProperty(String key, String value) {
+        if(key != null){
+            System.setProperty(key, value);
+            logEnvVar(key.toUpperCase(), value);
+        }
+    }
+
 }
