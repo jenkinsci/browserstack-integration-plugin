@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.2.12-SNAPSHOT</version>
+  <version>1.2.13-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -37,8 +37,8 @@
     <tag>HEAD</tag>
   </scm>
 
-  <!-- Adding a distribution management section here to override the now 
-    defunct mave.jenkins-ci.org. If we update the parent pom version to newer 
+  <!-- Adding a distribution management section here to override the now
+    defunct mave.jenkins-ci.org. If we update the parent pom version to newer
     than 2.5 then this section is not needed. -->
   <distributionManagement>
     <repository>
@@ -53,7 +53,7 @@
 
 
   <properties>
-    <!-- Baseline Jenkins version you use to build the plugin. Users must 
+    <!-- Baseline Jenkins version you use to build the plugin. Users must
       have this version or newer to run. -->
     <jenkins.version>2.334</jenkins.version>
     <java.level>8</java.level>
@@ -62,8 +62,8 @@
     <junit-quickcheck.version>0.8</junit-quickcheck.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <!-- This is the testing Tracking Id. If you want to build the project 
-      for production, please use the production profile which replaces this with 
+    <!-- This is the testing Tracking Id. If you want to build the project
+      for production, please use the production profile which replaces this with
       the production tracking id. -->
     <ga.tracking.id>UA-79358556-2</ga.tracking.id>
   </properties>
