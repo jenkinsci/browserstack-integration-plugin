@@ -3,6 +3,7 @@ package com.browserstack.automate.ci.jenkins;
 import com.browserstack.automate.ci.common.BrowserStackBuildWrapperOperations;
 import com.browserstack.automate.ci.common.analytics.Analytics;
 import com.browserstack.automate.ci.jenkins.local.LocalConfig;
+import com.browserstack.automate.ci.jenkins.qualityDashboard.QualityDashboardInit;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
@@ -51,8 +52,11 @@ public final class BrowserStackBuildWrapperDescriptor extends BuildWrapperDescri
             if (config.has("usageStatsEnabled")) {
                 setEnableUsageStats(config.getBoolean("usageStatsEnabled"));
             }
+            if (config.has("credentialsId")){
+                QualityDashboardInit qdInit = new QualityDashboardInit();
+                qdInit.pluginConfiguredNotif();
+            }
         }
-
         return true;
     }
 

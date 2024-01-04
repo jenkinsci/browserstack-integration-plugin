@@ -61,4 +61,23 @@ public class Constants {
         public static final String UNMARKED = "unmarked";
         public static final String PASSED = "passed";
     }
+
+    public static final class QualityDashboardAPI {
+
+        public static final String URL_BASE = "https://quality-dashboard-api.browserstack.com/api/v1/jenkins";
+        public static final String IS_INIT_SETUP_REQUIRED = URL_BASE + "/init-setup-required";
+
+        public static final String HISTORY_FOR_DAYS = URL_BASE + "/history-for-days";
+
+        public static final String ADD_ALL_PIPELINES = URL_BASE + "/add-all-pipelines";
+
+        public static final String ITEM_CRUD = URL_BASE + "/item";
+        public static final String IS_QD_ENABLED = URL_BASE + "/qd-enabled";
+        public static final String IS_PIPELINE_ENABLED = URL_BASE + "/pipeline-enabled";
+        public static final String GET_RESULT_DIRECTORY = URL_BASE + "/get-result-directory";
+
+        public static final String UPLOAD_RESULT_ZIP = URL_BASE + "/upload-result";
+        public static final String STORE_PIPELINE_RESULTS = URL_BASE + "/save-results";
+
+    }
 }
