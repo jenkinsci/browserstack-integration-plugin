@@ -3,6 +3,7 @@ package com.browserstack.automate.ci.jenkins.qualityDashboard;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
 import hudson.model.*;
@@ -13,6 +14,7 @@ import okhttp3.*;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,46 +25,63 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Extension
 public class QualityDashboardPipelineTracker extends RunListener<Run> {
 
     QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
 
-    //check if this is the final step of the build
-    // if yes, get the result dir for the pipeline
-    // compose an object which contains, status, duration and zip fo test directory (if configured)
-    // check if this was called by upstream proj. if so, get result dir for the parent pipeline
-    // if parent pipeline configured then, copy the test results in that dir. If result dir not configured for parent, create a browserstack-artifacts dir if not present and copy the result there
     @Override
     public void onCompleted(Run run, TaskListener listener) {
         super.onCompleted(run, listener);
         BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
         if(browserStackCredentials!=null) {
+            WorkflowRun workflowRun = (WorkflowRun) run;
+            WorkflowJob workflowJob = workflowRun.getParent();
+            String jobName = workflowJob.getFullName();
+            int buildNumber = run.getNumber();
             try {
-                WorkflowRun workflowRun = (WorkflowRun) run;
-                WorkflowJob workflowJob = workflowRun.getParent();
-                String jobName = workflowJob.getFullName();
                 if(isQDEnabled(browserStackCredentials) && isPipelineEnabledForQD(browserStackCredentials, jobName)) {
                     Result overallResult = run.getResult();
                     if(overallResult != null) {
-                        String finalZipFilePath = null; String qdS3Url = null;
+                        String qdS3Url = null;
                         String finalPathToZip = getFinalZipPath(run, browserStackCredentials);
+                        apiUtil.logToQD(browserStackCredentials, "Final Computed Zip Path for jobName: " + jobName + " and buildNumber: " + buildNumber + " is: " + finalPathToZip);
                         if(StringUtils.isNotEmpty(finalPathToZip)) {
-                            int buildNumber = run.getNumber();
+                            apiUtil.logToQD(browserStackCredentials, "Found artifacts in configured path for jobName: " + jobName + " and buildNumber: " + buildNumber);
                             copyDirectoryToParentIfRequired(run, finalPathToZip, browserStackCredentials);
-                            finalZipFilePath = packZip(finalPathToZip, run, jobName);
-                            qdS3Url = uploadZipToQd(finalZipFilePath, browserStackCredentials, jobName, buildNumber);
+                            qdS3Url = zipArtifactsAndUploadToQD(finalPathToZip, browserStackCredentials, jobName, buildNumber);
+                        } else if(run.getHasArtifacts()) {
+                            apiUtil.logToQD(browserStackCredentials, "No artifacts in configured path but found archive artifacts for jobName: " + jobName + " and buildNumber: " + buildNumber);
+                            finalPathToZip = run.getArtifactsDir().getAbsolutePath();
+                            apiUtil.logToQD(browserStackCredentials, "Got artifact path for jobName: " + jobName + " and buildNumber: " + buildNumber + " as: " + finalPathToZip);
+                            qdS3Url = zipArtifactsAndUploadToQD(finalPathToZip, browserStackCredentials, jobName, buildNumber);
+                        } else {
+                            apiUtil.logToQD(browserStackCredentials, "Finally no artifacts found for jobName: " + jobName + " and buildNumber: " + buildNumber);
                         }
                         sendBuildDataToQD(run, overallResult, qdS3Url, browserStackCredentials);
+                    } else {
+                        apiUtil.logToQD(browserStackCredentials, "Null Result Captured for jobName: " + jobName + " and buildNumber: " + buildNumber);
                     }
                 }
             } catch (IOException e) {
+                try {
+                    apiUtil.logToQD(browserStackCredentials, "Global Exception for jobName: " + jobName + " and buildNumber: " + buildNumber + " is: " + e.toString());
+                } catch (JsonProcessingException ex) {
+                    throw new RuntimeException(ex);
+                }
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private String zipArtifactsAndUploadToQD (String finalPathToZip, BrowserStackCredentials browserStackCredentials, String jobName, int buildNumber) throws IOException {
+        String finalZipFilePath = packZip(finalPathToZip, jobName, browserStackCredentials);
+        apiUtil.logToQD(browserStackCredentials, "Final zip file's path for jobName: " + jobName + " and buildNumber: " + buildNumber + " is:" + finalZipFilePath);
+        String qdS3Url = uploadZipToQd(finalZipFilePath, browserStackCredentials, jobName, buildNumber);
+        Files.deleteIfExists(Paths.get(finalZipFilePath));
+        apiUtil.logToQD(browserStackCredentials, "Deleted file from server after upload for jobName: " + jobName + " and buildNumber: " + buildNumber);
+        return qdS3Url;
     }
 
     private void sendBuildDataToQD(Run run, Result overallResult, String finalZipPath, BrowserStackCredentials browserStackCredentials) {
@@ -77,6 +96,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
             String jsonBody = objectMapper.writeValueAsString(pipelineResultsReqObj);
 
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
+            apiUtil.logToQD(browserStackCredentials, "Sending Final Results for jobName: " + jobName + " and buildNumber: " + buildNumber);
             apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.STORE_PIPELINE_RESULTS, browserStackCredentials, requestBody);
         } catch(IOException e) {
             e.printStackTrace();
@@ -94,9 +114,9 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
         Path path = Paths.get(filePath);
         return Files.exists(path) ? true : false;
     }
-    private String getFinalZipPath(Run run, BrowserStackCredentials browserStackCredentials) {
+    private String getFinalZipPath(Run run, BrowserStackCredentials browserStackCredentials) throws JsonProcessingException {
         String finalZipPath = null;
-        String currentResultDir = getResultDirForPipeline(getUrlForPipeline(run), browserStackCredentials);
+        String currentResultDir = getResultDirForPipeline(getUrlForPipeline(run), browserStackCredentials, run.getNumber());
         if(StringUtils.isNotEmpty(currentResultDir) && checkIfPathIsFound(currentResultDir)) {
             finalZipPath = currentResultDir;
         } else {
@@ -111,13 +131,9 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
     }
 
     private String getDefaultWorkspaceDirectory(Run run) {
-        String pipelineDirectory = null;
         Jenkins jenkins = Jenkins.getInstanceOrNull();
-        String workspacePath = jenkins.getRootDir().getAbsolutePath();
-        if (StringUtils.isNotEmpty(workspacePath)) {
-            pipelineDirectory = workspacePath;
-        }
-        return pipelineDirectory;
+        String workspacePath = jenkins != null && jenkins.getRootDir() != null ? jenkins.getRootDir().getAbsolutePath() : null;
+        return StringUtils.isNotEmpty(workspacePath) ? workspacePath : null;
     }
 
     private String getUrlForPipeline(Run<?, ?> build) {
@@ -129,9 +145,11 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
         if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
             ResponseBody responseBody = response.body();
             if(responseBody != null && Boolean.parseBoolean(response.body().string())) {
+                apiUtil.logToQD(browserStackCredentials, "QD enabled check passed");
                 return true;
             }
         }
+        apiUtil.logToQD(browserStackCredentials, "QD enabled check failed");
         return false;
     }
 
@@ -144,13 +162,15 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
         if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
             ResponseBody responseBody = response.body();
             if(responseBody != null && Boolean.parseBoolean(response.body().string())) {
+                apiUtil.logToQD(browserStackCredentials, "Pipeline enabled - pipelineName: " + pipelineName);
                 return true;
             }
         }
+        apiUtil.logToQD(browserStackCredentials, "Pipeline disabled - pipelineName: " + pipelineName);
         return false;
     }
 
-    private String getResultDirForPipeline(String pipelineUrl, BrowserStackCredentials browserStackCredentials) {
+    private String getResultDirForPipeline(String pipelineUrl, BrowserStackCredentials browserStackCredentials, int buildNumber) throws JsonProcessingException {
         String resultDir = null;
         try {
             QualityDashboardGetDetailsForPipeline getResultDirReqObj = new QualityDashboardGetDetailsForPipeline(pipelineUrl);
@@ -166,34 +186,29 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
         } catch(IOException e) {
             e.printStackTrace();
         }
+        resultDir = resultDir !=null && resultDir.contains("%build_number%") ? resultDir.replace("%build_number%", String.valueOf(buildNumber)) : resultDir;
+        apiUtil.logToQD(browserStackCredentials, "Result Directory for jobName: " + pipelineUrl + " and buildNumber: " + buildNumber + " is resultDir: " + resultDir);
         return resultDir;
     }
 
-    private String packZip(String sourceDirPath, Run run, String jobName) {
-        String defaultWorkspaceDir = getDefaultWorkspaceDirectory(run);
-        String zipFilePath = defaultWorkspaceDir + "/workspace/" + jobName + "/browserstack-artifacts.zip";
+    private String packZip(String sourceDirPath, String jobName, BrowserStackCredentials browserStackCredentials) throws JsonProcessingException {
+        Path zipPath = Paths.get(sourceDirPath).getParent();
+        String zipFile = zipPath.toString() + "/browserstack-artifacts.zip";
+        Path zipFilePath = Paths.get(zipFile);
+        apiUtil.logToQD(browserStackCredentials, "zipFilePath for jobName: " + jobName + " is:" + zipFilePath);
         try {
-            Files.deleteIfExists(Paths.get(zipFilePath));
-            Path p = Files.createFile(Paths.get(zipFilePath));
-            try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
-                Path pp = Paths.get(sourceDirPath);
-                Files.walk(pp)
-                        .filter(path -> !Files.isDirectory(path))
-                        .forEach(path -> {
-                            ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-                            try {
-                                zs.putNextEntry(zipEntry);
-                                Files.copy(path, zs);
-                                zs.closeEntry();
-                            } catch (IOException e) {
-                                System.err.println(e);
-                            }
-                        });
-            }
+            Files.deleteIfExists(zipFilePath);
+            ZipUtil.pack(new File(sourceDirPath), new File(zipFile));
+            apiUtil.logToQD(browserStackCredentials, "zipFile size for jobName: " + jobName + " is:" + Files.size(zipFilePath));
         } catch (IOException e) {
-            e.printStackTrace();
+            String exceptionString = exceptionToString(e);
+            apiUtil.logToQD(browserStackCredentials, "Error creating zip for jobName: " + jobName + " is:" + exceptionString);
         }
-        return zipFilePath;
+        return zipFile;
+    }
+
+    private String exceptionToString(Throwable throwable) {
+        return throwable.toString();
     }
 
     private String uploadZipToQd(String pathToZip, BrowserStackCredentials browserStackCredentials, String jobName, int buildNumber) throws IOException {
@@ -218,7 +233,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
         String finalParentPathTo = null;
         String upStreamProj = upStreamPipelineUrl(run);
         if(StringUtils.isNotEmpty(upStreamProj)) {
-            String parentResultDir = getResultDirForPipeline(upStreamProj, browserStackCredentials);
+            String parentResultDir = getResultDirForPipeline(upStreamProj, browserStackCredentials, run.getNumber());
             if(StringUtils.isNotEmpty(parentResultDir) && checkIfPathIsFound(parentResultDir)) {
                 finalParentPathTo = parentResultDir;
             } else {

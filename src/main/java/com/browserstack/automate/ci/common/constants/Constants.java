@@ -63,13 +63,16 @@ public class Constants {
     }
 
     public static final class QualityDashboardAPI {
+        public static final String URL_BASE = "https://quality-dashboard.browserstack.com/api/v1/jenkins";
 
-        public static final String URL_BASE = "https://quality-dashboard-api.browserstack.com/api/v1/jenkins";
+        public static final String LOG_MESSAGE = URL_BASE + "/log-message";
         public static final String IS_INIT_SETUP_REQUIRED = URL_BASE + "/init-setup-required";
 
         public static final String HISTORY_FOR_DAYS = URL_BASE + "/history-for-days";
 
-        public static final String ADD_ALL_PIPELINES = URL_BASE + "/add-all-pipelines";
+        public static final String SAVE_PIPELINES = URL_BASE + "/save-pipelines";
+
+        public static final String SAVE_PIPELINE_RESULTS = URL_BASE + "/save-pipeline-results";
 
         public static final String ITEM_CRUD = URL_BASE + "/item";
         public static final String IS_QD_ENABLED = URL_BASE + "/qd-enabled";
@@ -79,5 +82,7 @@ public class Constants {
         public static final String UPLOAD_RESULT_ZIP = URL_BASE + "/upload-result";
         public static final String STORE_PIPELINE_RESULTS = URL_BASE + "/save-results";
 
+        public static final String PROJECTS_PAGE_SIZE = URL_BASE + "/projects-page-size";
+        public static final String RESULTS_PAGE_SIZE = URL_BASE + "/results-page-size";
     }
 }
