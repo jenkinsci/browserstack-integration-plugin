@@ -14,7 +14,6 @@ import okhttp3.Response;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
 
 @Extension
 public class QualityDashboardInitItemListener extends ItemListener {
@@ -78,15 +77,18 @@ public class QualityDashboardInitItemListener extends ItemListener {
         return jsonBody;
     }
 
-    private Response syncItemListToQD(String jsonBody, String url, String typeOfRequest) {
+    private Response syncItemListToQD(String jsonBody, String url, String typeOfRequest) throws JsonProcessingException {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
         QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
         BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
         if(typeOfRequest.equals("PUT")) {
+            apiUtil.logToQD(browserStackCredentials, "Syncing Item Update - PUT");
             return apiUtil.makePutRequestToQd(url, browserStackCredentials, requestBody);
         } else if(typeOfRequest.equals("DELETE")) {
+            apiUtil.logToQD(browserStackCredentials, "Syncing Item Deleted - DELETE");
             return apiUtil.makeDeleteRequestToQd(url, browserStackCredentials, requestBody);
         } else {
+            apiUtil.logToQD(browserStackCredentials, "Syncing Item Added - POST");
             return apiUtil.makePostRequestToQd(url, browserStackCredentials, requestBody);
         }
     }

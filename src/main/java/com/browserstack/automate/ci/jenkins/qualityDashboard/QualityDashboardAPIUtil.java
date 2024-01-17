@@ -1,10 +1,13 @@
 package com.browserstack.automate.ci.jenkins.qualityDashboard;
 
+import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
-
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.io.Serializable;
 
 public class QualityDashboardAPIUtil {
 
@@ -67,5 +70,23 @@ public class QualityDashboardAPIUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void logToQD(BrowserStackCredentials browserStackCredentials, String logMessage) throws JsonProcessingException {
+        LogMessage logMessageObj = new LogMessage(logMessage);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonBody = objectMapper.writeValueAsString(logMessageObj);
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
+        makePostRequestToQd(Constants.QualityDashboardAPI.LOG_MESSAGE, browserStackCredentials, requestBody);
+    }
+}
+
+class LogMessage implements Serializable {
+
+    @JsonProperty("message")
+    private String message;
+
+    public LogMessage(String message) {
+        this.message = message;
     }
 }
