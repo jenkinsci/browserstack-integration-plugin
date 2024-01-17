@@ -79,8 +79,12 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
         String finalZipFilePath = packZip(finalPathToZip, jobName, browserStackCredentials);
         apiUtil.logToQD(browserStackCredentials, "Final zip file's path for jobName: " + jobName + " and buildNumber: " + buildNumber + " is:" + finalZipFilePath);
         String qdS3Url = uploadZipToQd(finalZipFilePath, browserStackCredentials, jobName, buildNumber);
-        Files.deleteIfExists(Paths.get(finalZipFilePath));
-        apiUtil.logToQD(browserStackCredentials, "Deleted file from server after upload for jobName: " + jobName + " and buildNumber: " + buildNumber);
+        if(StringUtils.isNotEmpty(finalZipFilePath)) {
+            Files.deleteIfExists(Paths.get(finalZipFilePath));
+            apiUtil.logToQD(browserStackCredentials, "Deleted file from server after upload for jobName: " + jobName + " and buildNumber: " + buildNumber);
+        } else {
+            apiUtil.logToQD(browserStackCredentials, "No zip file to delete for jobName: " + jobName + " and buildNumber: " + buildNumber);
+        }
         return qdS3Url;
     }
 
