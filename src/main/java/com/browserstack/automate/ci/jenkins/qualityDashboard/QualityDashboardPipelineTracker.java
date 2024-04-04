@@ -94,8 +94,16 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
             String jobName = run.getParent().getFullName();
             int buildNumber = run.getNumber();
             long endTimeInMillis = run.getTimeInMillis();
+
+            Jenkins jenkins = Jenkins.getInstanceOrNull();
+            String rootUrl = jenkins !=null ? jenkins.getRootUrl() : null;
+            String jobUrl = null;
+            if(rootUrl != null) {
+                jobUrl = rootUrl + run.getUrl();
+            }
+
             Timestamp endTime = new Timestamp(endTimeInMillis);
-            PipelineResults pipelineResultsReqObj = new PipelineResults(buildNumber, pipelineDuration, overallResult.toString(), finalZipPath, jobName, endTime);
+            PipelineResults pipelineResultsReqObj = new PipelineResults(buildNumber, pipelineDuration, overallResult.toString(), finalZipPath, jobName, endTime, jobUrl);
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonBody = objectMapper.writeValueAsString(pipelineResultsReqObj);
 
@@ -292,6 +300,9 @@ class PipelineResults implements Serializable {
     @JsonProperty("buildDuration")
     private Long buildDuration;
 
+    @JsonProperty("jobUrl")
+    private String jobUrl;
+
     @JsonProperty("endTime")
     private Timestamp endTime;
     @JsonProperty("buildStatus")
@@ -300,12 +311,13 @@ class PipelineResults implements Serializable {
     @JsonProperty("zipFile")
     private String zipFile;
 
-    public PipelineResults(Integer buildNumber, Long buildDuration, String buildStatus, String zipFile, String pipelineName, Timestamp endTime) {
+    public PipelineResults(Integer buildNumber, Long buildDuration, String buildStatus, String zipFile, String pipelineName, Timestamp endTime, String jobUrl) {
         this.buildNumber = buildNumber;
         this.buildDuration = buildDuration;
         this.buildStatus = buildStatus;
         this.zipFile = zipFile;
         this.pipelineName = pipelineName;
         this.endTime = endTime;
+        this.jobUrl = jobUrl;
     }
 }
