@@ -63,7 +63,7 @@ public class Constants {
     }
 
     public static final class QualityDashboardAPI {
-        public static final String URL_BASE = "https://quality-dashboard.browserstack.com/api/v1/jenkins";
+        public static final String URL_BASE = "https://quality-engineering-insights.browserstack.com/api/v1/jenkins";
 
         public static final String LOG_MESSAGE = URL_BASE + "/log-message";
         public static final String IS_INIT_SETUP_REQUIRED = URL_BASE + "/init-setup-required";
