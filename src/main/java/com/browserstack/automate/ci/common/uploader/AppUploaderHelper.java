@@ -12,6 +12,8 @@ import hudson.model.Actionable;
 import hudson.util.FormValidation;
 
 public class AppUploaderHelper {
+  private static final int MAX_RETRY_ATTEMPTS = 2;
+  private static final long RETRY_DELAY_MS = 1000;
 
   public static FormValidation validateAppPath(String appPath) {
     if (appPath == null || appPath.isEmpty()) {
@@ -47,23 +49,36 @@ public class AppUploaderHelper {
 
     AppUploader appUploader = new AppUploader(appPath, credentials, customProxy, logger);
     String appId = "";
-    try {
-      PluginLogger.log(logger, "Uploading app " + appPath + " to Browserstack.");
-      appId = appUploader.uploadFile();
-      PluginLogger.log(logger,
-          appPath + " uploaded successfully to Browserstack with app_url : " + appId);
-    } catch (AppAutomateException e) {
-      PluginLogger.logError(logger, "App upload failed.");
-      PluginLogger.logError(logger, e.getMessage());
-      return null;
-    } catch (InvalidFileExtensionException e) {
-      PluginLogger.logError(logger, e.getMessage());
-      return null;
-    } catch (FileNotFoundException e) {
-      PluginLogger.logError(logger, e.getMessage());
-      return null;
+    for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+      try {
+        PluginLogger.log(logger, String.format("Uploading app %s to Browserstack. Attempt %d of %d", appPath, attempt, MAX_RETRY_ATTEMPTS));
+        appId = appUploader.uploadFile();
+        PluginLogger.log(logger,
+                String.format("%s uploaded successfully to Browserstack with app_url : %s", appPath, appId));
+        return appId;
+      } catch (AppAutomateException e) {
+        PluginLogger.logError(logger, String.format("App upload failed with status code: %d. Attempt %d of %d", e.getStatusCode(), attempt, MAX_RETRY_ATTEMPTS));
+        PluginLogger.logError(logger, e.getMessage());
+        if (attempt < MAX_RETRY_ATTEMPTS) {
+          PluginLogger.log(logger, String.format("Retrying in %d seconds...", RETRY_DELAY_MS / 1000));
+          try {
+            Thread.sleep(RETRY_DELAY_MS);
+          } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            PluginLogger.log(logger, "Upload retry interrupted. Error: " + ie.getMessage());
+            return null;
+          }
+        }
+      } catch (InvalidFileExtensionException e) {
+        PluginLogger.logError(logger, e.getMessage());
+        return null;
+      } catch (FileNotFoundException e) {
+        PluginLogger.logError(logger, e.getMessage());
+        return null;
+      }
     }
-    return appId;
+    PluginLogger.logError(logger, String.format("App upload failed after %d attempts", MAX_RETRY_ATTEMPTS));
+    return null;
   }
 
 }
