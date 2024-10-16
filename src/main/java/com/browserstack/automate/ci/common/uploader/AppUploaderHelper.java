@@ -57,9 +57,10 @@ public class AppUploaderHelper {
                 String.format("%s uploaded successfully to Browserstack with app_url : %s", appPath, appId));
         return appId;
       } catch (AppAutomateException e) {
-        PluginLogger.logError(logger, String.format("App upload failed with status code: %d. Attempt %d of %d", e.getStatusCode(), attempt, MAX_RETRY_ATTEMPTS));
+        int statusCode = e.getStatusCode();
+        PluginLogger.logError(logger, String.format("App upload failed with status code: %d. Attempt %d of %d", statusCode, attempt, MAX_RETRY_ATTEMPTS));
         PluginLogger.logError(logger, e.getMessage());
-        if (attempt < MAX_RETRY_ATTEMPTS) {
+        if ((statusCode >= 500 || statusCode == 0) && attempt < MAX_RETRY_ATTEMPTS) {
           PluginLogger.log(logger, String.format("Retrying in %d seconds...", RETRY_DELAY_MS / 1000));
           try {
             Thread.sleep(RETRY_DELAY_MS);
@@ -68,11 +69,10 @@ public class AppUploaderHelper {
             PluginLogger.log(logger, "Upload retry interrupted. Error: " + ie.getMessage());
             return null;
           }
+        } else {
+          return null;
         }
-      } catch (InvalidFileExtensionException e) {
-        PluginLogger.logError(logger, e.getMessage());
-        return null;
-      } catch (FileNotFoundException e) {
+      } catch (InvalidFileExtensionException | FileNotFoundException e) {
         PluginLogger.logError(logger, e.getMessage());
         return null;
       }
