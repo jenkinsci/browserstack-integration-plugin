@@ -22,6 +22,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -75,11 +78,18 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
     JSONArray configDetails = reportConfigDetailsResponse.getJSONArray("config_details");
     String lookUpURL = reportConfigDetailsResponse.getString("lookup_endpoint");
+    Date buildTimestamp = new Date(build.getStartTimeInMillis());
 
-    String UUID = fetchUUID(logger, lookUpURL, credentials, browserStackBuildName, projectName);
+    // Format the timestamp (e.g., YYYY-MM-DD HH:MM:SS)
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+    String formattedTime = sdf.format(buildTimestamp);
+
+    // Encode the timestamp to make it URL-safe
+    String encodedTimestamp = URLEncoder.encode(formattedTime, "UTF-8");
+
+    String UUID = fetchUUID(logger, lookUpURL, credentials, browserStackBuildName, projectName, encodedTimestamp);
     if (UUID == null) {
       logError(logger, "Cannot find a build with name " + browserStackBuildName);
-      return;
     }
 
     for (int i = 0; i < configDetails.length(); i++) {
@@ -94,11 +104,13 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
   }
 
-  private String fetchUUID(PrintStream logger, String lookUpURL, BrowserStackCredentials credentials , String buildName, String projectName) throws InterruptedException {
+  private String fetchUUID(PrintStream logger, String lookUpURL, BrowserStackCredentials credentials , String buildName, String projectName, String encodedTimestamp) throws InterruptedException {
     String lookUpURLWithParams = lookUpURL + "?build_name=" + buildName;
     if(projectName != null) {
-      lookUpURLWithParams = lookUpURLWithParams + "&project_name" + projectName;
+      lookUpURLWithParams = lookUpURLWithParams + "&project_name=" + projectName;
     }
+    lookUpURLWithParams = lookUpURLWithParams + "&pipeline_timestamp=" + encodedTimestamp;
+
 
     log(logger, "Fetching build....");
     for (int attempts = 0; attempts < MAX_ATTEMPTS; attempts++) {

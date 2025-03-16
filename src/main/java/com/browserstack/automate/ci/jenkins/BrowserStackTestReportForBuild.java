@@ -31,7 +31,7 @@ public class BrowserStackTestReportForBuild extends AbstractBrowserStackTestRepo
     this.credentials = credentials;
     this.reportUrl = reportUrl;
     this.UUID = UUID;
-    this.reportHtml = null;
+    this.reportHtml = UUID == null ? REPORT_FAILED : null;
     this.reportStyle = "";
     this.logger = logger;
     this.reportName = reportName;
@@ -50,7 +50,7 @@ public class BrowserStackTestReportForBuild extends AbstractBrowserStackTestRepo
   }
 
   private void fetchReportConditions() {
-    if ( reportHtml==null || reportHtml.equals(REPORT_IN_PROGRESS) || reportHtml.equals(REPORT_FAILED)) {
+    if ( reportHtml == null || reportHtml.equals(REPORT_IN_PROGRESS)) {
       fetchReport();
     }
   }
