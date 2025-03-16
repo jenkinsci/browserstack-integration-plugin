@@ -4,7 +4,7 @@ import com.browserstack.automate.ci.common.constants.Constants;
 import hudson.model.Run;
 import hudson.model.Action;
 
-public abstract class AbstractBrowserStackReportFetcherForBuild implements Action  {
+public abstract class AbstractBrowserStackTestReportForBuild implements Action  {
   private Run<?, ?> run;
 
 

@@ -10,7 +10,7 @@ import java.io.PrintStream;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
-public class BrowserStackReportFetcherForBuild extends AbstractBrowserStackReportFetcherForBuild {
+public class BrowserStackTestReportForBuild extends AbstractBrowserStackTestReportForBuild {
 
  private BrowserStackCredentials credentials;
   private String reportUrl;
@@ -25,7 +25,7 @@ public class BrowserStackReportFetcherForBuild extends AbstractBrowserStackRepor
   private static final OkHttpClient client = new OkHttpClient();
   makeRequestsUtil requestsUtil;
 
-  public BrowserStackReportFetcherForBuild(Run<?, ?> run, BrowserStackCredentials credentials, String reportUrl, String UUID, String reportName, String tabUrl, final PrintStream logger) {
+  public BrowserStackTestReportForBuild(Run<?, ?> run, BrowserStackCredentials credentials, String reportUrl, String UUID, String reportName, String tabUrl, final PrintStream logger) {
     super();
     setBuild(run);
     this.credentials = credentials;

@@ -31,8 +31,8 @@ import java.util.logging.Logger;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
-public class BrowserStackReportFetcherPublisher extends Recorder implements SimpleBuildStep {
-  private static final Logger LOGGER = Logger.getLogger(BrowserStackReportFetcherPublisher.class.getName());
+public class BrowserStackTestReportPublisher extends Recorder implements SimpleBuildStep {
+  private static final Logger LOGGER = Logger.getLogger(BrowserStackTestReportPublisher.class.getName());
   private static final OkHttpClient client = new OkHttpClient();
   private static final int MAX_ATTEMPTS = 3;
   private static final int RETRY_DELAY_SECONDS = 10;
@@ -40,7 +40,7 @@ public class BrowserStackReportFetcherPublisher extends Recorder implements Simp
 
   makeRequestsUtil requestsUtil;
   @DataBoundConstructor
-  public BrowserStackReportFetcherPublisher(Map<String, String> customEnvVars) {
+  public BrowserStackTestReportPublisher(Map<String, String> customEnvVars) {
     this.customEnvVars = customEnvVars != null ? new HashMap<>(customEnvVars) : new HashMap<>();
     requestsUtil = new makeRequestsUtil();
   }
@@ -89,7 +89,7 @@ public class BrowserStackReportFetcherPublisher extends Recorder implements Simp
       String reportName = config.getString("report_name");
       String reportTabUrl = config.getString("report_tab_url");
 
-      build.addAction(new BrowserStackReportFetcherForBuild(build, credentials, reportUrl, UUID, reportName, reportTabUrl, logger));
+      build.addAction(new BrowserStackTestReportForBuild(build, credentials, reportUrl, UUID, reportName, reportTabUrl, logger));
     }
 
   }
