@@ -15,7 +15,10 @@ public class Constants {
     public static final String BROWSERSTACK_REPORT_PATH_PATTERN = "**/browserstack-artifacts/*";
     public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
-    public static  final String BROWSERSTACK_CONFIG_DETAILS_ENDPOINT = "http://localhost:3002/api/v1/external/ci/report-config";
+    public static  final String BROWSERSTACK_CONFIG_DETAILS_ENDPOINT = "http://localhost:3002/api/ci-tools/v1/events/report-config";
+    public static final String INTEGRATIONS_TOOL_KEY = "jenkins";
+
+    public static  final String REPORT_CONFIG_OPERATION_NAME = "report-config";
 
     public static final String REPORT_COMPLETED_STATUS = "COMPLETED";
     public static final String REPORT_IN_PROGRESS_STATUS = "IN_PROGRESS";

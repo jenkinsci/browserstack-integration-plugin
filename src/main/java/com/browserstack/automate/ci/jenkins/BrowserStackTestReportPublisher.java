@@ -22,6 +22,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -95,34 +96,47 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     for (int i = 0; i < configDetails.length(); i++) {
       JSONObject config = configDetails.getJSONObject(i);
 
-      String reportUrl = config.getString("report_url");
+      String reportUrl = config.getString("report_fetch_url");
       String reportName = config.getString("report_name");
       String reportTabUrl = config.getString("report_tab_url");
-
+      log(logger, reportUrl+" "+ UUID );
       build.addAction(new BrowserStackTestReportForBuild(build, credentials, reportUrl, UUID, reportName, reportTabUrl, logger));
     }
 
   }
 
   private String fetchUUID(PrintStream logger, String lookUpURL, BrowserStackCredentials credentials , String buildName, String projectName, String encodedTimestamp) throws InterruptedException {
-    String lookUpURLWithParams = lookUpURL + "?build_name=" + buildName;
-    if(projectName != null) {
-      lookUpURLWithParams = lookUpURLWithParams + "&project_name=" + projectName;
-    }
-    lookUpURLWithParams = lookUpURLWithParams + "&pipeline_timestamp=" + encodedTimestamp;
 
+    Map<String, String> params = new HashMap<>();
+    params.put("build_name",buildName);
+    params.put("pipeline_timestamp", encodedTimestamp);
+    params.put("tool", Constants.INTEGRATIONS_TOOL_KEY);
+    if(projectName != null) {
+      params.put("project_name",projectName);
+    }
 
     log(logger, "Fetching build....");
+    String lookUpURLWithParams;
+
+    //constructing build params
+    try {
+      lookUpURLWithParams = requestsUtil.buildQueryParams(lookUpURL, params);
+    } catch (URISyntaxException uriSyntaxException) {
+      logError(logger, "Could not build look up url with params" + uriSyntaxException.getMessage());
+      return null;
+    }
+
+    //making attempts
     for (int attempts = 0; attempts < MAX_ATTEMPTS; attempts++) {
       try {
         Response response = requestsUtil.makeRequest(lookUpURLWithParams, credentials);
         if (response.isSuccessful()) {
-
+          assert response.body() != null;
           JSONObject lookUpResponse = new JSONObject(response.body().string());
           String UUID = lookUpResponse.optString("UUID", null);
 
           if(UUID !=null) {
-            log(logger, "build found with "+ buildName + "and project name" + projectName);
+            log(logger, "build found with "+ buildName + " and project name " + projectName);
             return UUID;
           }
 
@@ -140,9 +154,14 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
   private JSONObject fetchConfigDetails(PrintStream logger, String configDetailsURL, BrowserStackCredentials credentials) {
     log(logger, "Fetching config details for reports");
+    Map<String, String> params = new HashMap<>();
+    params.put("tool",Constants.INTEGRATIONS_TOOL_KEY);
+    params.put("operation",Constants.REPORT_CONFIG_OPERATION_NAME);
     try  {
-      Response response = requestsUtil.makeRequest(configDetailsURL, credentials);
+      String configDetailsURLWithParams = requestsUtil.buildQueryParams(configDetailsURL, params);
+      Response response = requestsUtil.makeRequest(configDetailsURLWithParams, credentials);
       if (response.isSuccessful()) {
+        assert response.body() != null;
         return new JSONObject(response.body().string());
       }
       logError(logger, "Failed to fetch config details: " + response.code());

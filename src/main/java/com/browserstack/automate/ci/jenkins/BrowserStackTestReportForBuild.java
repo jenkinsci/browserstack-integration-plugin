@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import okhttp3.*;
 
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
 import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
@@ -31,7 +33,7 @@ public class BrowserStackTestReportForBuild extends AbstractBrowserStackTestRepo
     this.credentials = credentials;
     this.reportUrl = reportUrl;
     this.UUID = UUID;
-    this.reportHtml = UUID == null ? REPORT_FAILED : null;
+    this.reportHtml = null;
     this.reportStyle = "";
     this.logger = logger;
     this.reportName = reportName;
@@ -55,9 +57,18 @@ public class BrowserStackTestReportForBuild extends AbstractBrowserStackTestRepo
     }
   }
   private void fetchReport() {
-    String CIReportUrlWithParams = reportUrl + "?UUID=" + UUID + "&report_name=" + reportName;
-    log(logger, "Fetching report from" + CIReportUrlWithParams);
+    if( UUID == null ) {
+      reportHtml = REPORT_FAILED;
+      return;
+    }
+    Map<String, String> params = new HashMap<>();
+    params.put("UUID", UUID);
+    params.put("report_name",reportName);
+    params.put("tool", Constants.INTEGRATIONS_TOOL_KEY);
+
     try {
+      String CIReportUrlWithParams = requestsUtil.buildQueryParams(reportUrl, params);
+      log(logger, "Fetching browserstack report " + reportName );
       Response response = requestsUtil.makeRequest(CIReportUrlWithParams, credentials);
       if (response.isSuccessful()) {
         JSONObject reportResponse = new JSONObject(response.body().string());
