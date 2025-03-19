@@ -1,6 +1,7 @@
-package com.browserstack.automate.ci.jenkins;
+package com.browserstack.automate.ci.jenkins.integrationService;
 
 import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import hudson.model.Action;
 import hudson.model.Run;
 import org.json.JSONObject;
@@ -71,9 +72,9 @@ public class BrowserStackTestReportAction implements Action {
     params.put("tool", Constants.INTEGRATIONS_TOOL_KEY);
 
     try {
-      String CIReportUrlWithParams = requestsUtil.buildQueryParams(reportUrl, params);
+      String ciReportUrlWithParams = requestsUtil.buildQueryParams(reportUrl, params);
       log(logger, "Fetching browserstack report " + reportName);
-      Response response = requestsUtil.makeRequest(CIReportUrlWithParams, credentials);
+      Response response = requestsUtil.makeRequest(ciReportUrlWithParams, credentials);
       if (response.isSuccessful()) {
         JSONObject reportResponse = new JSONObject(response.body().string());
         String reportStatus = reportResponse.optString("report_status");

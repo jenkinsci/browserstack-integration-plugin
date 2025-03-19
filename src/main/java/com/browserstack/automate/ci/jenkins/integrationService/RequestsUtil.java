@@ -1,5 +1,6 @@
-package com.browserstack.automate.ci.jenkins;
+package com.browserstack.automate.ci.jenkins.integrationService;
 
+import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

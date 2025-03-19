@@ -20,9 +20,11 @@ public class Constants {
 
     public static  final String REPORT_CONFIG_OPERATION_NAME = "report-config";
 
-    public static final String REPORT_COMPLETED_STATUS = "COMPLETED";
-    public static final String REPORT_IN_PROGRESS_STATUS = "IN_PROGRESS";
-
+    public static enum REPORT_STATUS {
+      IN_PROGRESS,
+      COMPLETED,
+      FAILED
+    }
     // Product
     public static final String AUTOMATE = "automate";
     public static final String APP_AUTOMATE = "app-automate";

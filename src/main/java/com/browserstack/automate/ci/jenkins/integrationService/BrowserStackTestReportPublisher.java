@@ -1,7 +1,9 @@
-package com.browserstack.automate.ci.jenkins;
+package com.browserstack.automate.ci.jenkins.integrationService;
 
 import com.browserstack.automate.ci.common.BrowserStackEnvVars;
 import com.browserstack.automate.ci.common.constants.Constants;
+import com.browserstack.automate.ci.jenkins.BrowserStackBuildAction;
+import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
