@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-public class makeRequestsUtil {
+public class RequestsUtil {
   OkHttpClient client = new OkHttpClient();
 
   public Response makeRequest(String getUrl, BrowserStackCredentials browserStackCredentials) throws Exception {

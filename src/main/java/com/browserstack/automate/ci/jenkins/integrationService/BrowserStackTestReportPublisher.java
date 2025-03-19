@@ -42,11 +42,12 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
   private static final int RETRY_DELAY_SECONDS = 10;
   private final Map<String, String> customEnvVars;
 
-  makeRequestsUtil requestsUtil;
+  RequestsUtil requestsUtil;
+
   @DataBoundConstructor
   public BrowserStackTestReportPublisher(Map<String, String> customEnvVars) {
     this.customEnvVars = customEnvVars != null ? new HashMap<>(customEnvVars) : new HashMap<>();
-    requestsUtil = new makeRequestsUtil();
+    requestsUtil = new RequestsUtil();
   }
 
   @Override
@@ -99,20 +100,20 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
       String reportUrl = config.getString("report_fetch_url");
       String reportName = config.getString("report_name");
       String reportTabUrl = config.getString("report_tab_url");
-      log(logger, reportUrl+" "+ UUID );
-      build.addAction(new BrowserStackTestReportForBuild(build, credentials, reportUrl, UUID, reportName, reportTabUrl, logger));
+      log(logger, reportUrl + " " + UUID);
+      build.addAction(new BrowserStackTestReportAction(build, credentials, reportUrl, UUID, reportName, reportTabUrl, logger));
     }
 
   }
 
-  private String fetchUUID(PrintStream logger, String lookUpURL, BrowserStackCredentials credentials , String buildName, String projectName, String encodedTimestamp) throws InterruptedException {
+  private String fetchUUID(PrintStream logger, String lookUpURL, BrowserStackCredentials credentials, String buildName, String projectName, String encodedTimestamp) throws InterruptedException {
 
     Map<String, String> params = new HashMap<>();
-    params.put("build_name",buildName);
+    params.put("build_name", buildName);
     params.put("pipeline_timestamp", encodedTimestamp);
     params.put("tool", Constants.INTEGRATIONS_TOOL_KEY);
-    if(projectName != null) {
-      params.put("project_name",projectName);
+    if (projectName != null) {
+      params.put("project_name", projectName);
     }
 
     log(logger, "Fetching build....");
@@ -135,8 +136,8 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
           JSONObject lookUpResponse = new JSONObject(response.body().string());
           String UUID = lookUpResponse.optString("UUID", null);
 
-          if(UUID !=null) {
-            log(logger, "build found with "+ buildName + " and project name " + projectName);
+          if (UUID != null) {
+            log(logger, "build found with " + buildName + " and project name " + projectName);
             return UUID;
           }
 
@@ -148,16 +149,16 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
       TimeUnit.SECONDS.sleep(RETRY_DELAY_SECONDS);
     }
 
-    LOGGER.info("build not found even after "+ MAX_ATTEMPTS + "attempts");
+    LOGGER.info("build not found even after " + MAX_ATTEMPTS + "attempts");
     return null;
   }
 
   private JSONObject fetchConfigDetails(PrintStream logger, String configDetailsURL, BrowserStackCredentials credentials) {
     log(logger, "Fetching config details for reports");
     Map<String, String> params = new HashMap<>();
-    params.put("tool",Constants.INTEGRATIONS_TOOL_KEY);
-    params.put("operation",Constants.REPORT_CONFIG_OPERATION_NAME);
-    try  {
+    params.put("tool", Constants.INTEGRATIONS_TOOL_KEY);
+    params.put("operation", Constants.REPORT_CONFIG_OPERATION_NAME);
+    try {
       String configDetailsURLWithParams = requestsUtil.buildQueryParams(configDetailsURL, params);
       Response response = requestsUtil.makeRequest(configDetailsURLWithParams, credentials);
       if (response.isSuccessful()) {
