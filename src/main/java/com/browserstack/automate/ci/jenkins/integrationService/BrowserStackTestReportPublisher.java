@@ -17,6 +17,7 @@ import hudson.tasks.Recorder;
 import hudson.FilePath;
 import hudson.Launcher;
 import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.Symbol;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import okhttp3.*;
@@ -183,6 +184,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     return BuildStepMonitor.NONE;
   }
 
+  @Symbol("browserStackReport")
   @Extension
   public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
