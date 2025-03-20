@@ -184,7 +184,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     return BuildStepMonitor.NONE;
   }
 
-  @Symbol("browserStackReport")
+  @Symbol("browserStackTestReports")
   @Extension
   public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
