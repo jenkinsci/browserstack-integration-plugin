@@ -89,13 +89,14 @@
 
                                 </ul>
                             </j:if>
+                            <j:if test="${it.reportRetryRequired()}">
+                                <p class="no-report-para"><strong class="strong-font-custom">Unable to Fetch Report try refreshing...</strong></p>
+                            </j:if>
                         </div>
                     </div>
                 </j:if>
 
                 <j:if test="${(it.isReportAvailable())}">
-                    <h2>BrowserStack Report</h2>
-                    <h3>Report:</h3>
                     <div>
                         <j:out value="${it.getReportHtml()}"/>
                     </div>

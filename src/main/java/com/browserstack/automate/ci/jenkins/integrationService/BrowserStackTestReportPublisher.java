@@ -184,7 +184,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     return BuildStepMonitor.NONE;
   }
 
-  @Symbol("browserStackTestReports")
+  @Symbol("browserStackBuildTestReports")
   @Extension
   public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -193,6 +193,11 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     public boolean isApplicable(Class<? extends AbstractProject> aClass) {
       // indicates that this builder can be used with all kinds of project types
       return true;
+    }
+
+    @Override
+    public String getDisplayName() {
+      return Constants.BROWSERSTACK_TEST_REPORT_DISPLAY_NAME;
     }
 
   }

@@ -25,8 +25,14 @@ public class BrowserStackTestReportAction implements Action {
   private String reportStyle;
   private String reportName;
   private String urlName;
+
+  private int maxRetryReportAttempt;
   private static final String REPORT_IN_PROGRESS = "REPORT_IN_PROGRESS";
   private static final String REPORT_FAILED = "REPORT_FAILED";
+
+  private static final String RETRY_REPORT = "RETRY_REPORT";
+
+  private static final int MAX_ATTEMPTS = 3;
   private static final OkHttpClient client = new OkHttpClient();
   RequestsUtil requestsUtil;
 
@@ -41,6 +47,8 @@ public class BrowserStackTestReportAction implements Action {
     this.logger = logger;
     this.reportName = reportName;
     this.urlName = tabUrl;
+    this.maxRetryReportAttempt = MAX_ATTEMPTS;
+
     requestsUtil = new RequestsUtil();
   }
 
@@ -56,7 +64,7 @@ public class BrowserStackTestReportAction implements Action {
   }
 
   private void fetchReportConditions() {
-    if (reportHtml == null || reportHtml.equals(REPORT_IN_PROGRESS)) {
+    if (reportHtml == null || reportHtml.equals(REPORT_IN_PROGRESS) || reportHtml.equals(RETRY_REPORT)) {
       fetchReport();
     }
   }
@@ -79,7 +87,8 @@ public class BrowserStackTestReportAction implements Action {
         JSONObject reportResponse = new JSONObject(response.body().string());
         String reportStatus = reportResponse.optString("report_status");
         if (reportStatus.equalsIgnoreCase(String.valueOf(Constants.REPORT_STATUS.COMPLETED))) {
-          reportHtml = reportResponse.optString("report_html", null);
+          String defaultHTML = "<h1>No Report Found</h1>";
+          reportHtml = reportResponse.optString("report_html", defaultHTML);
           reportStyle = reportResponse.optString("report_style", "");
         } else if (reportStatus.equalsIgnoreCase(String.valueOf(Constants.REPORT_STATUS.IN_PROGRESS))) {
           reportHtml = REPORT_IN_PROGRESS;
@@ -89,7 +98,11 @@ public class BrowserStackTestReportAction implements Action {
         logError(logger, "Received Non success response while fetching report" + response.code());
       }
     } catch (Exception e) {
-      reportHtml = REPORT_FAILED;
+      reportHtml = RETRY_REPORT;
+      this.maxRetryReportAttempt--;
+      if(this.maxRetryReportAttempt < 0) {
+        reportHtml = REPORT_FAILED;
+      }
       logError(logger, "Exception while fetching the report" + e.getMessage());
     }
   }
@@ -102,8 +115,12 @@ public class BrowserStackTestReportAction implements Action {
     return reportHtml.equals(REPORT_FAILED);
   }
 
+  public boolean reportRetryRequired() {
+    return reportHtml.equals(RETRY_REPORT);
+  }
+
   public boolean isReportAvailable() {
-    if (reportHtml != null && !reportHtml.equals(REPORT_IN_PROGRESS) && !reportHtml.equals(REPORT_FAILED)) {
+    if (reportHtml != null && !reportHtml.equals(REPORT_IN_PROGRESS) && !reportHtml.equals(REPORT_FAILED) && !reportHtml.equals(RETRY_REPORT)) {
       return true;
     }
     return false;
