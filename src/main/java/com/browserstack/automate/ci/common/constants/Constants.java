@@ -16,10 +16,9 @@ public class Constants {
     public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
     public static  final String BROWSERSTACK_CONFIG_DETAILS_ENDPOINT = "https://integrate.browserstack.com/api/ci-tools/v1/events/report-config";
+    public static final String BROWSERSTACK_TEST_REPORT_DISPLAY_NAME = "BrowserStack Build Test Reports";
     public static final String INTEGRATIONS_TOOL_KEY = "jenkins";
-
     public static  final String REPORT_CONFIG_OPERATION_NAME = "report-config-details";
-
     public static enum REPORT_STATUS {
       IN_PROGRESS,
       COMPLETED,
