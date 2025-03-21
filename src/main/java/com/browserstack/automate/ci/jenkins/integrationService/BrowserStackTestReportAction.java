@@ -100,7 +100,7 @@ public class BrowserStackTestReportAction implements Action {
     } catch (Exception e) {
       reportHtml = RETRY_REPORT;
       this.maxRetryReportAttempt--;
-      if(this.maxRetryReportAttempt < 0) {
+      if (this.maxRetryReportAttempt < 0) {
         reportHtml = REPORT_FAILED;
       }
       logError(logger, "Exception while fetching the report" + e.getMessage());
