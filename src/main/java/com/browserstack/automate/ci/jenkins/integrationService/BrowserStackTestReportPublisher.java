@@ -49,7 +49,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
   @DataBoundConstructor
   public BrowserStackTestReportPublisher(Map<String, String> customEnvVars) {
-    this.customEnvVars = customEnvVars != null ? new HashMap<>(customEnvVars) : new HashMap<>();
+    this.customEnvVars = customEnvVars != null && !customEnvVars.isEmpty() ? new HashMap<>(customEnvVars) : new HashMap<>();
     requestsUtil = new RequestsUtil();
   }
 

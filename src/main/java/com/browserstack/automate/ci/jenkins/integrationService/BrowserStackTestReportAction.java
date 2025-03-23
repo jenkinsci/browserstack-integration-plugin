@@ -23,8 +23,8 @@ public class BrowserStackTestReportAction implements Action {
   private String reportHtml;
   private final transient PrintStream logger;
   private String reportStyle;
-  private String reportName;
-  private String urlName;
+  public String reportName;
+  public String urlName;
 
   private int maxRetryReportAttempt;
   private static final String REPORT_IN_PROGRESS = "REPORT_IN_PROGRESS";
@@ -124,6 +124,11 @@ public class BrowserStackTestReportAction implements Action {
       return true;
     }
     return false;
+  }
+
+  public boolean reportHasStatus() {
+    if (reportHtml == null) return false;
+    return reportHtml.equals(REPORT_IN_PROGRESS) || reportHtml.equals(REPORT_FAILED);
   }
 
   public Run<?, ?> getBuild() {

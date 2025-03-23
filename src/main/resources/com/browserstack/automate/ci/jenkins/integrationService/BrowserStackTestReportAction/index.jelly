@@ -75,10 +75,10 @@
                     <div class="new-container">
                         <div class="report-row">
                             <j:if test="${(it.isReportInProgress())}">
-                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Test Report In Progress</strong></p>
+                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack ${it.reportName} Report In Progress</strong></p>
                             </j:if>
                             <j:if test="${(it.isReportFailed())}">
-                                <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack Test Report Available</strong></p>
+                                <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack ${it.reportName} Report Available</strong></p>
                                 <br/>
                                 <p class="no-report-para">BrowserStack test report could not be generated for this build. Please ensure that:</p>
                                 <br/>
