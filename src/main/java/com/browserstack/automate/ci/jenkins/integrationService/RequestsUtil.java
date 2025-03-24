@@ -12,7 +12,11 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 public class RequestsUtil {
-  OkHttpClient client = new OkHttpClient();
+  private transient OkHttpClient client;
+
+  public RequestsUtil() {
+    this.client = new OkHttpClient();
+  }
 
   public Response makeRequest(String getUrl, BrowserStackCredentials browserStackCredentials) throws Exception {
     try {

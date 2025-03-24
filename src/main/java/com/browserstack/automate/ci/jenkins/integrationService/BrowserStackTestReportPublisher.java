@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -37,7 +38,6 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackTestReportPublisher extends Recorder implements SimpleBuildStep {
   private static final Logger LOGGER = Logger.getLogger(BrowserStackTestReportPublisher.class.getName());
-  private static final OkHttpClient client = new OkHttpClient();
   private static final int MAX_ATTEMPTS = 3;
   private static final int RETRY_DELAY_SECONDS = 5;
   private final Map<String, String> customEnvVars;
@@ -46,7 +46,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
   @DataBoundConstructor
   public BrowserStackTestReportPublisher(Map<String, String> customEnvVars) {
-    this.customEnvVars = customEnvVars != null && !customEnvVars.isEmpty() ? new HashMap<>(customEnvVars) : new HashMap<>();
+    this.customEnvVars = customEnvVars != null && !customEnvVars.isEmpty() ? new ConcurrentHashMap<>(customEnvVars) : new ConcurrentHashMap<>();
     requestsUtil = new RequestsUtil();
   }
 
@@ -72,7 +72,8 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
     LOGGER.info("Adding BrowserStack Report Action");
 
-    JSONObject reportConfigDetailsResponse = fetchConfigDetails(logger, Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT, credentials);
+    String configDetailsEndpoint = Constants.INTEGRATE_BASE_URL + Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT;
+    JSONObject reportConfigDetailsResponse = fetchConfigDetails(logger, configDetailsEndpoint, credentials);
     if (reportConfigDetailsResponse == null) {
       logError(logger, "Could not fetch the report config details");
       return;
@@ -100,7 +101,6 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
       String reportUrl = config.getString("report_fetch_url");
       String reportName = config.getString("report_name");
       String reportTabUrl = config.getString("report_tab_url");
-      log(logger, reportUrl + " " + UUID);
       build.addAction(new BrowserStackTestReportAction(build, credentials, reportUrl, UUID, reportName, reportTabUrl, logger));
     }
 
