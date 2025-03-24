@@ -63,8 +63,8 @@ public class Constants {
     }
 
     public static class QualityDashboardAPI {
-
-        public static String host = "https://quality-engineering-insights.browserstack.com";
+        public static final String QD_DEFAULT_URL = "https://quality-engineering-insights.browserstack.com";
+        public static String host = QD_DEFAULT_URL;
         public static String URL_BASE;
 
         public static String getHost() {

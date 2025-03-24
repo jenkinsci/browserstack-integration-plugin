@@ -191,6 +191,8 @@ public class BrowserStackBuildWrapperOperations {
         if ( host != null ) {
             logEnvVar(BrowserStackEnvVars.QEI_URL, host);
             Constants.QualityDashboardAPI.setHost(host);
+        } else {
+            Constants.QualityDashboardAPI.setHost(Constants.QualityDashboardAPI.QD_DEFAULT_URL);
         }
     }
 
