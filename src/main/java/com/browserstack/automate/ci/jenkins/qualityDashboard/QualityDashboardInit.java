@@ -90,7 +90,7 @@ public class QualityDashboardInit {
 
     private static boolean initialQDSetupRequired(BrowserStackCredentials browserStackCredentials) throws JsonProcessingException {
         try {
-            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.IS_INIT_SETUP_REQUIRED, browserStackCredentials);
+            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.getIsInitSetupRequiredEndpoint(), browserStackCredentials);
             if (response != null && response.code() == HttpURLConnection.HTTP_OK) {
                 ResponseBody responseBody = response.body();
                 if(responseBody != null && responseBody.string().equals("REQUIRED")) {
@@ -134,7 +134,7 @@ public class QualityDashboardInit {
                 PipelinesPaginated pipelinesPaginated = new PipelinesPaginated(page, totalPages, singlePagePipelineList);
                 String jsonBody = objectMapper.writeValueAsString(pipelinesPaginated);
                 RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
-                Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.SAVE_PIPELINES, browserStackCredentials, requestBody);
+                Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.getSavePipelinesEndpoint(), browserStackCredentials, requestBody);
                 if (response == null ||  response.code() != HttpURLConnection.HTTP_OK) {
                     apiUtil.logToQD(browserStackCredentials,"Got Non 200 response while saving projects");
                     isSuccess = false;
@@ -188,7 +188,7 @@ public class QualityDashboardInit {
                 BuildResultsPaginated buildResultsPaginated = new BuildResultsPaginated(page, totalPages, buildResultList);
                 String jsonBody = objectMapper.writeValueAsString(buildResultsPaginated);
                 RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
-                Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.SAVE_PIPELINE_RESULTS, browserStackCredentials, requestBody);
+                Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.getSavePipelineResultsEndpoint(), browserStackCredentials, requestBody);
                 if (response == null ||  response.code() != HttpURLConnection.HTTP_OK) {
                     apiUtil.logToQD(browserStackCredentials,"Got Non 200 response while saving projects");
                     break;
@@ -202,7 +202,7 @@ public class QualityDashboardInit {
     private static int getHistoryForDays(BrowserStackCredentials browserStackCredentials) {
         int no_of_days = 90;
         try {
-            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.HISTORY_FOR_DAYS, browserStackCredentials);
+            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.getHistoryForDaysEndpoint(), browserStackCredentials);
             if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
                 ResponseBody responseBody = response.body();
                 if(responseBody != null) {
@@ -221,7 +221,7 @@ public class QualityDashboardInit {
     private static int getProjectPageSize(BrowserStackCredentials browserStackCredentials) {
         int projectPageSize = 2000;
         try {
-            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.PROJECTS_PAGE_SIZE, browserStackCredentials);
+            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.getProjectsPageSizeEndpoint(), browserStackCredentials);
             if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
                 ResponseBody responseBody = response.body();
                 if(responseBody != null) {
@@ -240,7 +240,7 @@ public class QualityDashboardInit {
     private static int getResultPageSize(BrowserStackCredentials browserStackCredentials) {
         int resultPageSize = 1000;
         try {
-            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.RESULTS_PAGE_SIZE, browserStackCredentials);
+            Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.getResultsPageSizeEndpoint(), browserStackCredentials);
             if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
                 ResponseBody responseBody = response.body();
                 if(responseBody != null) {
