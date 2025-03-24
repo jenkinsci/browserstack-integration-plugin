@@ -39,7 +39,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
   private static final Logger LOGGER = Logger.getLogger(BrowserStackTestReportPublisher.class.getName());
   private static final OkHttpClient client = new OkHttpClient();
   private static final int MAX_ATTEMPTS = 3;
-  private static final int RETRY_DELAY_SECONDS = 10;
+  private static final int RETRY_DELAY_SECONDS = 5;
   private final Map<String, String> customEnvVars;
 
   RequestsUtil requestsUtil;
