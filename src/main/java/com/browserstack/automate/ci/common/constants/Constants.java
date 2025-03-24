@@ -1,7 +1,5 @@
 package com.browserstack.automate.ci.common.constants;
 
-// TODO
-import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,24 +62,17 @@ public class Constants {
         public static final String PASSED = "passed";
     }
 
-public static class QualityDashboardAPI {
-        // TODO
+    public static class QualityDashboardAPI {
+
         public static String host = "https://quality-engineering-insights.browserstack.com";
         public static String URL_BASE;
-        // public static PrintStream newlogger = System.out;  // Ensure logging to console
 
         public static String getHost() {
             return host;
         }
 
-        public static void setHost(String newHost, PrintStream logger) {
+        public static void setHost(String newHost) {
             host = newHost;
-            // newlogger = logger;
-
-            // log(logger, "QualityDashboardAPI newHost: " + getHost());
-            // URL_BASE = host + "/api/v1/jenkins";
-            // log(newlogger, "QualityDashboardAPI url base host: " + URL_BASE);
-            // log(newlogger, "QualityDashboardAPI host1: " + getHost());
         }
 
         public static String getURLBase() {
