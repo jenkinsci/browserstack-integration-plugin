@@ -20,15 +20,29 @@ public class QualityDashboardInitItemListener extends ItemListener {
 
     @Override
     public void onCreated(Item job) {
-        String itemName = job.getFullName();
-        String itemType = getItemTypeModified(job);
-        if(itemType != null && itemType.equals("PIPELINE")) {
-            try {
-                String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
-                syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "POST");
-            } catch(IOException e) {
-                e.printStackTrace();
+        try {
+            BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
+            QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
+            apiUtil.logToQD(browserStackCredentials, "Item Created : " );
+            apiUtil.logToQD(browserStackCredentials, "Item Created : " + job.getClass().getName()) ;
+            // apiUtil.logToQD(browserStackCredentials, "Job Type : " + job.getClass().getName() + "---" + job.getFullName() + "---" + job instanceof FreeStyleProject);
+
+            String itemName = job.getFullName();
+            String itemType = getItemTypeModified(job);
+
+            apiUtil.logToQD(browserStackCredentials, "Item Type  : " + itemType + " : " + itemName + " : " + itemType.equals("PIPELINE"));
+            if(itemType != null && itemType.equals("PIPELINE")) {
+                try {
+                    apiUtil.logToQD(browserStackCredentials, "Item Type inside the Folder  : " + itemType + " : " + itemName + " : " + itemType.equals("PIPELINE"));
+                    String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
+                    syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "POST");
+
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 
