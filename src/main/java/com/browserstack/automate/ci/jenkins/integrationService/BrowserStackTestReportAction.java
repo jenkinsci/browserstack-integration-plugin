@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import okhttp3.*;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,11 +87,11 @@ public class BrowserStackTestReportAction implements Action {
       if (response.isSuccessful()) {
         JSONObject reportResponse = new JSONObject(response.body().string());
         String reportStatus = reportResponse.optString("report_status");
-        if (reportStatus.equalsIgnoreCase(String.valueOf(Constants.REPORT_STATUS.COMPLETED))) {
+        if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.COMPLETED))) {
           String defaultHTML = "<h1>No Report Found</h1>";
           reportHtml = reportResponse.optString("report_html", defaultHTML);
           reportStyle = reportResponse.optString("report_style", "");
-        } else if (reportStatus.equalsIgnoreCase(String.valueOf(Constants.REPORT_STATUS.IN_PROGRESS))) {
+        } else if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.IN_PROGRESS))) {
           reportHtml = REPORT_IN_PROGRESS;
         } else {
           reportHtml = REPORT_FAILED;
@@ -103,7 +104,7 @@ public class BrowserStackTestReportAction implements Action {
       if (this.maxRetryReportAttempt < 0) {
         reportHtml = REPORT_FAILED;
       }
-      logError(logger, "Exception while fetching the report" + e.getMessage());
+      logError(logger, "Exception while fetching the report" + Arrays.toString(e.getStackTrace()));
     }
   }
 

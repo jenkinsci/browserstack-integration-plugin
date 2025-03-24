@@ -28,10 +28,7 @@ import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -92,7 +89,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     // Encode the timestamp to make it URL-safe
     String encodedTimestamp = URLEncoder.encode(formattedTime, "UTF-8");
 
-    String UUID = fetchUUID(logger, lookUpURL, credentials, browserStackBuildName, projectName, encodedTimestamp);
+    String UUID = fetchBuildUUID(logger, lookUpURL, credentials, browserStackBuildName, projectName, encodedTimestamp);
     if (UUID == null) {
       logError(logger, "Cannot find a build with name " + browserStackBuildName);
     }
@@ -109,7 +106,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
   }
 
-  private String fetchUUID(PrintStream logger, String lookUpURL, BrowserStackCredentials credentials, String buildName, String projectName, String encodedTimestamp) throws InterruptedException {
+  private String fetchBuildUUID(PrintStream logger, String lookUpURL, BrowserStackCredentials credentials, String buildName, String projectName, String encodedTimestamp) throws InterruptedException {
 
     Map<String, String> params = new HashMap<>();
     params.put("build_name", buildName);
@@ -126,7 +123,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     try {
       lookUpURLWithParams = requestsUtil.buildQueryParams(lookUpURL, params);
     } catch (URISyntaxException uriSyntaxException) {
-      logError(logger, "Could not build look up url with params" + uriSyntaxException.getMessage());
+      logError(logger, "Could not build look up url with params" + Arrays.toString(uriSyntaxException.getStackTrace()));
       return null;
     }
 
@@ -147,7 +144,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
           LOGGER.info("build not found will retry in sometime.." + lookUpResponse.getString("message"));
         }
       } catch (Exception e) {
-        logError(logger, "Attempt " + (attempts + 1) + " failed: " + e.getMessage());
+        logError(logger, "Attempt " + (attempts + 1) + " failed: " + Arrays.toString(e.getStackTrace()));
       }
       TimeUnit.SECONDS.sleep(RETRY_DELAY_SECONDS);
     }
@@ -170,7 +167,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
       }
       logError(logger, "Failed to fetch config details: " + response.code());
     } catch (Exception e) {
-      logError(logger, "Exception occurred while fetching config details: " + e.getMessage());
+      logError(logger, "Exception occurred while fetching config details: " + Arrays.toString(e.getStackTrace()));
     }
     return null;
   }

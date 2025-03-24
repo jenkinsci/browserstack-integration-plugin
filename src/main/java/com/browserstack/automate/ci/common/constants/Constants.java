@@ -19,11 +19,7 @@ public class Constants {
     public static final String BROWSERSTACK_TEST_REPORT_DISPLAY_NAME = "BrowserStack Build Test Reports";
     public static final String INTEGRATIONS_TOOL_KEY = "jenkins";
     public static  final String REPORT_CONFIG_OPERATION_NAME = "report-config-details";
-    public static enum REPORT_STATUS {
-      IN_PROGRESS,
-      COMPLETED,
-      FAILED
-    }
+
     // Product
     public static final String AUTOMATE = "automate";
     public static final String APP_AUTOMATE = "app-automate";
