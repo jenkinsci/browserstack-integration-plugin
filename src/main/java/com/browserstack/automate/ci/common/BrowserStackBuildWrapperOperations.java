@@ -187,11 +187,10 @@ public class BrowserStackBuildWrapperOperations {
             logEnvVar(BrowserStackEnvVars.BROWSERSTACK_RERUN, reRun);
         }
 
-        // TODO
         String host = env.get(BrowserStackEnvVars.QEI_URL);
         if ( host != null ) {
             logEnvVar(BrowserStackEnvVars.QEI_URL, host);
-            Constants.QualityDashboardAPI.setHost(host, logger);
+            Constants.QualityDashboardAPI.setHost(host);
         }
     }
 
