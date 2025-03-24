@@ -42,12 +42,12 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
   private static final int RETRY_DELAY_SECONDS = 5;
   private final Map<String, String> customEnvVars;
 
-  RequestsUtil requestsUtil;
+  private RequestsUtil requestsUtil;
 
   @DataBoundConstructor
   public BrowserStackTestReportPublisher(Map<String, String> customEnvVars) {
     this.customEnvVars = customEnvVars != null && !customEnvVars.isEmpty() ? new ConcurrentHashMap<>(customEnvVars) : new ConcurrentHashMap<>();
-    requestsUtil = new RequestsUtil();
+    this.requestsUtil = new RequestsUtil();
   }
 
   @Override

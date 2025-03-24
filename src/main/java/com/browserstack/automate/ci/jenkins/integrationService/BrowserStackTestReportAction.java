@@ -34,8 +34,7 @@ public class BrowserStackTestReportAction implements Action {
   private static final String RETRY_REPORT = "RETRY_REPORT";
 
   private static final int MAX_ATTEMPTS = 3;
-  private static final OkHttpClient client = new OkHttpClient();
-  RequestsUtil requestsUtil;
+  private RequestsUtil requestsUtil;
 
   public BrowserStackTestReportAction(Run<?, ?> run, BrowserStackCredentials credentials, String reportUrl, String UUID, String reportName, String tabUrl, final PrintStream logger) {
     super();
@@ -50,7 +49,7 @@ public class BrowserStackTestReportAction implements Action {
     this.urlName = tabUrl;
     this.maxRetryReportAttempt = MAX_ATTEMPTS;
 
-    requestsUtil = new RequestsUtil();
+    this.requestsUtil = new RequestsUtil();
   }
 
 

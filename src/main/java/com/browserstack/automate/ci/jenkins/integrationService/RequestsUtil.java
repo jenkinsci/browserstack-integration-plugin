@@ -14,9 +14,6 @@ import java.util.Map;
 public class RequestsUtil {
   private transient OkHttpClient client;
 
-  public RequestsUtil() {
-    this.client = new OkHttpClient();
-  }
 
   public Response makeRequest(String getUrl, BrowserStackCredentials browserStackCredentials) throws Exception {
     try {
@@ -24,7 +21,7 @@ public class RequestsUtil {
               .url(getUrl)
               .header("Authorization", Credentials.basic(browserStackCredentials.getUsername(), browserStackCredentials.getDecryptedAccesskey()))
               .build();
-      Response response = client.newCall(request).execute();
+      Response response = getClient().newCall(request).execute();
       return response;
     } catch (IOException e) {
       e.printStackTrace();
@@ -44,6 +41,13 @@ public class RequestsUtil {
       uriSyntaxException.printStackTrace();
       throw uriSyntaxException;
     }
+  }
+
+  private OkHttpClient getClient() {
+    if (client == null) {
+      client = new OkHttpClient();
+    }
+    return client;
   }
 }
 
