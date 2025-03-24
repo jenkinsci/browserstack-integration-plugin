@@ -105,19 +105,54 @@ public class QualityDashboardInit {
         return false;
     }
 
-    private static List<String> getAllPipelines(BrowserStackCredentials browserStackCredentials) throws JsonProcessingException {
+    private static List<String> getAllPipelines(BrowserStackCredentials browserStackCredentials) {
         List<String> allPipelines = new ArrayList<>();
         Jenkins jenkins = Jenkins.getInstanceOrNull();
+        Integer totalPipelines = 0;
+
         if (jenkins != null) {
+            totalPipelines = jenkins.getAllItems().size();
             jenkins.getAllItems().forEach(job -> {
-                if(job instanceof WorkflowJob) {
-                    String pipelineName = job.getFullName();
+                try {
+                    // Logging job details
+                    apiUtil.logToQD(
+                        browserStackCredentials,
+                        String.format(
+                            "Job name: %s, instance type: %s, and is_workflow_job: %s",
+                            job.getName(),
+                            job.getClass().getSimpleName(),
+                            (job instanceof WorkflowJob) ? "yes" : "no"
+                        )
+                    );
+                } catch (JsonProcessingException e) {
+                    // Handling the exception and logging an error
+                    System.err.println("Error processing JSON for job: " + job.getName());
+                    e.printStackTrace();
+                }
+
+                if (job instanceof WorkflowJob) {
+                    String pipelineName = job.getFullName(); // Getting pipeline name
                     allPipelines.add(pipelineName);
                 }
             });
         } else {
-            apiUtil.logToQD(browserStackCredentials,"Issue getting Jenkins Instance");
+            try {
+                apiUtil.logToQD(browserStackCredentials, "Issue getting Jenkins Instance");
+            } catch (JsonProcessingException e) {
+                System.err.println("Error logging issue with Jenkins instance.");
+                e.printStackTrace();
+            }
         }
+
+        try {
+            apiUtil.logToQD(browserStackCredentials,"Total Pipelines on the jenkins side : " + totalPipelines);
+            apiUtil.logToQD(browserStackCredentials,"Total Pipelines detected : " + allPipelines.size());
+        } catch (JsonProcessingException e) {
+            // Handling the exception and logging an error
+            System.err.println("Error processing JSON for total pipelines: ");
+            e.printStackTrace();
+        }
+        // Returning the list of filtered pipelines
         return allPipelines;
     }
 
@@ -135,6 +170,7 @@ public class QualityDashboardInit {
                 String jsonBody = objectMapper.writeValueAsString(pipelinesPaginated);
                 RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
                 Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.getSavePipelinesEndpoint(), browserStackCredentials, requestBody);
+                apiUtil.logToQD(browserStackCredentials, "Sending page " + page + " with " + singlePagePipelineList.size() + " pipelines");
                 if (response == null ||  response.code() != HttpURLConnection.HTTP_OK) {
                     apiUtil.logToQD(browserStackCredentials,"Got Non 200 response while saving projects");
                     isSuccess = false;
