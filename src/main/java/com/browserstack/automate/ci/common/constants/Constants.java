@@ -1,5 +1,7 @@
 package com.browserstack.automate.ci.common.constants;
 
+// TODO
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,27 +64,80 @@ public class Constants {
         public static final String PASSED = "passed";
     }
 
-    public static final class QualityDashboardAPI {
-        public static final String URL_BASE = "https://quality-engineering-insights.browserstack.com/api/v1/jenkins";
+public static class QualityDashboardAPI {
+        // TODO
+        public static String host = "https://quality-engineering-insights.browserstack.com";
+        public static String URL_BASE;
+        // public static PrintStream newlogger = System.out;  // Ensure logging to console
 
-        public static final String LOG_MESSAGE = URL_BASE + "/log-message";
-        public static final String IS_INIT_SETUP_REQUIRED = URL_BASE + "/init-setup-required";
+        public static String getHost() {
+            return host;
+        }
 
-        public static final String HISTORY_FOR_DAYS = URL_BASE + "/history-for-days";
+        public static void setHost(String newHost, PrintStream logger) {
+            host = newHost;
+            // newlogger = logger;
 
-        public static final String SAVE_PIPELINES = URL_BASE + "/save-pipelines";
+            // log(logger, "QualityDashboardAPI newHost: " + getHost());
+            // URL_BASE = host + "/api/v1/jenkins";
+            // log(newlogger, "QualityDashboardAPI url base host: " + URL_BASE);
+            // log(newlogger, "QualityDashboardAPI host1: " + getHost());
+        }
 
-        public static final String SAVE_PIPELINE_RESULTS = URL_BASE + "/save-pipeline-results";
-
-        public static final String ITEM_CRUD = URL_BASE + "/item";
-        public static final String IS_QD_ENABLED = URL_BASE + "/qd-enabled";
-        public static final String IS_PIPELINE_ENABLED = URL_BASE + "/pipeline-enabled";
-        public static final String GET_RESULT_DIRECTORY = URL_BASE + "/get-result-directory";
-
-        public static final String UPLOAD_RESULT_ZIP = URL_BASE + "/upload-result";
-        public static final String STORE_PIPELINE_RESULTS = URL_BASE + "/save-results";
-
-        public static final String PROJECTS_PAGE_SIZE = URL_BASE + "/projects-page-size";
-        public static final String RESULTS_PAGE_SIZE = URL_BASE + "/results-page-size";
+        public static String getURLBase() {
+            return getHost() + "/api/v1/jenkins";
+        }
+    
+        public static String getLogMessageEndpoint() {
+            return getURLBase() + "/log-message";
+        }
+    
+        public static String getIsInitSetupRequiredEndpoint() {
+            return getURLBase() + "/init-setup-required";
+        }
+    
+        public static String getHistoryForDaysEndpoint() {
+            return getURLBase() + "/history-for-days";
+        }
+    
+        public static String getSavePipelinesEndpoint() {
+            return getURLBase() + "/save-pipelines";
+        }
+    
+        public static String getSavePipelineResultsEndpoint() {
+            return getURLBase() + "/save-pipeline-results";
+        }
+    
+        public static String getItemCrudEndpoint() {
+            return getURLBase() + "/item";
+        }
+    
+        public static String getIsQdEnabledEndpoint() {
+            return getURLBase() + "/qd-enabled";
+        }
+    
+        public static String getIsPipelineEnabledEndpoint() {
+            return getURLBase() + "/pipeline-enabled";
+        }
+    
+        public static String getResultDirectoryEndpoint() {
+            return getURLBase() + "/get-result-directory";
+        }
+    
+        public static String getUploadResultZipEndpoint() {
+            return getURLBase() + "/upload-result";
+        }
+    
+        public static String getStorePipelineResultsEndpoint() {
+            return getURLBase() + "/save-results";
+        }
+    
+        public static String getProjectsPageSizeEndpoint() {
+            return getURLBase() + "/projects-page-size";
+        }
+    
+        public static String getResultsPageSizeEndpoint() {
+            return getURLBase() + "/results-page-size";
+        }
     }
 }

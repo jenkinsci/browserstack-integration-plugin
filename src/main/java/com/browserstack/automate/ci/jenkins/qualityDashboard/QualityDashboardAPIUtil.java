@@ -77,7 +77,7 @@ public class QualityDashboardAPIUtil {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody = objectMapper.writeValueAsString(logMessageObj);
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
-        makePostRequestToQd(Constants.QualityDashboardAPI.LOG_MESSAGE, browserStackCredentials, requestBody);
+        makePostRequestToQd(Constants.QualityDashboardAPI.getLogMessageEndpoint(), browserStackCredentials, requestBody);
     }
 }
 

@@ -100,6 +100,11 @@ public class BrowserStackPipelineStepExecution extends StepExecution {
         EnvVars overrides = run.getEnvironment(taskListener);
         HashMap<String, String> overridesMap = new HashMap<String, String>();
         overridesMap.put(Constants.JENKINS_BUILD_TAG, overrides.get(Constants.JENKINS_BUILD_TAG));
+        // TODO
+        log(logger, overrides.toString());
+        if ( overrides.containsKey(BrowserStackEnvVars.QEI_URL) ) {
+            overridesMap.put(BrowserStackEnvVars.QEI_URL, overrides.get(BrowserStackEnvVars.QEI_URL));
+        }
         if ( parentContextEnvVars.containsKey(BrowserStackEnvVars.GRR_JENKINS_KEY) ) {
             overridesMap.put(BrowserStackEnvVars.GRR_JENKINS_KEY, parentContextEnvVars.get(BrowserStackEnvVars.GRR_JENKINS_KEY));
         }

@@ -109,7 +109,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
 
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
             apiUtil.logToQD(browserStackCredentials, "Sending Final Results for jobName: " + jobName + " and buildNumber: " + buildNumber);
-            apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.STORE_PIPELINE_RESULTS, browserStackCredentials, requestBody);
+            apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.getStorePipelineResultsEndpoint(), browserStackCredentials, requestBody);
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -153,7 +153,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
     }
 
     private boolean isQDEnabled(BrowserStackCredentials browserStackCredentials) throws IOException {
-        Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.IS_QD_ENABLED, browserStackCredentials);
+        Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.getIsQdEnabledEndpoint(), browserStackCredentials);
         if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
             ResponseBody responseBody = response.body();
             if(responseBody != null && Boolean.parseBoolean(response.body().string())) {
@@ -170,7 +170,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody = objectMapper.writeValueAsString(getPipelineEnabledObj);
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
-        Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.IS_PIPELINE_ENABLED, browserStackCredentials, requestBody);
+        Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.getIsPipelineEnabledEndpoint(), browserStackCredentials, requestBody);
         if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
             ResponseBody responseBody = response.body();
             if(responseBody != null && Boolean.parseBoolean(response.body().string())) {
@@ -190,7 +190,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
             String jsonBody = objectMapper.writeValueAsString(getResultDirReqObj);
 
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
-            Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.GET_RESULT_DIRECTORY, browserStackCredentials, requestBody);
+            Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.getResultDirectoryEndpoint(), browserStackCredentials, requestBody);
             if (response != null && response.code() == HttpURLConnection.HTTP_OK) {
                 String responseBody = response.body() !=null ? response.body().string() : null;
                 resultDir = responseBody;
@@ -234,7 +234,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
                 .addFormDataPart("buildNumber", String.valueOf(buildNumber))
                 .build();
 
-        Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.UPLOAD_RESULT_ZIP, browserStackCredentials, requestBody);
+        Response response = apiUtil.makePostRequestToQd(Constants.QualityDashboardAPI.getUploadResultZipEndpoint(), browserStackCredentials, requestBody);
         if (response != null && response.code() == HttpURLConnection.HTTP_OK) {
             qdS3Url = response.body() !=null ? response.body().string() : null;
         }
