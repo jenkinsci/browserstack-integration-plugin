@@ -23,9 +23,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
         try {
             BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
             QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
-            apiUtil.logToQD(browserStackCredentials, "Item Created : " );
             apiUtil.logToQD(browserStackCredentials, "Item Created : " + job.getClass().getName()) ;
-            // apiUtil.logToQD(browserStackCredentials, "Job Type : " + job.getClass().getName() + "---" + job.getFullName() + "---" + job instanceof FreeStyleProject);
 
             String itemName = job.getFullName();
             String itemType = getItemTypeModified(job);
