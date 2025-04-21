@@ -62,10 +62,9 @@ public class Constants {
         public static final String PASSED = "passed";
     }
 
-    public static class QualityDashboardAPI {
+    public static final class QualityDashboardAPI {
         public static final String QEI_DEFAULT_URL = "https://quality-engineering-insights.browserstack.com";
         public static String host = QEI_DEFAULT_URL;
-        public static String URL_BASE;
 
         public static String getHost() {
             return host;
@@ -75,59 +74,59 @@ public class Constants {
             host = newHost;
         }
 
-        public static String getURLBase() {
+        public static final String getURLBase() {
             return getHost() + "/api/v1/jenkins";
         }
     
-        public static String getLogMessageEndpoint() {
+        public static final String getLogMessageEndpoint() {
             return getURLBase() + "/log-message";
         }
     
-        public static String getIsInitSetupRequiredEndpoint() {
+        public static final String getIsInitSetupRequiredEndpoint() {
             return getURLBase() + "/init-setup-required";
         }
     
-        public static String getHistoryForDaysEndpoint() {
+        public static final String getHistoryForDaysEndpoint() {
             return getURLBase() + "/history-for-days";
         }
     
-        public static String getSavePipelinesEndpoint() {
+        public static final String getSavePipelinesEndpoint() {
             return getURLBase() + "/save-pipelines";
         }
     
-        public static String getSavePipelineResultsEndpoint() {
+        public static final String getSavePipelineResultsEndpoint() {
             return getURLBase() + "/save-pipeline-results";
         }
     
-        public static String getItemCrudEndpoint() {
+        public static final String getItemCrudEndpoint() {
             return getURLBase() + "/item";
         }
     
-        public static String getIsQdEnabledEndpoint() {
+        public static final String getIsQdEnabledEndpoint() {
             return getURLBase() + "/qd-enabled";
         }
     
-        public static String getIsPipelineEnabledEndpoint() {
+        public static final String getIsPipelineEnabledEndpoint() {
             return getURLBase() + "/pipeline-enabled";
         }
     
-        public static String getResultDirectoryEndpoint() {
+        public static final String getResultDirectoryEndpoint() {
             return getURLBase() + "/get-result-directory";
         }
     
-        public static String getUploadResultZipEndpoint() {
+        public static final String getUploadResultZipEndpoint() {
             return getURLBase() + "/upload-result";
         }
     
-        public static String getStorePipelineResultsEndpoint() {
+        public static final String getStorePipelineResultsEndpoint() {
             return getURLBase() + "/save-results";
         }
     
-        public static String getProjectsPageSizeEndpoint() {
+        public static final String getProjectsPageSizeEndpoint() {
             return getURLBase() + "/projects-page-size";
         }
     
-        public static String getResultsPageSizeEndpoint() {
+        public static final String getResultsPageSizeEndpoint() {
             return getURLBase() + "/results-page-size";
         }
     }
