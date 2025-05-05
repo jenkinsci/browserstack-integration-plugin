@@ -35,23 +35,9 @@
 
                     <iframe id="browserstack-iframe-${session.id}" src="${session.publicUrl}" class="browserstack-session-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" />
 
-                    <script type="text/javascript">
-                        var testAction = <st:bind value="${it}"/>
-                        var sessionId = <st:bind value="${session.id}" />
-                        //<![CDATA[
-                        var startTime = (new Date).valueOf();
-                        function onLoadIFrame() {
-                            testAction.iframeLoadTime((new Date).valueOf() - startTime);
-                        }
-
-                        var iframeElem = document.getElementById('browserstack-iframe-' + sessionId);
-                        if (iframeElem.addEventListener) {
-                            iframeElem.addEventListener('load', onLoadIFrame, true);
-                        } else if (iframeElem.attachEvent) {
-                            iframeElem.attachEvent('onload', onLoadIFrame);
-                        }
-                        //]]>
-                    </script>
+                    <st:bind value="${it}" var="testAction"/>
+                    <span class="browserstack-analytics-data-holder" data-session-id="${session.id}"/>
+                    <st:adjunct includes="com.browserstack.automate.ci.jenkins.AutomateTestAction.resource"/>
 
                     <style type="text/css">
                     .browserstack-session-frame {
