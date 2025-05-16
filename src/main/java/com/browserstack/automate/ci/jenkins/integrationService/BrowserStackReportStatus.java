@@ -3,5 +3,8 @@ package com.browserstack.automate.ci.jenkins.integrationService;
 public enum BrowserStackReportStatus {
   IN_PROGRESS,
   COMPLETED,
-  FAILED
+  TEST_AVAILABLE,
+  NOT_AVAILABLE,
+  BUILD_NOT_FOUND,
+  MULTIPLE_BUILD_FOUND
 }

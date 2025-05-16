@@ -7,6 +7,7 @@ import hudson.model.Run;
 import org.json.JSONObject;
 import okhttp3.*;
 
+import javax.xml.bind.annotation.XmlType;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,15 +20,18 @@ public class BrowserStackTestReportAction implements Action {
 
   private Run<?, ?> run;
   private BrowserStackCredentials credentials;
-  private String reportUrl;
-  private final String UUID;
   private String reportHtml;
+
+  private String buildName;
+  private String buildCreatedAt;
   private final transient PrintStream logger;
   private String reportStyle;
   public String reportName;
   public String urlName;
 
   private int maxRetryReportAttempt;
+
+  private static final String DEFAULT_REPORT_TIMEOUT = "120";
   private static final String REPORT_IN_PROGRESS = "REPORT_IN_PROGRESS";
   private static final String REPORT_FAILED = "REPORT_FAILED";
 
@@ -36,18 +40,16 @@ public class BrowserStackTestReportAction implements Action {
   private static final int MAX_ATTEMPTS = 3;
   private RequestsUtil requestsUtil;
 
-  public BrowserStackTestReportAction(Run<?, ?> run, BrowserStackCredentials credentials, String reportUrl, String UUID, String reportName, String tabUrl, final PrintStream logger) {
+  public BrowserStackTestReportAction(Run<?, ?> run, BrowserStackCredentials credentials, String buildName, String builldCreatedAt, final PrintStream logger) {
     super();
     setBuild(run);
     this.credentials = credentials;
-    this.reportUrl = reportUrl;
-    this.UUID = UUID;
+    this.buildName = buildName;
+    this.buildCreatedAt = builldCreatedAt;
     this.reportHtml = null;
     this.reportStyle = "";
+    maxRetryReportAttempt = MAX_ATTEMPTS;
     this.logger = logger;
-    this.reportName = reportName;
-    this.urlName = tabUrl;
-    this.maxRetryReportAttempt = MAX_ATTEMPTS;
 
     this.requestsUtil = new RequestsUtil();
   }
@@ -70,28 +72,37 @@ public class BrowserStackTestReportAction implements Action {
   }
 
   private void fetchReport() {
-    if (UUID == null) {
-      reportHtml = REPORT_FAILED;
-      return;
-    }
     Map<String, String> params = new HashMap<>();
-    params.put("UUID", UUID);
-    params.put("report_name", reportName);
-    params.put("tool", Constants.INTEGRATIONS_TOOL_KEY);
+    String pollValue = "FIRST";
+    params.put("buildCreatedAt", buildCreatedAt);
+    params.put("buildName", buildName);
+    params.put("requestingCi", Constants.INTEGRATIONS_TOOL_KEY);
+    params.put("reportFormat", Arrays.asList(Constants.REPORT_FORMAT).toString());
+    params.put("requestType", pollValue);
+    params.put("userTimeout", DEFAULT_REPORT_TIMEOUT);
 
     try {
+      String reportUrl = Constants.CAD_BASE_URL + Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT;
       String ciReportUrlWithParams = requestsUtil.buildQueryParams(reportUrl, params);
       log(logger, "Fetching browserstack report " + reportName);
       Response response = requestsUtil.makeRequest(ciReportUrlWithParams, credentials);
       if (response.isSuccessful()) {
+        assert response.body() != null;
         JSONObject reportResponse = new JSONObject(response.body().string());
-        String reportStatus = reportResponse.optString("report_status");
-        if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.COMPLETED))) {
+        String reportStatus = reportResponse.optString("reportStatus");
+        if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.COMPLETED)) ||
+                reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.TEST_AVAILABLE)) ||
+                reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.NOT_AVAILABLE))) {
+
           String defaultHTML = "<h1>No Report Found</h1>";
-          reportHtml = reportResponse.optString("report_html", defaultHTML);
-          reportStyle = reportResponse.optString("report_style", "");
+          JSONObject report = reportResponse.optJSONObject("report");
+          reportHtml = report != null ? report.optString("report_html", defaultHTML) : defaultHTML;
+          reportStyle = report != null ? report.optString("report_style", "") : "";
+
         } else if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.IN_PROGRESS))) {
+
           reportHtml = REPORT_IN_PROGRESS;
+
         } else {
           reportHtml = REPORT_FAILED;
         }

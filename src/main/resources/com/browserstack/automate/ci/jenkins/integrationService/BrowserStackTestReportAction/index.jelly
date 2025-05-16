@@ -75,7 +75,7 @@
                     <div class="new-container">
                         <div class="report-row">
                             <j:if test="${(it.isReportInProgress())}">
-                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack ${it.reportName} Report In Progress</strong></p>
+                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack ${it.reportName} Report In Progress, please refresh after sometime</strong></p>
                             </j:if>
                             <j:if test="${(it.isReportFailed())}">
                                 <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack ${it.reportName} Report Available</strong></p>
@@ -85,8 +85,6 @@
                                 <ul class="bullet-points">
                                     <li class="bullet-item">You have set valid BrowserStack credentials via BrowserStack Plugin.</li>
                                     <li class="bullet-item">You have used BROWSERSTACK_BUILD_NAME as your build name</li>
-                                    <li class="bullet-item">try passing BROWSERSTACK_PROJECT_NAME environment variable</li>
-
                                 </ul>
                             </j:if>
                             <j:if test="${it.reportRetryRequired()}">
