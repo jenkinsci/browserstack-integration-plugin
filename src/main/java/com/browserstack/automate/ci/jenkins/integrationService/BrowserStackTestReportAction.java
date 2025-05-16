@@ -2,12 +2,12 @@ package com.browserstack.automate.ci.jenkins.integrationService;
 
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
+import com.google.gson.Gson;
 import hudson.model.Action;
 import hudson.model.Run;
 import org.json.JSONObject;
 import okhttp3.*;
 
-import javax.xml.bind.annotation.XmlType;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +36,8 @@ public class BrowserStackTestReportAction implements Action {
   private static final String REPORT_FAILED = "REPORT_FAILED";
 
   private static final String RETRY_REPORT = "RETRY_REPORT";
+
+  private static final String RATE_LIMIT = "RATE_LIMIT";
 
   private static final int MAX_ATTEMPTS = 3;
   private RequestsUtil requestsUtil;
@@ -66,7 +68,7 @@ public class BrowserStackTestReportAction implements Action {
   }
 
   private void fetchReportConditions() {
-    if (reportHtml == null || reportHtml.equals(REPORT_IN_PROGRESS) || reportHtml.equals(RETRY_REPORT)) {
+    if (reportHtml == null || reportHtml.equals(REPORT_IN_PROGRESS) || reportHtml.equals(RETRY_REPORT) || reportHtml.equals(RATE_LIMIT)) {
       fetchReport();
     }
   }
@@ -83,9 +85,11 @@ public class BrowserStackTestReportAction implements Action {
 
     try {
       String reportUrl = Constants.CAD_BASE_URL + Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT;
-      String ciReportUrlWithParams = requestsUtil.buildQueryParams(reportUrl, params);
+      Gson gson = new Gson();
+      String json = gson.toJson(params);
+      RequestBody ciReportBody = RequestBody.create(MediaType.parse("application/json"), json);
       log(logger, "Fetching browserstack report " + reportName);
-      Response response = requestsUtil.makeRequest(ciReportUrlWithParams, credentials);
+      Response response = requestsUtil.makeRequest(reportUrl, credentials, ciReportBody);
       if (response.isSuccessful()) {
         assert response.body() != null;
         JSONObject reportResponse = new JSONObject(response.body().string());
@@ -96,8 +100,8 @@ public class BrowserStackTestReportAction implements Action {
 
           String defaultHTML = "<h1>No Report Found</h1>";
           JSONObject report = reportResponse.optJSONObject("report");
-          reportHtml = report != null ? report.optString("reportHtml", defaultHTML) : defaultHTML;
-          reportStyle = report != null ? report.optString("reportCss", "") : "";
+          reportHtml = report != null ? report.optString("richHtml", defaultHTML) : defaultHTML;
+          reportStyle = report != null ? report.optString("richCss", "") : "";
 
         } else if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.IN_PROGRESS))) {
 
@@ -106,6 +110,10 @@ public class BrowserStackTestReportAction implements Action {
         } else {
           reportHtml = REPORT_FAILED;
         }
+      } else if (response.code() == 429) {
+        reportHtml = RATE_LIMIT;
+      } else {
+        reportHtml = REPORT_FAILED;
         logError(logger, "Received Non success response while fetching report" + response.code());
       }
     } catch (Exception e) {
@@ -129,6 +137,8 @@ public class BrowserStackTestReportAction implements Action {
   public boolean reportRetryRequired() {
     return reportHtml.equals(RETRY_REPORT);
   }
+
+  public boolean isUserRateLimited() { return  reportHtml.equals(RATE_LIMIT); }
 
   public boolean isReportAvailable() {
     if (reportHtml != null && !reportHtml.equals(REPORT_IN_PROGRESS) && !reportHtml.equals(REPORT_FAILED) && !reportHtml.equals(RETRY_REPORT)) {
@@ -157,12 +167,12 @@ public class BrowserStackTestReportAction implements Action {
 
   @Override
   public String getDisplayName() {
-    return this.reportName;
+    return Constants.BROWSERSTACK_CAD_REPORT_DISPLAY_NAME;
   }
 
   @Override
   public String getUrlName() {
-    return this.urlName;
+    return Constants.BROWSERSTACK_TEST_REPORT_URL;
   }
 
 }

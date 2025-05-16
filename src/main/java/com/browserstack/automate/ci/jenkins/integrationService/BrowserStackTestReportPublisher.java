@@ -98,7 +98,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
     @Override
     public String getDisplayName() {
-      return Constants.BROWSERSTACK_TEST_REPORT_DISPLAY_NAME;
+      return Constants.BROWSERSTACK_CAD_REPORT_DISPLAY_NAME;
     }
 
   }

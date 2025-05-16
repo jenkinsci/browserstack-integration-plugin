@@ -1,10 +1,7 @@
 package com.browserstack.automate.ci.jenkins.integrationService;
 
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
-import okhttp3.Credentials;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.io.IOException;
@@ -15,14 +12,14 @@ public class RequestsUtil {
   private transient OkHttpClient client;
 
 
-  public Response makeRequest(String getUrl, BrowserStackCredentials browserStackCredentials) throws Exception {
+  public Response makeRequest(String url, BrowserStackCredentials browserStackCredentials, RequestBody body) throws Exception {
     try {
       Request request = new Request.Builder()
-              .url(getUrl)
+              .url(url)
               .header("Authorization", Credentials.basic(browserStackCredentials.getUsername(), browserStackCredentials.getDecryptedAccesskey()))
+              .post(body)
               .build();
-      Response response = getClient().newCall(request).execute();
-      return response;
+      return getClient().newCall(request).execute();
     } catch (IOException e) {
       e.printStackTrace();
       throw e;

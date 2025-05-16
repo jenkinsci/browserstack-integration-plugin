@@ -75,12 +75,12 @@
                     <div class="new-container">
                         <div class="report-row">
                             <j:if test="${(it.isReportInProgress())}">
-                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack ${it.reportName} Report In Progress, please refresh after sometime</strong></p>
+                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Test Report generation In Progress, please refresh after sometime</strong></p>
                             </j:if>
                             <j:if test="${(it.isReportFailed())}">
-                                <p class="no-report-para"><strong class="strong-font-custom">No BrowserStack ${it.reportName} Report Available</strong></p>
+                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Test Report Could Not Be Fetched</strong></p>
                                 <br/>
-                                <p class="no-report-para">BrowserStack test report could not be generated for this build. Please ensure that:</p>
+                                <p class="no-report-para">BrowserStack test report could not be fetched for this build since something went wrong. Please ensure that:</p>
                                 <br/>
                                 <ul class="bullet-points">
                                     <li class="bullet-item">You have set valid BrowserStack credentials via BrowserStack Plugin.</li>
@@ -88,7 +88,10 @@
                                 </ul>
                             </j:if>
                             <j:if test="${it.reportRetryRequired()}">
-                                <p class="no-report-para"><strong class="strong-font-custom">Unable to Fetch Report try refreshing...</strong></p>
+                                <p class="no-report-para"><strong class="strong-font-custom">Unable to Fetch Report something went wrong try refreshing...</strong></p>
+                            </j:if>
+                            <j:if test="${it.isUserRateLimited()}">
+                                <p class="no-report-para"><strong class="strong-font-custom"> You have been rate limited, please retry after sometime</strong></p>
                             </j:if>
                         </div>
                     </div>
