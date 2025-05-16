@@ -96,8 +96,8 @@ public class BrowserStackTestReportAction implements Action {
 
           String defaultHTML = "<h1>No Report Found</h1>";
           JSONObject report = reportResponse.optJSONObject("report");
-          reportHtml = report != null ? report.optString("report_html", defaultHTML) : defaultHTML;
-          reportStyle = report != null ? report.optString("report_style", "") : "";
+          reportHtml = report != null ? report.optString("reportHtml", defaultHTML) : defaultHTML;
+          reportStyle = report != null ? report.optString("reportCss", "") : "";
 
         } else if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.IN_PROGRESS))) {
 
