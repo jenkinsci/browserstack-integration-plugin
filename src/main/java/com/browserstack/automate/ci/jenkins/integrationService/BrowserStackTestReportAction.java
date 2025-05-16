@@ -18,138 +18,162 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackTestReportAction implements Action {
 
-  private Run<?, ?> run;
-  private BrowserStackCredentials credentials;
-  private String reportHtml;
-
-  private String buildName;
-  private String buildCreatedAt;
-  private final transient PrintStream logger;
-  private String reportStyle;
-  public String reportName;
-  public String urlName;
-
-  private int maxRetryReportAttempt;
-
   private static final String DEFAULT_REPORT_TIMEOUT = "120";
+  private static final String SUCCESS_REPORT = "SUCCESS_REPORT";
   private static final String REPORT_IN_PROGRESS = "REPORT_IN_PROGRESS";
   private static final String REPORT_FAILED = "REPORT_FAILED";
-
   private static final String RETRY_REPORT = "RETRY_REPORT";
-
   private static final String RATE_LIMIT = "RATE_LIMIT";
-
+  private static final String TEST_AVAILABLE = "TEST_AVAILABLE";
   private static final int MAX_ATTEMPTS = 3;
-  private RequestsUtil requestsUtil;
 
-  public BrowserStackTestReportAction(Run<?, ?> run, BrowserStackCredentials credentials, String buildName, String builldCreatedAt, final PrintStream logger) {
-    super();
-    setBuild(run);
+  private final transient PrintStream logger;
+  private final RequestsUtil requestsUtil;
+  private final BrowserStackCredentials credentials;
+  private final String buildName;
+  private final String buildCreatedAt;
+
+  private Run<?, ?> run;
+  private String reportHtml;
+  private String reportStyle;
+  private String reportStatus;
+  private int maxRetryReportAttempt;
+
+  public BrowserStackTestReportAction(Run<?, ?> run, BrowserStackCredentials credentials, String buildName, String buildCreatedAt, final PrintStream logger) {
+    this.run = run;
     this.credentials = credentials;
     this.buildName = buildName;
-    this.buildCreatedAt = builldCreatedAt;
+    this.buildCreatedAt = buildCreatedAt;
+    this.logger = logger;
+    this.requestsUtil = new RequestsUtil();
     this.reportHtml = null;
     this.reportStyle = "";
-    maxRetryReportAttempt = MAX_ATTEMPTS;
-    this.logger = logger;
-
-    this.requestsUtil = new RequestsUtil();
+    this.reportStatus = "";
+    this.maxRetryReportAttempt = MAX_ATTEMPTS;
   }
 
-
   public String getReportHtml() {
-    fetchReportConditions();
+    ensureReportFetched();
     return reportHtml;
   }
 
   public String getReportStyle() {
-    fetchReportConditions();
+    ensureReportFetched();
     return reportStyle;
   }
 
-  private void fetchReportConditions() {
-    if (reportHtml == null || reportHtml.equals(REPORT_IN_PROGRESS) || reportHtml.equals(RETRY_REPORT) || reportHtml.equals(RATE_LIMIT)) {
+  private void ensureReportFetched() {
+    if (!isReportCompletedOrFailed()) {
       fetchReport();
     }
   }
 
+  private boolean isReportCompletedOrFailed() {
+    return reportStatus.equals(SUCCESS_REPORT) || reportStatus.equals(REPORT_FAILED);
+  }
+
   private void fetchReport() {
+    Map<String, String> params = createReportParams();
+    String reportUrl = Constants.CAD_BASE_URL + Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT;
+
+    try {
+      log(logger, "Fetching BrowserStack report...");
+      Response response = requestsUtil.makeRequest(reportUrl, credentials, createRequestBody(params));
+      handleResponse(response);
+    } catch (Exception e) {
+      handleFetchException(e);
+    }
+  }
+
+  private Map<String, String> createReportParams() {
     Map<String, String> params = new HashMap<>();
-    String pollValue = "FIRST";
     params.put("buildCreatedAt", buildCreatedAt);
     params.put("buildName", buildName);
     params.put("requestingCi", Constants.INTEGRATIONS_TOOL_KEY);
     params.put("reportFormat", Arrays.asList(Constants.REPORT_FORMAT).toString());
-    params.put("requestType", pollValue);
+    params.put("requestType", "POLL");
     params.put("userTimeout", DEFAULT_REPORT_TIMEOUT);
+    return params;
+  }
 
-    try {
-      String reportUrl = Constants.CAD_BASE_URL + Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT;
-      Gson gson = new Gson();
-      String json = gson.toJson(params);
-      RequestBody ciReportBody = RequestBody.create(MediaType.parse("application/json"), json);
-      log(logger, "Fetching browserstack report " + reportName);
-      Response response = requestsUtil.makeRequest(reportUrl, credentials, ciReportBody);
-      if (response.isSuccessful()) {
-        assert response.body() != null;
-        JSONObject reportResponse = new JSONObject(response.body().string());
-        String reportStatus = reportResponse.optString("reportStatus");
-        if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.COMPLETED)) ||
-                reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.TEST_AVAILABLE)) ||
-                reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.NOT_AVAILABLE))) {
+  private RequestBody createRequestBody(Map<String, String> params) {
+    Gson gson = new Gson();
+    String json = gson.toJson(params);
+    return RequestBody.create(MediaType.parse("application/json"), json);
+  }
 
-          String defaultHTML = "<h1>No Report Found</h1>";
-          JSONObject report = reportResponse.optJSONObject("report");
-          reportHtml = report != null ? report.optString("richHtml", defaultHTML) : defaultHTML;
-          reportStyle = report != null ? report.optString("richCss", "") : "";
-
-        } else if (reportStatus.equalsIgnoreCase(String.valueOf(BrowserStackReportStatus.IN_PROGRESS))) {
-
-          reportHtml = REPORT_IN_PROGRESS;
-
-        } else {
-          reportHtml = REPORT_FAILED;
-        }
-      } else if (response.code() == 429) {
-        reportHtml = RATE_LIMIT;
-      } else {
-        reportHtml = REPORT_FAILED;
-        logError(logger, "Received Non success response while fetching report" + response.code());
-      }
-    } catch (Exception e) {
-      reportHtml = RETRY_REPORT;
-      this.maxRetryReportAttempt--;
-      if (this.maxRetryReportAttempt < 0) {
-        reportHtml = REPORT_FAILED;
-      }
-      logError(logger, "Exception while fetching the report" + Arrays.toString(e.getStackTrace()));
+  private void handleResponse(Response response) throws Exception {
+    if (response.isSuccessful()) {
+      processSuccessfulResponse(response);
+    } else if (response.code() == 429) {
+      reportStatus = RATE_LIMIT;
+    } else {
+      reportStatus = REPORT_FAILED;
+      logError(logger, "Non-success response while fetching report: " + response.code());
     }
+  }
+
+  private void processSuccessfulResponse(Response response) throws Exception {
+    assert response.body() != null;
+    JSONObject reportResponse = new JSONObject(response.body().string());
+    String responseReportStatus = reportResponse.optString("reportStatus");
+    JSONObject report = reportResponse.optJSONObject("report");
+
+    switch (responseReportStatus.toUpperCase()) {
+      case "COMPLETED":
+      case "NOT_AVAILABLE":
+        setReportSuccess(report);
+        break;
+      case "IN_PROGRESS":
+        reportStatus = REPORT_IN_PROGRESS;
+        break;
+      case "TEST_AVAILABLE":
+        setReportSuccess(report);
+        reportStatus = TEST_AVAILABLE;
+        break;
+      default:
+        reportStatus = REPORT_FAILED;
+    }
+  }
+
+  private void setReportSuccess(JSONObject report) {
+    String defaultHTML = "<h1>No Report Found</h1>";
+    reportStatus = SUCCESS_REPORT;
+    reportHtml = report != null ? report.optString("richHtml", defaultHTML) : defaultHTML;
+    reportStyle = report != null ? report.optString("richCss", "") : "";
+  }
+
+  private void handleFetchException(Exception e) {
+    reportStatus = RETRY_REPORT;
+    maxRetryReportAttempt--;
+    if (maxRetryReportAttempt < 0) {
+      reportStatus = REPORT_FAILED;
+    }
+    logError(logger, "Exception while fetching the report: " + Arrays.toString(e.getStackTrace()));
   }
 
   public boolean isReportInProgress() {
-    return reportHtml.equals(REPORT_IN_PROGRESS);
+    return reportStatus.equals(REPORT_IN_PROGRESS);
   }
 
   public boolean isReportFailed() {
-    return reportHtml.equals(REPORT_FAILED);
+    return reportStatus.equals(REPORT_FAILED);
   }
 
   public boolean reportRetryRequired() {
-    return reportHtml.equals(RETRY_REPORT);
+    return reportStatus.equals(RETRY_REPORT);
   }
 
-  public boolean isUserRateLimited() { return  reportHtml.equals(RATE_LIMIT); }
+  public boolean isUserRateLimited() {
+    return reportStatus.equals(RATE_LIMIT);
+  }
 
   public boolean isReportAvailable() {
-    if (reportHtml != null && !reportHtml.equals(REPORT_IN_PROGRESS) && !reportHtml.equals(REPORT_FAILED) && !reportHtml.equals(RETRY_REPORT)) {
-      return true;
-    }
-    return false;
+    return reportStatus.equals(SUCCESS_REPORT) || reportStatus.equals(TEST_AVAILABLE);
   }
 
   public boolean reportHasStatus() {
-    if (reportHtml == null) return false;
-    return reportHtml.equals(REPORT_IN_PROGRESS) || reportHtml.equals(REPORT_FAILED);
+    return !reportStatus.isEmpty() && (reportStatus.equals(REPORT_IN_PROGRESS) || reportStatus.equals(REPORT_FAILED));
   }
 
   public Run<?, ?> getBuild() {
@@ -174,5 +198,4 @@ public class BrowserStackTestReportAction implements Action {
   public String getUrlName() {
     return Constants.BROWSERSTACK_TEST_REPORT_URL;
   }
-
 }

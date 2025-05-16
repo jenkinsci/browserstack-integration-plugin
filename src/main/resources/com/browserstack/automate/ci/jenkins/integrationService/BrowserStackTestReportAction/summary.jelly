@@ -86,9 +86,9 @@
                             <span class="meta-label">BUILD</span>
                             <h1 class="build-meta">${it.build}</h1>
                         </div>
-                        <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Test Report In Progress...</strong></p>
+                        <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Build Test Report In Progress...</strong></p>
                         <div class="report-row cta">
-                            <a href="${it.urlName}">View BrowserStack ${it.reportName} Report</a>
+                            <a href="${it.urlName}">View BrowserStack Build Test Report</a>
                         </div>
                     </j:if>
                     <j:if test="${(it.isReportFailed())}">
@@ -113,7 +113,7 @@
                     <h1 class="build-meta">${it.build}</h1>
                 </div>
                 <div class="report-row cta">
-                    <a href="${it.urlName}">View BrowserStack ${it.reportName} Report</a>
+                    <a href="${it.urlName}">View BrowserStack Build Test Report</a>
                 </div>
             </div>
         </j:if>
