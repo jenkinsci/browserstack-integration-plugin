@@ -86,12 +86,13 @@ public class BrowserStackTestReportAction implements Action {
   }
 
   private Map<String, String> createReportParams() {
+    String RquestTypeForJenkins = "POLL";
     Map<String, String> params = new HashMap<>();
     params.put("buildCreatedAt", buildCreatedAt);
     params.put("buildName", buildName);
     params.put("requestingCi", Constants.INTEGRATIONS_TOOL_KEY);
     params.put("reportFormat", Arrays.asList(Constants.REPORT_FORMAT).toString());
-    params.put("requestType", "POLL");
+    params.put("requestType", RquestTypeForJenkins);
     params.put("userTimeout", DEFAULT_REPORT_TIMEOUT);
     return params;
   }
@@ -170,6 +171,10 @@ public class BrowserStackTestReportAction implements Action {
 
   public boolean isReportAvailable() {
     return reportStatus.equals(SUCCESS_REPORT) || reportStatus.equals(TEST_AVAILABLE);
+  }
+
+  public boolean isReportTestAvailable() {
+    return reportStatus.equals(TEST_AVAILABLE);
   }
 
   public boolean reportHasStatus() {
