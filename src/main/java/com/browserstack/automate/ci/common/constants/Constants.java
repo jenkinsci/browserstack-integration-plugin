@@ -15,7 +15,7 @@ public class Constants {
     public static final String BROWSERSTACK_REPORT_PATH_PATTERN = "**/browserstack-artifacts/*";
     public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
-    public static final String CAD_BASE_URL = "https://api-observability.browserstack.com/api";
+    public static final String CAD_BASE_URL = "https://api-observability.browserstack.com/ext";
     public static  final String BROWSERSTACK_CONFIG_DETAILS_ENDPOINT = "/v1/builds/buildReport";
 
     public static final String INTEGRATIONS_TOOL_KEY = "jenkins";

@@ -88,7 +88,7 @@ public class BrowserStackTestReportAction implements Action {
   private Map<String, String> createReportParams() {
     String RquestTypeForJenkins = "POLL";
     Map<String, String> params = new HashMap<>();
-    params.put("buildCreatedAt", buildCreatedAt);
+    params.put("buildStartedAt", buildCreatedAt);
     params.put("buildName", buildName);
     params.put("requestingCi", Constants.INTEGRATIONS_TOOL_KEY);
     params.put("reportFormat", Arrays.asList(Constants.REPORT_FORMAT).toString());
