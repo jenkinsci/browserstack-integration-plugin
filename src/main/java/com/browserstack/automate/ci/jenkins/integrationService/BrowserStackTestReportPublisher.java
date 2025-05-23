@@ -65,11 +65,9 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     Date buildTimestamp = new Date(build.getStartTimeInMillis());
 
     // Format the timestamp (e.g., YYYY-MM-DD HH:MM:SS)
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-    String formattedTime = sdf.format(buildTimestamp);
+    long unixTimestamp = buildTimestamp.getTime() / 1000;
 
-    // Encode the timestamp to make it URL-safe
-    String buildCreatedAt = URLEncoder.encode(formattedTime, "UTF-8");
+    String buildCreatedAt = String.valueOf(unixTimestamp);
 
     build.addAction(new BrowserStackTestReportAction(build, credentials, browserStackBuildName,buildCreatedAt, logger));
 

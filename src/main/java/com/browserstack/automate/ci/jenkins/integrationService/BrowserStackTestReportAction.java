@@ -73,7 +73,7 @@ public class BrowserStackTestReportAction implements Action {
   }
 
   private void fetchReport() {
-    Map<String, String> params = createReportParams();
+    Map<String, Object> params = createReportParams();
     String reportUrl = Constants.CAD_BASE_URL + Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT;
 
     try {
@@ -85,19 +85,19 @@ public class BrowserStackTestReportAction implements Action {
     }
   }
 
-  private Map<String, String> createReportParams() {
+  private Map<String, Object> createReportParams() {
     String RquestTypeForJenkins = "POLL";
-    Map<String, String> params = new HashMap<>();
+    Map<String, Object> params = new HashMap<>();
     params.put("buildStartedAt", buildCreatedAt);
-    params.put("buildName", buildName);
+    params.put("originalBuildName", buildName);
     params.put("requestingCi", Constants.INTEGRATIONS_TOOL_KEY);
-    params.put("reportFormat", Arrays.asList(Constants.REPORT_FORMAT).toString());
+    params.put("reportFormat", Arrays.asList(Constants.REPORT_FORMAT));
     params.put("requestType", RquestTypeForJenkins);
     params.put("userTimeout", DEFAULT_REPORT_TIMEOUT);
     return params;
   }
 
-  private RequestBody createRequestBody(Map<String, String> params) {
+  private RequestBody createRequestBody(Map<String, Object> params) {
     Gson gson = new Gson();
     String json = gson.toJson(params);
     return RequestBody.create(MediaType.parse("application/json"), json);
