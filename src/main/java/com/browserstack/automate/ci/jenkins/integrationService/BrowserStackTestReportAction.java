@@ -81,7 +81,9 @@ public class BrowserStackTestReportAction implements Action {
       Response response = requestsUtil.makeRequest(reportUrl, credentials, createRequestBody(params));
       handleResponse(response);
     } catch (Exception e) {
-      handleFetchException(e);
+      if(!isReportTestAvailable()) {
+        handleFetchException(e);
+      }
     }
   }
 

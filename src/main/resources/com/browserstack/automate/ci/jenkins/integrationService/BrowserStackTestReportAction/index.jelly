@@ -98,9 +98,6 @@
                 </j:if>
 
                 <j:if test="${(it.isReportAvailable())}">
-                    <j:if test="${(it.isReportTestAvailable())}" >
-                        <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Build Test Report generation In Progress meanwhile these are the test listing...</strong></p>
-                    </j:if>
                     <div>
                         <j:out value="${it.getReportHtml()}"/>
                     </div>
