@@ -15,4 +15,5 @@ public interface BrowserStackEnvVars {
     String GRR_JENKINS_KEY = "BROWSERSTACK_GRR_REGION";
     String AUTOMATE_API_ENV_KEY = "browserstack.automate.api";
     String APP_AUTOMATE_API_ENV_KEY = "browserstack.app-automate.api";
+    String QEI_URL = "QEI_URL";
 }
