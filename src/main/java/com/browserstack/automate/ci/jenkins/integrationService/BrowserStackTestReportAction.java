@@ -108,11 +108,15 @@ public class BrowserStackTestReportAction implements Action {
   private void handleResponse(Response response) throws Exception {
     if (response.isSuccessful()) {
       processSuccessfulResponse(response);
-    } else if (response.code() == 429) {
-      reportStatus = RATE_LIMIT;
     } else {
-      reportStatus = REPORT_FAILED;
-      logError(logger, "Non-success response while fetching report: " + response.code());
+      if(!isReportTestAvailable()) {
+        if (response.code() == 429) {
+          reportStatus = RATE_LIMIT;
+        } else {
+          reportStatus = REPORT_FAILED;
+          logError(logger, "Non-success response while fetching report: " + response.code());
+        }
+      }
     }
   }
 
