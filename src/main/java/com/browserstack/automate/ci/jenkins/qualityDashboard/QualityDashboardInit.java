@@ -201,7 +201,13 @@ public class QualityDashboardInit {
                                     long endTimeInMillis = build.getTimeInMillis();
                                     Timestamp endTime = new Timestamp(endTimeInMillis);
                                     String result = overallResult != null ? overallResult.toString() : null;
-                                    PipelineDetails pipelineDetail = new PipelineDetails(pipelineName, buildNumber, duration, result, endTime);
+                                    
+                                    // Get root upstream project information for QEI with build number (returns in format "project#build")
+                                    String rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(build, browserStackCredentials);
+                                    // Get immediate parent project information for QEI (returns in format "project#build")
+                                    String immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(build, browserStackCredentials);
+                                    PipelineDetails pipelineDetail = new PipelineDetails(pipelineName, buildNumber, duration, result, 
+                                                                                        endTime, rootUpstreamProject, immediateParentProject);
                                     allBuildResults.add(pipelineDetail);
                                 }
                         );
@@ -307,13 +313,22 @@ class PipelineDetails {
 
     @JsonProperty("endTime")
     private Timestamp endTime;
+    
+    @JsonProperty("rootProject")
+    private String rootProject;
+    
+    @JsonProperty("immediateParentProject")
+    private String immediateParentProject;
 
-    public PipelineDetails(String pipelineName, Integer buildNumber, Long buildDuration, String buildStatus, Timestamp endTime) {
+    public PipelineDetails(String pipelineName, Integer buildNumber, Long buildDuration, String buildStatus, 
+                          Timestamp endTime, String rootProject, String immediateParentProject) {
         this.pipelineName = pipelineName;
         this.buildNumber = buildNumber;
         this.buildDuration = buildDuration;
         this.buildStatus = buildStatus;
         this.endTime = endTime;
+        this.rootProject = rootProject;
+        this.immediateParentProject = immediateParentProject;
     }
 }
 

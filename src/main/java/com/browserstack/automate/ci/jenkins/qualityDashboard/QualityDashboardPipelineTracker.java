@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
-import java.util.List;
 
 @Extension
 public class QualityDashboardPipelineTracker extends RunListener<Run> {
@@ -102,8 +101,14 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
                 jobUrl = rootUrl + run.getUrl();
             }
 
+            // Get root upstream project information for QEI with build number (returns in format "project#build")
+            String rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(run, browserStackCredentials);
+            // Get immediate parent project information for QEI (returns in format "project#build")
+            String immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(run, browserStackCredentials);
+
             Timestamp endTime = new Timestamp(endTimeInMillis);
-            PipelineResults pipelineResultsReqObj = new PipelineResults(buildNumber, pipelineDuration, overallResult.toString(), finalZipPath, jobName, endTime, jobUrl);
+            PipelineResults pipelineResultsReqObj = new PipelineResults(buildNumber, pipelineDuration, overallResult.toString(), 
+                    finalZipPath, jobName, endTime, jobUrl, rootUpstreamProject, immediateParentProject);
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonBody = objectMapper.writeValueAsString(pipelineResultsReqObj);
 
@@ -243,7 +248,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
 
     private void copyDirectoryToParentIfRequired(Run run, String finalParentPathFrom, BrowserStackCredentials browserStackCredentials) throws IOException {
         String finalParentPathTo = null;
-        String upStreamProj = upStreamPipelineUrl(run);
+        String upStreamProj = UpstreamPipelineResolver.resolveImmediateUpstreamProject(run, browserStackCredentials);
         if(StringUtils.isNotEmpty(upStreamProj)) {
             String parentResultDir = getResultDirForPipeline(upStreamProj, browserStackCredentials, run.getNumber());
             if(StringUtils.isNotEmpty(parentResultDir) && checkIfPathIsFound(parentResultDir)) {
@@ -267,18 +272,6 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
                 FileUtils.moveDirectory(new File(finalParentPathTo + "/" + finalParentFromFile.getName()), newZipDir);
             }
         }
-    }
-
-    private String upStreamPipelineUrl(Run run) {
-        String upstreamProjectName = null;
-        List<Cause> causes = run.getCauses();
-        for (Cause cause : causes) {
-            if (cause instanceof Cause.UpstreamCause) {
-                Cause.UpstreamCause upstreamCause = (Cause.UpstreamCause) cause;
-                upstreamProjectName = upstreamCause.getUpstreamProject();
-            }
-        }
-        return upstreamProjectName;
     }
 }
 
@@ -310,8 +303,16 @@ class PipelineResults implements Serializable {
 
     @JsonProperty("zipFile")
     private String zipFile;
+    
+    @JsonProperty("rootProject")
+    private String rootProject;
+    
+    @JsonProperty("immediateParentProject")
+    private String immediateParentProject;
 
-    public PipelineResults(Integer buildNumber, Long buildDuration, String buildStatus, String zipFile, String pipelineName, Timestamp endTime, String jobUrl) {
+    public PipelineResults(Integer buildNumber, Long buildDuration, String buildStatus, String zipFile, 
+                          String pipelineName, Timestamp endTime, String jobUrl, String rootProject, 
+                          String immediateParentProject) {
         this.buildNumber = buildNumber;
         this.buildDuration = buildDuration;
         this.buildStatus = buildStatus;
@@ -319,5 +320,7 @@ class PipelineResults implements Serializable {
         this.pipelineName = pipelineName;
         this.endTime = endTime;
         this.jobUrl = jobUrl;
+        this.rootProject = rootProject;
+        this.immediateParentProject = immediateParentProject;
     }
 }
