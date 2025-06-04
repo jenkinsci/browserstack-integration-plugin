@@ -203,11 +203,21 @@ public class QualityDashboardInit {
                                     String result = overallResult != null ? overallResult.toString() : null;
                                     
                                     // Get root upstream project information for QEI with build number (returns in format "project#build")
-                                    String rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(build, browserStackCredentials);
-                                    // Get immediate parent project information for QEI (returns in format "project#build")
-                                    String immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(build, browserStackCredentials);
-                                    PipelineDetails pipelineDetail = new PipelineDetails(pipelineName, buildNumber, duration, result, 
-                                                                                        endTime, rootUpstreamProject, immediateParentProject);
+                                    String rootUpstreamProject = "";
+                                    String immediateParentProject = "";
+                                    try {
+                                        rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(build, browserStackCredentials);
+                                        immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(build, browserStackCredentials);
+                                    } catch (Exception e) {          
+                                        try {
+                                            apiUtil.logToQD(browserStackCredentials, "Failed to resolve root upstream project for build " + buildNumber + ": " + e.getMessage());
+                                        } catch (JsonProcessingException ex) {
+                                            System.err.println("Error logging upstream project resolution failure for build " + buildNumber + ": " + ex.getMessage());
+                                            ex.printStackTrace();
+                                        }
+                                    }
+                                    PipelineDetails pipelineDetail = new PipelineDetails(pipelineName, buildNumber, duration, result,
+                                            endTime, rootUpstreamProject, immediateParentProject);
                                     allBuildResults.add(pipelineDetail);
                                 }
                         );

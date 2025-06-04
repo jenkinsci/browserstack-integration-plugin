@@ -100,12 +100,20 @@ public class QualityDashboardPipelineTracker extends RunListener<Run> {
             if(rootUrl != null) {
                 jobUrl = rootUrl + run.getUrl();
             }
-
             // Get root upstream project information for QEI with build number (returns in format "project#build")
-            String rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(run, browserStackCredentials);
-            // Get immediate parent project information for QEI (returns in format "project#build")
-            String immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(run, browserStackCredentials);
-
+            String rootUpstreamProject = "";
+            String immediateParentProject = "";
+            try {
+                rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(run, browserStackCredentials);
+                immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(run, browserStackCredentials);
+            } catch (Exception e) {          
+                try {
+                    apiUtil.logToQD(browserStackCredentials, "Failed to resolve root upstream project for build " + buildNumber + ": " + e.getMessage());
+                } catch (JsonProcessingException ex) {
+                    System.err.println("Error logging upstream project resolution failure for build " + buildNumber + ": " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
             Timestamp endTime = new Timestamp(endTimeInMillis);
             PipelineResults pipelineResultsReqObj = new PipelineResults(buildNumber, pipelineDuration, overallResult.toString(), 
                     finalZipPath, jobName, endTime, jobUrl, rootUpstreamProject, immediateParentProject);
