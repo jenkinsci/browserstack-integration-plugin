@@ -9,13 +9,14 @@ import com.google.common.collect.Lists;
 import hudson.Extension;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.Run;
 import java.sql.Timestamp;
 import java.time.Instant;
 import jenkins.model.Jenkins;
 import okhttp3.*;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import java.time.temporal.ChronoUnit;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -114,25 +115,31 @@ public class QualityDashboardInit {
             totalPipelines = jenkins.getAllItems().size();
             jenkins.getAllItems().forEach(job -> {
                 try {
+                    String jobType = job.getClass().getSimpleName();
+                    boolean isWorkflowJob = job instanceof WorkflowJob;
+                    
                     // Logging job details
                     apiUtil.logToQD(
                         browserStackCredentials,
                         String.format(
                             "Job name: %s, instance type: %s, and is_workflow_job: %s",
                             job.getName(),
-                            job.getClass().getSimpleName(),
-                            (job instanceof WorkflowJob) ? "yes" : "no"
+                            jobType,
+                            isWorkflowJob ? "yes" : "no"
                         )
                     );
+                    if ( job instanceof Job) {
+                        String pipelineName = job.getFullName();
+                        allPipelines.add(pipelineName);
+                    }
+                    else{
+                        apiUtil.logToQD(browserStackCredentials, "Skipping job: " + job.getName() + " as it is not a Job instance");
+                    }
+                    
                 } catch (JsonProcessingException e) {
                     // Handling the exception and logging an error
                     System.err.println("Error processing JSON for job: " + job.getName());
                     e.printStackTrace();
-                }
-
-                if (job instanceof WorkflowJob) {
-                    String pipelineName = job.getFullName(); // Getting pipeline name
-                    allPipelines.add(pipelineName);
                 }
             });
         } else {
@@ -188,10 +195,12 @@ public class QualityDashboardInit {
         Jenkins jenkins = Jenkins.getInstanceOrNull();
         Instant thresholdInstant = Instant.now().minus(getHistoryForDays(browserStackCredentials), ChronoUnit.DAYS);
         if (jenkins != null) {
-            jenkins.getAllItems().forEach(job -> {
-                if (job instanceof WorkflowJob) {
+            jenkins.getAllItems().forEach(item -> {
+                // Support both WorkflowJob and Matrix projects (and potentially other job types)
+                if (item instanceof Job) {
+                    Job<?, ?> job = (Job<?, ?>) item;
                     String pipelineName = job.getFullName();
-                    List<WorkflowRun> allBuilds = ((WorkflowJob) job).getBuilds();
+                    List<? extends Run<?, ?>> allBuilds = job.getBuilds();
                     if(!allBuilds.isEmpty()) {
                         allBuilds.stream().filter(build -> Instant.ofEpochMilli(build.getTimeInMillis()).isAfter(thresholdInstant)).forEach(
                                 build -> {
@@ -265,9 +274,8 @@ public class QualityDashboardInit {
             }
         } catch(IOException e) {
             e.printStackTrace();
-        } finally {
-            return no_of_days;
         }
+        return no_of_days;
     }
 
     private static int getProjectPageSize(BrowserStackCredentials browserStackCredentials) {
@@ -284,9 +292,8 @@ public class QualityDashboardInit {
             }
         } catch(IOException e) {
             e.printStackTrace();
-        } finally {
-            return projectPageSize;
         }
+        return projectPageSize;
     }
 
     private static int getResultPageSize(BrowserStackCredentials browserStackCredentials) {
@@ -303,9 +310,8 @@ public class QualityDashboardInit {
             }
         } catch(IOException e) {
             e.printStackTrace();
-        } finally {
-            return resultPageSize;
         }
+        return resultPageSize;
     }
 }
 
