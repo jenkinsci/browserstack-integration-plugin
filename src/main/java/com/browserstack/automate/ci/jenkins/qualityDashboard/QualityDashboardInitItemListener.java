@@ -12,16 +12,22 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 @Extension
 public class QualityDashboardInitItemListener extends ItemListener {
+
+    private static final Logger LOGGER = Logger.getLogger(QualityDashboardInitItemListener.class.getName());
 
     @Override
     public void onCreated(Item job) {
         try {
             BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
+            if(browserStackCredentials == null) {
+                LOGGER.info("BrowserStackCredentials not found. Please ensure they are configured correctly.");
+                return;
+            }
             QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
             apiUtil.logToQD(browserStackCredentials, "Item Created : " + job.getClass().getName()) ;
 
@@ -35,7 +41,8 @@ public class QualityDashboardInitItemListener extends ItemListener {
                     String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
                     syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "POST");
 
-                } catch(IOException e) {
+                } catch(Exception e) {
+                    LOGGER.info("Error syncing item creation to Quality Dashboard: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -52,7 +59,8 @@ public class QualityDashboardInitItemListener extends ItemListener {
             try {
                 String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
                 syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "DELETE");
-            } catch(IOException e) {
+            } catch(Exception e) {
+                LOGGER.info("Error syncing item deletion to Quality Dashboard: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -67,7 +75,8 @@ public class QualityDashboardInitItemListener extends ItemListener {
                 newName = job.getParent().getFullName() + "/" + newName;
                 String jsonBody = getJsonReqBody(new ItemRename(oldName, newName, itemType));
                 syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "PUT");
-            } catch(IOException e) {
+            } catch(Exception e) {
+            LOGGER.info("Error syncing item rename to Quality Dashboard: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -93,6 +102,10 @@ public class QualityDashboardInitItemListener extends ItemListener {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
         QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
         BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
+        if(browserStackCredentials == null) {
+            LOGGER.info("BrowserStack credentials not found. Please ensure they are configured correctly.");
+            return null;
+        }  
         if(typeOfRequest.equals("PUT")) {
             apiUtil.logToQD(browserStackCredentials, "Syncing Item Update - PUT");
             return apiUtil.makePutRequestToQd(url, browserStackCredentials, requestBody);

@@ -22,18 +22,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.logging.Logger;
 
 @Extension
 public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
 
+    private static final Logger LOGGER = Logger.getLogger(QualityDashboardPipelineTracker.class.getName());
     QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
 
     @Override
     public void onCompleted(Run<?, ?> run, TaskListener listener) {
         super.onCompleted(run, listener);
         BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
-        if(browserStackCredentials!=null) {
-            String jobName = getJobNameFromRun(run);
+        if(browserStackCredentials != null) {
+            String jobName = getJobNameFromRun(run, browserStackCredentials);
             int buildNumber = run.getNumber();
             try {
                 if(isQDEnabled(browserStackCredentials) && isPipelineEnabledForQD(browserStackCredentials, jobName)) {
@@ -52,6 +54,9 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
                 }
                 throw new RuntimeException(e);
             }
+        }
+        else {
+            LOGGER.info("BrowserStack credentials not found. Please ensure they are configured correctly.");
         }
     }
 
@@ -186,16 +191,35 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
     }
 
     private boolean isQDEnabled(BrowserStackCredentials browserStackCredentials) throws IOException {
+        // Check if we have a valid cached value
+        Boolean cachedResult = QDEnabledCache.getCachedValue();
+        if (cachedResult != null) {
+            LOGGER.info("Using cached QD enabled status: " + cachedResult);
+            return cachedResult;
+        }
+        
+        // Cache expired or not set, make API call
+        LOGGER.info("QD enabled status cache expired or not set, making API call");
         Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.getIsQdEnabledEndpoint(), browserStackCredentials);
-        if (response != null &&  response.code() == HttpURLConnection.HTTP_OK) {
+        boolean isEnabled = false;
+        
+        if (response != null && response.code() == HttpURLConnection.HTTP_OK) {
             ResponseBody responseBody = response.body();
-            if(responseBody != null && Boolean.parseBoolean(response.body().string())) {
+            if (responseBody != null && Boolean.parseBoolean(response.body().string())) {
+                isEnabled = true;
                 apiUtil.logToQD(browserStackCredentials, "QD enabled check passed");
-                return true;
             }
         }
-        apiUtil.logToQD(browserStackCredentials, "QD enabled check failed");
-        return false;
+        
+        if (!isEnabled) {
+            apiUtil.logToQD(browserStackCredentials, "QD enabled check failed");
+        }
+        
+        // Cache the result for 1 hour
+        QDEnabledCache.setCachedValue(isEnabled);
+        LOGGER.info("Cached QD enabled status: " + isEnabled + " for 1 hour");
+        
+        return isEnabled;
     }
 
     private boolean isPipelineEnabledForQD(BrowserStackCredentials browserStackCredentials, String pipelineName) throws IOException {
@@ -302,7 +326,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
         }
     }
 
-    private String getJobNameFromRun(Run<?, ?> run){
+    private String getJobNameFromRun(Run<?, ?> run, BrowserStackCredentials browserStackCredentials) {
         try {
             // Check if parent is a Job (covers all job types)
             if (run.getParent() instanceof Job) {
@@ -316,13 +340,29 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
             }
         } catch (Exception e) {
             try {
-                apiUtil.logToQD(QualityDashboardUtil.getBrowserStackCreds(), "Error getting job name from run: " + e.getMessage());
+                apiUtil.logToQD(browserStackCredentials, "Error getting job name from run: " + e.getMessage());
             } catch (JsonProcessingException jsonEx) {
                 jsonEx.printStackTrace();
             }
         }
         return null;
     }
+    private static class QDEnabledCache {
+        private static volatile Boolean qdEnabled = null;
+        private static volatile long expiryTime = 0L;
+        
+        public static Boolean getCachedValue() {
+            if (qdEnabled != null && System.currentTimeMillis() < expiryTime) {
+                return qdEnabled;
+            }
+            return null; // Cache expired or not set
+        }
+        
+        public static void setCachedValue(boolean value) {
+            qdEnabled = value;
+            expiryTime = System.currentTimeMillis() + Constants.QualityDashboardAPI.CACHE_DURATION_MS;
+        }
+    } 
 }
 
 class QualityDashboardGetDetailsForPipeline implements Serializable {

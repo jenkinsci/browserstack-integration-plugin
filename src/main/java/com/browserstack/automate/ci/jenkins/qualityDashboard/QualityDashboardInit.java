@@ -22,13 +22,15 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Extension
 public class QualityDashboardInit {
 
+    private static final Logger LOGGER = Logger.getLogger(QualityDashboardInit.class.getName());
     static QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
 
-    @Initializer(after = InitMilestone.PLUGINS_PREPARED)
+    @Initializer(after = InitMilestone.JOB_LOADED)
     public static void postInstall() {
         try {
             initQDSetupIfRequired();
@@ -52,9 +54,11 @@ public class QualityDashboardInit {
     private static void initQDSetupIfRequired() throws JsonProcessingException {
         BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
         try {
-            if(browserStackCredentials!=null) {
+            if(browserStackCredentials != null) {
                 apiUtil.logToQD(browserStackCredentials,"Starting plugin data export to QD");
                 checkQDIntegrationAndDumpMetaData(browserStackCredentials);
+            } else {
+                LOGGER.info("BrowserStack credentials not found. Skipping Quality Dashboard initialization.");
             }
         } catch (Exception e) {
             try {
