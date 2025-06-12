@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.logging.Logger;
 
 @Extension
@@ -349,18 +350,17 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
     }
     private static class QDEnabledCache {
         private static volatile Boolean qdEnabled = null;
-        private static volatile long expiryTime = 0L;
-        
+        private static volatile Instant expiryTime = Instant.EPOCH;
+
         public static Boolean getCachedValue() {
-            if (qdEnabled != null && System.currentTimeMillis() < expiryTime) {
+            if (qdEnabled != null && Instant.now().isBefore(expiryTime)) {
                 return qdEnabled;
             }
             return null; // Cache expired or not set
         }
-        
         public static void setCachedValue(boolean value) {
             qdEnabled = value;
-            expiryTime = System.currentTimeMillis() + Constants.QualityDashboardAPI.CACHE_DURATION_MS;
+            expiryTime = Instant.now().plusMillis(Constants.QualityDashboardAPI.CACHE_DURATION_MS);
         }
     } 
 }
