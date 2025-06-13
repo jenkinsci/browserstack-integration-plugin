@@ -132,13 +132,9 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
             try {
                 rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(run, browserStackCredentials);
                 immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(run, browserStackCredentials);
-            } catch (Exception e) {          
-                try {
-                    apiUtil.logToQD(browserStackCredentials, "Failed to resolve root upstream project for build " + buildNumber + ": " + e.getMessage());
-                } catch (JsonProcessingException ex) {
-                    System.err.println("Error logging upstream project resolution failure for build " + buildNumber + ": " + ex.getMessage());
-                    ex.printStackTrace();
-                }
+            } catch (Exception e) {
+                LOGGER.info("Error resolving upstream project for jobName: " + jobName + " and buildNumber: " + buildNumber + ". Exception: " + e.getMessage());
+                e.printStackTrace();
             }
             Timestamp endTime = new Timestamp(endTimeInMillis);
             PipelineResults pipelineResultsReqObj = new PipelineResults(buildNumber, pipelineDuration, overallResult.toString(), 

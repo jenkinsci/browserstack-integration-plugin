@@ -142,7 +142,7 @@ public class QualityDashboardInit {
                     
                 } catch (JsonProcessingException e) {
                     // Handling the exception and logging an error
-                    System.err.println("Error processing JSON for job: " + job.getName());
+                    LOGGER.info("Error processing JSON for job: " + job.getName() + " - " + e.getMessage());
                     e.printStackTrace();
                 }
             });
@@ -150,7 +150,7 @@ public class QualityDashboardInit {
             try {
                 apiUtil.logToQD(browserStackCredentials, "Issue getting Jenkins Instance");
             } catch (JsonProcessingException e) {
-                System.err.println("Error logging issue with Jenkins instance.");
+                LOGGER.info("Error logging issue with Jenkins instance.");
                 e.printStackTrace();
             }
         }
@@ -160,7 +160,7 @@ public class QualityDashboardInit {
             apiUtil.logToQD(browserStackCredentials,"Total Pipelines detected : " + allPipelines.size());
         } catch (JsonProcessingException e) {
             // Handling the exception and logging an error
-            System.err.println("Error processing JSON for total pipelines: ");
+            LOGGER.info("Error processing JSON for total pipelines: " + e.getMessage());
             e.printStackTrace();
         }
         // Returning the list of filtered pipelines
@@ -222,12 +222,8 @@ public class QualityDashboardInit {
                                         rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(build, browserStackCredentials);
                                         immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(build, browserStackCredentials);
                                     } catch (Exception e) {          
-                                        try {
-                                            apiUtil.logToQD(browserStackCredentials, "Failed to resolve root upstream project for build " + buildNumber + ": " + e.getMessage());
-                                        } catch (JsonProcessingException ex) {
-                                            System.err.println("Error logging upstream project resolution failure for build " + buildNumber + ": " + ex.getMessage());
-                                            ex.printStackTrace();
-                                        }
+                                        LOGGER.info("Error resolving upstream project for " + pipelineName + " build number " + buildNumber + ": " + e.getMessage());
+                                        e.printStackTrace();
                                     }
                                     PipelineDetails pipelineDetail = new PipelineDetails(pipelineName, buildNumber, duration, result,
                                             endTime, rootUpstreamProject, immediateParentProject);
