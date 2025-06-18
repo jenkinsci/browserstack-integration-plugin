@@ -14,6 +14,7 @@ import hudson.model.Result;
 import hudson.model.Run;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.io.Serializable;
 import jenkins.model.Jenkins;
 import okhttp3.*;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -62,7 +63,7 @@ public class QualityDashboardInit {
             }
         } catch (Exception e) {
             try {
-                apiUtil.logToQD(browserStackCredentials, "Global exception in data export is:");
+                apiUtil.logToQD(browserStackCredentials, "Global exception in data export is:" + exceptionToString(e));
             } catch (Exception ex) {
                 String exceptionString = exceptionToString(ex);
                 apiUtil.logToQD(browserStackCredentials, "Global exception in exception data export is:" + exceptionString);
@@ -74,7 +75,7 @@ public class QualityDashboardInit {
 
     private static void checkQDIntegrationAndDumpMetaData(BrowserStackCredentials browserStackCredentials) throws JsonProcessingException {
         if(initialQDSetupRequired(browserStackCredentials)) {
-            List<String> allPipelines = getAllPipelines(browserStackCredentials);
+            List<PipelineInfo> allPipelines = getAllPipelines(browserStackCredentials);
             if(!allPipelines.isEmpty()){
                 boolean projectsSavedSuccessfully = sendPipelinesPaginated(browserStackCredentials, allPipelines);
                 if(projectsSavedSuccessfully) {
@@ -110,8 +111,8 @@ public class QualityDashboardInit {
         return false;
     }
 
-    private static List<String> getAllPipelines(BrowserStackCredentials browserStackCredentials) {
-        List<String> allPipelines = new ArrayList<>();
+    private static List<PipelineInfo> getAllPipelines(BrowserStackCredentials browserStackCredentials) {
+        List<PipelineInfo> allPipelines = new ArrayList<>();
         Jenkins jenkins = Jenkins.getInstanceOrNull();
         Integer totalPipelines = 0;
 
@@ -119,7 +120,7 @@ public class QualityDashboardInit {
             totalPipelines = jenkins.getAllItems().size();
             jenkins.getAllItems().forEach(job -> {
                 try {
-                    String jobType = job.getClass().getSimpleName();
+                    String itemType = QualityDashboardUtil.getItemTypeModified(job);
                     boolean isWorkflowJob = job instanceof WorkflowJob;
                     
                     // Logging job details
@@ -128,16 +129,16 @@ public class QualityDashboardInit {
                         String.format(
                             "Job name: %s, instance type: %s, and is_workflow_job: %s",
                             job.getName(),
-                            jobType,
+                            itemType,
                             isWorkflowJob ? "yes" : "no"
                         )
                     );
-                    if ( job instanceof Job) {
+                    if (itemType != null) {
                         String pipelineName = job.getFullName();
-                        allPipelines.add(pipelineName);
+                        allPipelines.add(new PipelineInfo(pipelineName, itemType));
                     }
                     else{
-                        apiUtil.logToQD(browserStackCredentials, "Skipping job: " + job.getName() + " as it is not a Job instance");
+                        apiUtil.logToQD(browserStackCredentials, "Skipping job: " + job.getName() + " as it is not a Job or Folder instance");
                     }
                     
                 } catch (JsonProcessingException e) {
@@ -167,13 +168,13 @@ public class QualityDashboardInit {
         return allPipelines;
     }
 
-    private static boolean sendPipelinesPaginated(BrowserStackCredentials browserStackCredentials, List<String> allPipelines) {
+    private static boolean sendPipelinesPaginated(BrowserStackCredentials browserStackCredentials, List<PipelineInfo> allPipelines) {
         boolean isSuccess = true;
         int pageSize = getProjectPageSize(browserStackCredentials);
-        List<List<String>> pipelinesInSmallerBatches = Lists.partition(allPipelines, pageSize);
+        List<List<PipelineInfo>> pipelinesInSmallerBatches = Lists.partition(allPipelines, pageSize);
         int totalPages = !pipelinesInSmallerBatches.isEmpty() ? pipelinesInSmallerBatches.size() : 0;
         int page = 0;
-        for(List<String> singlePagePipelineList : pipelinesInSmallerBatches) {
+        for(List<PipelineInfo> singlePagePipelineList : pipelinesInSmallerBatches) {
             try {
                 page++;
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -348,6 +349,19 @@ class PipelineDetails {
     }
 }
 
+class PipelineInfo implements Serializable {
+    @JsonProperty("pipelineName")
+    private String pipelineName;
+
+    @JsonProperty("jobType")
+    private String jobType;
+
+    public PipelineInfo(String pipelineName, String jobType) {
+        this.pipelineName = pipelineName;
+        this.jobType = jobType;
+    }
+}
+
 class PipelinesPaginated {
     @JsonProperty("page")
     private int page;
@@ -356,9 +370,9 @@ class PipelinesPaginated {
     private int totalPages;
 
     @JsonProperty("pipelines")
-    private List<String> pipelines;
+    private List<PipelineInfo> pipelines;
 
-    public PipelinesPaginated(int page, int totalPages, List<String> pipelines) {
+    public PipelinesPaginated(int page, int totalPages, List<PipelineInfo> pipelines) {
         this.page = page;
         this.totalPages = totalPages;
         this.pipelines = pipelines;

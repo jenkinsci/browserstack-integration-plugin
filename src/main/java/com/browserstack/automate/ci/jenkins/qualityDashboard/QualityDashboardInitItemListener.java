@@ -11,7 +11,6 @@ import hudson.model.listeners.ItemListener;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
@@ -29,15 +28,13 @@ public class QualityDashboardInitItemListener extends ItemListener {
                 return;
             }
             QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
-            apiUtil.logToQD(browserStackCredentials, "Item Created : " + job.getClass().getName()) ;
 
             String itemName = job.getFullName();
-            String itemType = getItemTypeModified(job);
+            String itemType = QualityDashboardUtil.getItemTypeModified(job);
 
-            apiUtil.logToQD(browserStackCredentials, "Item Type  : " + itemType + " : " + itemName + " : " + itemType.equals("PIPELINE"));
-            if(itemType != null && itemType.equals("PIPELINE")) {
+            apiUtil.logToQD(browserStackCredentials, "Item Created : " + itemName + " - " + "Item Type : " + itemType);
+            if(itemType != null) {
                 try {
-                    apiUtil.logToQD(browserStackCredentials, "Item Type inside the Folder  : " + itemType + " : " + itemName + " : " + itemType.equals("PIPELINE"));
                     String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
                     syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "POST");
 
@@ -54,7 +51,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
     @Override
     public void onDeleted(Item job) {
         String itemName = job.getFullName();
-        String itemType = getItemTypeModified(job);
+        String itemType = QualityDashboardUtil.getItemTypeModified(job);
         if(itemType != null) {
             try {
                 String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
@@ -68,7 +65,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
 
     @Override
     public void onRenamed(Item job, String oldName, String newName) {
-        String itemType = getItemTypeModified(job);
+        String itemType = QualityDashboardUtil.getItemTypeModified(job);
         if(itemType != null) {
             try {
                 oldName = job.getParent().getFullName() + "/" + oldName;
@@ -80,16 +77,6 @@ public class QualityDashboardInitItemListener extends ItemListener {
                 e.printStackTrace();
             }
         }
-    }
-
-    private String getItemTypeModified(Item job) {
-        String itemType = null;
-        boolean isFolderRenamed = job.getClass().getName().contains("Folder");
-        boolean isPipelineRenamed = job instanceof WorkflowJob;
-        if(isFolderRenamed || isPipelineRenamed) {
-            itemType = isPipelineRenamed ? "PIPELINE" : "FOLDER";
-        }
-        return itemType;
     }
 
     private <T> String getJsonReqBody( T item) throws JsonProcessingException {
