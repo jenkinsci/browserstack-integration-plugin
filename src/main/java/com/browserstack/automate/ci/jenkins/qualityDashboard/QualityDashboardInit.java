@@ -59,7 +59,7 @@ public class QualityDashboardInit {
                 apiUtil.logToQD(browserStackCredentials,"Starting plugin data export to QD");
                 checkQDIntegrationAndDumpMetaData(browserStackCredentials);
             } else {
-                LOGGER.info("BrowserStack credentials not found. Skipping Quality Dashboard initialization.");
+                LOGGER.warning("BrowserStack credentials not found. Skipping Quality Dashboard initialization.");
             }
         } catch (Exception e) {
             try {
@@ -143,7 +143,7 @@ public class QualityDashboardInit {
                     
                 } catch (JsonProcessingException e) {
                     // Handling the exception and logging an error
-                    LOGGER.info("Error processing JSON for job: " + job.getName() + " - " + e.getMessage());
+                    LOGGER.warning("Error processing JSON for job: " + job.getName() + " - " + e.getMessage());
                     e.printStackTrace();
                 }
             });
@@ -151,7 +151,7 @@ public class QualityDashboardInit {
             try {
                 apiUtil.logToQD(browserStackCredentials, "Issue getting Jenkins Instance");
             } catch (JsonProcessingException e) {
-                LOGGER.info("Error logging issue with Jenkins instance.");
+                LOGGER.warning("Error logging issue with Jenkins instance.");
                 e.printStackTrace();
             }
         }
@@ -161,7 +161,7 @@ public class QualityDashboardInit {
             apiUtil.logToQD(browserStackCredentials,"Total Pipelines detected : " + allPipelines.size());
         } catch (JsonProcessingException e) {
             // Handling the exception and logging an error
-            LOGGER.info("Error processing JSON for total pipelines: " + e.getMessage());
+            LOGGER.warning("Error processing JSON for total pipelines: " + e.getMessage());
             e.printStackTrace();
         }
         // Returning the list of filtered pipelines
@@ -223,7 +223,7 @@ public class QualityDashboardInit {
                                         rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(build, browserStackCredentials);
                                         immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(build, browserStackCredentials);
                                     } catch (Exception e) {          
-                                        LOGGER.info("Error resolving upstream project for " + pipelineName + " build number " + buildNumber + ": " + e.getMessage());
+                                        LOGGER.warning("Error resolving upstream project for " + pipelineName + " build number " + buildNumber + ": " + e.getMessage());
                                         e.printStackTrace();
                                     }
                                     PipelineDetails pipelineDetail = new PipelineDetails(pipelineName, buildNumber, duration, result,

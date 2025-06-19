@@ -57,7 +57,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
             }
         }
         else {
-            LOGGER.info("BrowserStack credentials not found. Please ensure they are configured correctly.");
+            LOGGER.warning("BrowserStack credentials not found. Please ensure they are configured correctly.");
         }
     }
 
@@ -133,7 +133,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
                 rootUpstreamProject = UpstreamPipelineResolver.resolveRootUpstreamProject(run, browserStackCredentials);
                 immediateParentProject = UpstreamPipelineResolver.resolveImmediateUpstreamProjectForQEI(run, browserStackCredentials);
             } catch (Exception e) {
-                LOGGER.info("Error resolving upstream project for jobName: " + jobName + " and buildNumber: " + buildNumber + ". Exception: " + e.getMessage());
+                LOGGER.warning("Error resolving upstream project for jobName: " + jobName + " and buildNumber: " + buildNumber + ". Exception: " + e.getMessage());
                 e.printStackTrace();
             }
             Timestamp endTime = new Timestamp(endTimeInMillis);
@@ -191,12 +191,8 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
         // Check if we have a valid cached value
         Boolean cachedResult = QDEnabledCache.getCachedValue();
         if (cachedResult != null) {
-            LOGGER.info("Using cached QD enabled status: " + cachedResult);
             return cachedResult;
         }
-        
-        // Cache expired or not set, make API call
-        LOGGER.info("QD enabled status cache expired or not set, making API call");
         Response response = apiUtil.makeGetRequestToQd(Constants.QualityDashboardAPI.getIsQdEnabledEndpoint(), browserStackCredentials);
         boolean isEnabled = false;
         

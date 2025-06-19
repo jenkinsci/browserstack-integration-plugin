@@ -24,7 +24,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
         try {
             BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
             if(browserStackCredentials == null) {
-                LOGGER.info("BrowserStackCredentials not found. Please ensure they are configured correctly.");
+                LOGGER.warning("BrowserStackCredentials not found. Please ensure they are configured correctly.");
                 return;
             }
             QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
@@ -39,7 +39,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
                     syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "POST");
 
                 } catch(Exception e) {
-                    LOGGER.info("Error syncing item creation to Quality Dashboard: " + e.getMessage());
+                    LOGGER.warning("Error syncing item creation to Quality Dashboard: " + e.getMessage());
                     e.printStackTrace();
                 }
             } else {
@@ -59,7 +59,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
                 String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
                 syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "DELETE");
             } catch(Exception e) {
-                LOGGER.info("Error syncing item deletion to Quality Dashboard: " + e.getMessage());
+                LOGGER.warning("Error syncing item deletion to Quality Dashboard: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -75,7 +75,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
                 String jsonBody = getJsonReqBody(new ItemRename(oldName, newName, itemType));
                 syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "PUT");
             } catch(Exception e) {
-            LOGGER.info("Error syncing item rename to Quality Dashboard: " + e.getMessage());
+            LOGGER.warning("Error syncing item rename to Quality Dashboard: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -92,7 +92,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
         QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
         BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
         if(browserStackCredentials == null) {
-            LOGGER.info("BrowserStack credentials not found. Please ensure they are configured correctly.");
+            LOGGER.warning("BrowserStack credentials not found. Please ensure they are configured correctly.");
             return null;
         }  
         if(typeOfRequest.equals("PUT")) {
