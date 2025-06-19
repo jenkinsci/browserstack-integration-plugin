@@ -33,7 +33,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
             String itemType = QualityDashboardUtil.getItemTypeModified(job);
 
             apiUtil.logToQD(browserStackCredentials, "Item Created : " + itemName + " - " + "Item Type : " + itemType);
-            if(itemType != null) {
+            if(itemType != null && !itemType.equals("FOLDER")) {
                 try {
                     String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
                     syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "POST");
@@ -42,6 +42,8 @@ public class QualityDashboardInitItemListener extends ItemListener {
                     LOGGER.info("Error syncing item creation to Quality Dashboard: " + e.getMessage());
                     e.printStackTrace();
                 }
+            } else {
+                apiUtil.logToQD(browserStackCredentials, "Skipping item creation sync: " + itemName);
             }
         } catch(Exception e) {
             e.printStackTrace();

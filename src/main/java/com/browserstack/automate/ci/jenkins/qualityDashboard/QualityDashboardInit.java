@@ -133,12 +133,12 @@ public class QualityDashboardInit {
                             isWorkflowJob ? "yes" : "no"
                         )
                     );
-                    if (itemType != null) {
+                    if (itemType != null && !itemType.equals("FOLDER")) {
                         String pipelineName = job.getFullName();
                         allPipelines.add(new PipelineInfo(pipelineName, itemType));
                     }
                     else{
-                        apiUtil.logToQD(browserStackCredentials, "Skipping job: " + job.getName() + " as it is not a Job or Folder instance");
+                        apiUtil.logToQD(browserStackCredentials, "Skipping job or Folder: " + job.getName() + " as it is not a Job or Folder instance");
                     }
                     
                 } catch (JsonProcessingException e) {
