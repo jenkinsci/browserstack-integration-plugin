@@ -19,13 +19,18 @@ public class QualityDashboardUtil {
     }
 
     public static String getItemTypeModified(Item job) {
-        if (job instanceof Job) {
-            return job.getClass().getSimpleName().toUpperCase();
-        }
-        else if (job.getClass().getName().contains("Folder")) {
-            return "FOLDER";
-        } 
-        else {
+        try {
+            if (job instanceof Job) {
+                return job.getClass().getSimpleName().toUpperCase();
+            }
+            else if (job.getClass().getName().contains("Folder")) {
+                return "FOLDER";
+            } 
+            else {
+                return null;
+            }
+        } catch (Exception e) {
+            // Return null in case of any error during job type determination
             return null;
         }
     }
