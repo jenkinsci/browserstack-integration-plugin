@@ -20,10 +20,9 @@ import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -33,11 +32,11 @@ import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackTestReportPublisher extends Recorder implements SimpleBuildStep {
   private static final Logger LOGGER = Logger.getLogger(BrowserStackTestReportPublisher.class.getName());
-  private final Map<String, String> customEnvVars;
+  private Map<String, String> customEnvVars;
 
   @DataBoundConstructor
-  public BrowserStackTestReportPublisher(Map<String, String> customEnvVars) {
-    this.customEnvVars = customEnvVars != null && !customEnvVars.isEmpty() ? new ConcurrentHashMap<>(customEnvVars) : new ConcurrentHashMap<>();
+  public BrowserStackTestReportPublisher(@CheckForNull String product) {
+    this.customEnvVars =  new ConcurrentHashMap<>();
   }
 
   @Override
@@ -83,7 +82,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
     return BuildStepMonitor.NONE;
   }
 
-  @Symbol("browserStackBuildTestReports")
+  @Symbol(Constants.BROWSERSTACK_REPORT_PIPELINE_FUNCTION)
   @Extension
   public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -93,7 +92,6 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
       // indicates that this builder can be used with all kinds of project types
       return true;
     }
-
     @Override
     public String getDisplayName() {
       return Constants.BROWSERSTACK_CAD_REPORT_DISPLAY_NAME;

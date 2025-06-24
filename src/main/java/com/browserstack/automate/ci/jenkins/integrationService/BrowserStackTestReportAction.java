@@ -3,11 +3,16 @@ package com.browserstack.automate.ci.jenkins.integrationService;
 import com.browserstack.automate.ci.common.constants.Constants;
 import com.browserstack.automate.ci.jenkins.BrowserStackCredentials;
 import com.google.gson.Gson;
+import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.model.Action;
 import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.tasks.ArtifactArchiver;
 import org.json.JSONObject;
 import okhttp3.*;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -93,7 +98,7 @@ public class BrowserStackTestReportAction implements Action {
     params.put("buildStartedAt", buildCreatedAt);
     params.put("originalBuildName", buildName);
     params.put("requestingCi", Constants.INTEGRATIONS_TOOL_KEY);
-    params.put("reportFormat", Arrays.asList(Constants.REPORT_FORMAT));
+    params.put("reportFormat", Arrays.asList("richHtml", "basicHtml"));
     params.put("requestType", RquestTypeForJenkins);
     params.put("userTimeout", DEFAULT_REPORT_TIMEOUT);
     return params;
@@ -148,6 +153,33 @@ public class BrowserStackTestReportAction implements Action {
     reportStatus = SUCCESS_REPORT;
     reportHtml = report != null ? report.optString("richHtml", defaultHTML) : defaultHTML;
     reportStyle = report != null ? report.optString("richCss", "") : "";
+
+    try {
+      String basicHtml = report != null ? report.optString("basicHtml", defaultHTML) : defaultHTML;
+      String fullHtml = "<!DOCTYPE html> <html><head> <head>" + basicHtml + "</html>";
+
+      // Save the HTML content to a file in the workspace
+      FilePath workspace = new FilePath(run.getRootDir()).getParent();
+      ArtifactArchiver artifactArchiver = getArtifactArchiver(workspace, fullHtml);
+      artifactArchiver.perform(run, workspace, new EnvVars(), null, TaskListener.NULL);
+    } catch (Exception e) {
+      logError(logger, "Failed to save or archive report artifact: " + e.getMessage());
+    }
+  }
+
+  private static ArtifactArchiver getArtifactArchiver(FilePath workspace, String fullHtml) throws IOException, InterruptedException {
+    FilePath artifactsDir = new FilePath(workspace, Constants.BROWSERSTACK_REPORT_FOLDER);
+    artifactsDir.mkdirs();
+    String htmlFileName = Constants.BROWSERSTACK_REPORT_FILENAME + ".html";
+
+    FilePath htmlFile = new FilePath(artifactsDir, htmlFileName);
+
+    htmlFile.write(fullHtml, "UTF-8");
+    String artifactFilePath = Constants.BROWSERSTACK_REPORT_FOLDER + "/" + htmlFileName;
+    // Archive the file as an artifact
+    ArtifactArchiver artifactArchiver = new ArtifactArchiver(artifactFilePath);
+    artifactArchiver.setAllowEmptyArchive(false);
+    return artifactArchiver;
   }
 
   private void handleFetchException(Exception e) {
@@ -202,7 +234,7 @@ public class BrowserStackTestReportAction implements Action {
 
   @Override
   public String getDisplayName() {
-    return Constants.BROWSERSTACK_CAD_REPORT_DISPLAY_NAME;
+    return Constants.BROWSERSTACK_REPORT_DISPLAY_NAME;
   }
 
   @Override

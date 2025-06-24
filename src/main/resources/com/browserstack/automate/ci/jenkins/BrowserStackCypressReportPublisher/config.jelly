@@ -1,4 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:l="/lib/layout">
-    This step will generate BrowserStack Cypress Test Report by utilising the build name from the environment variable BROWSERSTACK_BUILD_NAME set by the BrowserStack plugin
+    This step will generate BrowserStack Cypress Test Report by utilising the build name from the environment variable BROWSERSTACK_BUILD_NAME set by the BrowserStack plugin.
+    <br/>
+    ⚠️ Note: This post-build action is deprecated and will no longer be supported in future releases. To continue generating test reports, please use the new BrowserStack Test Report and Insights post-build action.
 </j:jelly>
