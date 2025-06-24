@@ -20,15 +20,27 @@ public class QualityDashboardInitItemListener extends ItemListener {
 
     @Override
     public void onCreated(Item job) {
-        String itemName = job.getFullName();
-        String itemType = getItemTypeModified(job);
-        if(itemType != null && itemType.equals("PIPELINE")) {
-            try {
-                String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
-                syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.ITEM_CRUD, "POST");
-            } catch(IOException e) {
-                e.printStackTrace();
+        try {
+            BrowserStackCredentials browserStackCredentials = QualityDashboardUtil.getBrowserStackCreds();
+            QualityDashboardAPIUtil apiUtil = new QualityDashboardAPIUtil();
+            apiUtil.logToQD(browserStackCredentials, "Item Created : " + job.getClass().getName()) ;
+
+            String itemName = job.getFullName();
+            String itemType = getItemTypeModified(job);
+
+            apiUtil.logToQD(browserStackCredentials, "Item Type  : " + itemType + " : " + itemName + " : " + itemType.equals("PIPELINE"));
+            if(itemType != null && itemType.equals("PIPELINE")) {
+                try {
+                    apiUtil.logToQD(browserStackCredentials, "Item Type inside the Folder  : " + itemType + " : " + itemName + " : " + itemType.equals("PIPELINE"));
+                    String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
+                    syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "POST");
+
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -39,7 +51,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
         if(itemType != null) {
             try {
                 String jsonBody = getJsonReqBody(new ItemUpdate(itemName, itemType));
-                syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.ITEM_CRUD, "DELETE");
+                syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "DELETE");
             } catch(IOException e) {
                 e.printStackTrace();
             }
@@ -54,7 +66,7 @@ public class QualityDashboardInitItemListener extends ItemListener {
                 oldName = job.getParent().getFullName() + "/" + oldName;
                 newName = job.getParent().getFullName() + "/" + newName;
                 String jsonBody = getJsonReqBody(new ItemRename(oldName, newName, itemType));
-                syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.ITEM_CRUD, "PUT");
+                syncItemListToQD(jsonBody, Constants.QualityDashboardAPI.getItemCrudEndpoint(), "PUT");
             } catch(IOException e) {
                 e.printStackTrace();
             }
