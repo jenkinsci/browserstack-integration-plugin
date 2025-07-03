@@ -47,7 +47,7 @@ public class BrowserStackReportStep extends Step {
 
         @Override
         public String getFunctionName() {
-            return Constants.BROWSERSTACK_REPORT_PIPELINE_FUNCTION;
+            return Constants.BROWSERSTACK_REPORT_AUT_PIPELINE_FUNCTION ; // deprecated Constants.BROWSERSTACK_REPORT_PIPELINE_FUNCTION;
         }
 
         @Override

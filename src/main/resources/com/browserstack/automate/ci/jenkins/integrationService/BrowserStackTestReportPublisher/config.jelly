@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:l="/lib/layout">
+    This step will generate BrowserStack Test Report and Insights by using the build name from the environment variable BROWSERSTACK_BUILD_NAME set by the BrowserStack plugin
+</j:jelly>

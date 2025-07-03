@@ -15,6 +15,18 @@ public class Constants {
     public static final String BROWSERSTACK_REPORT_PATH_PATTERN = "**/browserstack-artifacts/*";
     public static final String JENKINS_CI_PLUGIN = "JenkinsCiPlugin";
 
+    public static final String CAD_BASE_URL = "https://api-observability.browserstack.com/ext";
+    public static  final String BROWSERSTACK_CONFIG_DETAILS_ENDPOINT = "/v1/builds/buildReport";
+
+    public static final String INTEGRATIONS_TOOL_KEY = "jenkins";
+
+    public static final String BROWSERSTACK_TEST_REPORT_URL = "testReportBrowserStack";
+    public static final String BROWSERSTACK_CAD_REPORT_DISPLAY_NAME = "BrowserStack Test Report and Insights";
+    public static final String BROWSERSTACK_REPORT_FILENAME = "browserstack-report";
+    public static final String BROWSERSTACK_REPORT_FOLDER = "browserstack-artifacts";
+
+    public static final String BROWSERSTACK_REPORT_AUT_PIPELINE_FUNCTION = "browserStackReportAut";
+
     // Product
     public static final String AUTOMATE = "automate";
     public static final String APP_AUTOMATE = "app-automate";

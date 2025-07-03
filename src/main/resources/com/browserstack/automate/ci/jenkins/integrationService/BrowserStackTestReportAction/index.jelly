@@ -1,0 +1,107 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+    <style>
+        .report-container {
+        font-family: HelveticaNeue;
+        width: 80%;
+        margin: 0 auto;
+        margin-top: 8px;
+        border: solid 1px #dddddd;
+        background-color: #f7f7f7;
+        }
+
+        .build-header {
+        padding: 10px 16px;
+        display: flex;
+        background-color: #f7f7f7;
+        border: solid 1px #ddd;
+        }
+
+        .build-meta {
+        flex-grow: 1;
+        flex-direction: column;
+        display: flex;
+        }
+
+        .spec-meta {
+        flex-direction: column;
+        display: flex;
+        padding: 16px;
+        justify-content: center;
+        margin-right: 40px;
+        }
+
+        .build-name {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        }
+
+        .project-name {
+        font-size: 12px;
+        color: #666;
+        }
+
+        .build-link {
+        display: flex;
+        align-items: center;
+        }
+
+        .build-link a {
+        cursor: pointer;
+        font-size: 12px;
+        color: #009cfc;
+        text-decoration: none;
+        }
+
+        .spec-row {
+        display: flex;
+        border: solid 1px #ddd;
+        }
+
+        .spec-row:nth-child(odd) {
+        background-color: #fff;
+        }
+
+        .spec-row:nth-child(even) {
+        background-color: #fbfbfb;
+        }
+        <j:out value="${it.getReportStyle()}"/>
+    </style>
+    <l:layout title="BrowserStacks Report">
+        <st:include it="${it.build}" page="sidepanel.jelly" optional="true"/>
+            <l:main-panel>
+                <j:if test="${(!it.isReportAvailable())}">
+                    <div class="new-container">
+                        <div class="report-row">
+                            <j:if test="${(it.isReportInProgress())}">
+                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Build Test Report generation In Progress, please refresh after sometime</strong></p>
+                            </j:if>
+                            <j:if test="${(it.isReportFailed())}">
+                                <p class="no-report-para"><strong class="strong-font-custom">BrowserStack Build Test Report Could Not Be Fetched</strong></p>
+                                <br/>
+                                <p class="no-report-para">BrowserStack build test report could not be fetched for this build since something went wrong. Please ensure that:</p>
+                                <br/>
+                                <ul class="bullet-points">
+                                    <li class="bullet-item">You have set valid BrowserStack credentials via BrowserStack Plugin.</li>
+                                    <li class="bullet-item">You have used BROWSERSTACK_BUILD_NAME as your build name</li>
+                                </ul>
+                            </j:if>
+                            <j:if test="${it.reportRetryRequired()}">
+                                <p class="no-report-para"><strong class="strong-font-custom">Unable to Fetch Report something went wrong try refreshing...</strong></p>
+                            </j:if>
+                            <j:if test="${it.isUserRateLimited()}">
+                                <p class="no-report-para"><strong class="strong-font-custom"> You have been rate limited, please retry after sometime</strong></p>
+                            </j:if>
+                        </div>
+                    </div>
+                </j:if>
+
+                <j:if test="${(it.isReportAvailable())}">
+                    <div>
+                        <j:out value="${it.getReportHtml()}"/>
+                    </div>
+                </j:if>
+            </l:main-panel>
+    </l:layout>
+</j:jelly>
