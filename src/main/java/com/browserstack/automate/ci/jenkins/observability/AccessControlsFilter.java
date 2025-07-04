@@ -23,10 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.ObjectStreamException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -66,13 +63,13 @@ public class AccessControlsFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
-        Set<String> allowedOrigins = Set.of(
+        Set<String> allowedOrigins = new HashSet<String>(Arrays.asList(
                 "https://observability.browserstack.com",
                 "https://automation.browserstack.com",
                 "https://automate.browserstack.com",
                 "https://app-automate.browserstack.com",
                 "https://test-management.browserstack.com"
-        );
+        ));
 
         String origin = req.getHeader("Origin");
         if (origin != null && allowedOrigins.contains(origin)) {
