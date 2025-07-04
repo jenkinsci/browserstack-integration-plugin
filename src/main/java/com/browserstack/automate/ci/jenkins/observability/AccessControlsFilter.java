@@ -26,6 +26,7 @@ import java.io.ObjectStreamException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -65,12 +66,23 @@ public class AccessControlsFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
-        resp.addHeader("Access-Control-Allow-Credentials", "true");
-        resp.addHeader("Access-Control-Allow-Origin", "https://observability.browserstack.com");
-        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT");
-        resp.addHeader("Access-Control-Allow-Headers", "*");
-        resp.addHeader("Access-Control-Expose-Headers", "*");
-        resp.addHeader("Access-Control-Max-Age", "999");
+        Set<String> allowedOrigins = Set.of(
+                "https://observability.browserstack.com",
+                "https://automation.browserstack.com",
+                "https://automate.browserstack.com",
+                "https://app-automate.browserstack.com",
+                "https://test-management.browserstack.com"
+        );
+
+        String origin = req.getHeader("Origin");
+        if (origin != null && allowedOrigins.contains(origin)) {
+            resp.addHeader("Access-Control-Allow-Credentials", "true");
+            resp.addHeader("Access-Control-Allow-Origin", origin);
+            resp.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT");
+            resp.addHeader("Access-Control-Allow-Headers", "*");
+            resp.addHeader("Access-Control-Expose-Headers", "*");
+            resp.addHeader("Access-Control-Max-Age", "999");
+        }
 
         if (req.getMethod().equals(PREFLIGHT_REQUEST)) {
             resp.setStatus(200);
