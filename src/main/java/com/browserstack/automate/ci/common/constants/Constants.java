@@ -77,6 +77,8 @@ public class Constants {
     public static final class QualityDashboardAPI {
         public static final String QEI_DEFAULT_URL = "https://quality-engineering-insights.browserstack.com";
         public static String host = QEI_DEFAULT_URL;
+        // Cache configuration
+        public static final long CACHE_DURATION_MS = 60 * 60 * 1000L; // 1 hour in milliseconds
 
         public static String getHost() {
             return host;
