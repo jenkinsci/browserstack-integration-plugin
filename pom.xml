@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>browserstack-integration</artifactId>
-  <version>1.2.23-SNAPSHOT</version>
+  <version>1.2.23</version>
   <packaging>hpi</packaging>
 
   <name>BrowserStack</name>
@@ -34,7 +34,7 @@
     <connection>scm:git:ssh://github.com/jenkinsci/browserstack-integration-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/browserstack-integration-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/browserstack-integration-plugin</url>
-    <tag>HEAD</tag>
+    <tag>browserstack-integration-1.2.23</tag>
   </scm>
 
   <!-- Adding a distribution management section here to override the now
