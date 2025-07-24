@@ -13,13 +13,9 @@ import org.json.JSONObject;
 import okhttp3.*;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
-import static com.browserstack.automate.ci.common.logger.PluginLogger.logError;
 
 public class BrowserStackTestReportAction implements Action {
 
@@ -31,8 +27,6 @@ public class BrowserStackTestReportAction implements Action {
   private static final String RATE_LIMIT = "RATE_LIMIT";
   private static final String TEST_AVAILABLE = "TEST_AVAILABLE";
   private static final int MAX_ATTEMPTS = 3;
-
-  private final transient PrintStream logger;
   private final RequestsUtil requestsUtil;
   private final BrowserStackCredentials credentials;
   private final String buildName;
@@ -44,12 +38,11 @@ public class BrowserStackTestReportAction implements Action {
   private String reportStatus;
   private int maxRetryReportAttempt;
 
-  public BrowserStackTestReportAction(Run<?, ?> run, BrowserStackCredentials credentials, String buildName, String buildCreatedAt, final PrintStream logger) {
+  public BrowserStackTestReportAction(Run<?, ?> run, BrowserStackCredentials credentials, String buildName, String buildCreatedAt) {
     this.run = run;
     this.credentials = credentials;
     this.buildName = buildName;
     this.buildCreatedAt = buildCreatedAt;
-    this.logger = logger;
     this.requestsUtil = new RequestsUtil();
     this.reportHtml = null;
     this.reportStyle = "";
@@ -82,7 +75,6 @@ public class BrowserStackTestReportAction implements Action {
     String reportUrl = Constants.CAD_BASE_URL + Constants.BROWSERSTACK_CONFIG_DETAILS_ENDPOINT;
 
     try {
-      log(logger, "Fetching BrowserStack report...");
       Response response = requestsUtil.makeRequest(reportUrl, credentials, createRequestBody(params));
       handleResponse(response);
     } catch (Exception e) {
@@ -119,7 +111,6 @@ public class BrowserStackTestReportAction implements Action {
           reportStatus = RATE_LIMIT;
         } else {
           reportStatus = REPORT_FAILED;
-          logError(logger, "Non-success response while fetching report: " + response.code());
         }
       }
     }
@@ -163,7 +154,7 @@ public class BrowserStackTestReportAction implements Action {
       ArtifactArchiver artifactArchiver = getArtifactArchiver(workspace, fullHtml);
       artifactArchiver.perform(run, workspace, new EnvVars(), null, TaskListener.NULL);
     } catch (Exception e) {
-      logError(logger, "Failed to save or archive report artifact: " + e.getMessage());
+      //do nothing, as we don't want to fail the build if archiving fails
     }
   }
 
@@ -188,7 +179,6 @@ public class BrowserStackTestReportAction implements Action {
     if (maxRetryReportAttempt < 0) {
       reportStatus = REPORT_FAILED;
     }
-    logError(logger, "Exception while fetching the report: " + Arrays.toString(e.getStackTrace()));
   }
 
   public boolean isReportInProgress() {

@@ -68,7 +68,7 @@ public class BrowserStackTestReportPublisher extends Recorder implements SimpleB
 
     String buildCreatedAt = String.valueOf(unixTimestamp);
 
-    build.addAction(new BrowserStackTestReportAction(build, credentials, browserStackBuildName,buildCreatedAt, logger));
+    build.addAction(new BrowserStackTestReportAction(build, credentials, browserStackBuildName,buildCreatedAt));
 
   }
 
