@@ -1,6 +1,6 @@
 package com.browserstack.automate.ci.jenkins;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlPage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
