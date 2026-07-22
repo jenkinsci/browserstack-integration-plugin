@@ -10,6 +10,10 @@ public class Constants {
     public static final String BROWSERSTACK_CYPRESS_REPORT_DISPLAY_NAME = "BrowserStack Cypress Test Report";
     public static final String BROWSERSTACK_LOGO = String.format("%s/plugin/browserstack-integration/images/logo.png", Jenkins.RESOURCE_PATH);
     public static final String BROWSERSTACK_REPORT_URL = "testReportBrowserStack";
+    public static final String BROWSERSTACK_AI_HEALING_URL = "https://www.browserstack.com/docs/app-automate/appium/self-healing?ref=jenkins_plugin";
+    public static final String BROWSERSTACK_AI_TFA_URL = "https://www.browserstack.com/docs/test-reporting-and-analytics/agents/test-failure-analysis?fw-lang=java/testng&ref=jenkins_plugin";
+    public static final String BROWSERSTACK_AI_SMART_SELECTION_URL = "https://www.browserstack.com/docs/app-automate/appium/smart-test-selection?ref=jenkins_plugin";
+    public static final String BROWSERSTACK_AI_NL_AUTOMATION_URL = "https://www.browserstack.com/docs/app-automate/appium/set-up-test-env/nl-test-automation-agent-appium?ref=jenkins_plugin";
     public static final String BROWSERSTACK_CYPRESS_REPORT_URL = "testReportBrowserStackCypress";
     public static final String BROWSERSTACK_REPORT_PIPELINE_FUNCTION = "browserStackReportPublisher";
     public static final String BROWSERSTACK_REPORT_PATH_PATTERN = "**/browserstack-artifacts/*";

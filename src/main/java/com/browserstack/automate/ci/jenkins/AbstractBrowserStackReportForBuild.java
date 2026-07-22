@@ -26,6 +26,22 @@ public abstract class AbstractBrowserStackReportForBuild extends AbstractTestRes
         return build;
     }
 
+    public String getHealingAgentUrl() {
+        return Constants.BROWSERSTACK_AI_HEALING_URL;
+    }
+
+    public String getTfaAgentUrl() {
+        return Constants.BROWSERSTACK_AI_TFA_URL;
+    }
+
+    public String getSmartSelectionAgentUrl() {
+        return Constants.BROWSERSTACK_AI_SMART_SELECTION_URL;
+    }
+
+    public String getNlAutomationAgentUrl() {
+        return Constants.BROWSERSTACK_AI_NL_AUTOMATION_URL;
+    }
+
     public void setBuild(Run<?, ?> build) {
         this.build = build;
     }
