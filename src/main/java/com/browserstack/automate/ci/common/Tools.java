@@ -1,6 +1,6 @@
 package com.browserstack.automate.ci.common;
 
-import org.apache.commons.lang.RandomStringUtils;
+import java.security.SecureRandom;
 
 import hudson.FilePath;
 import hudson.model.Run;
@@ -63,8 +63,23 @@ public class Tools {
         return result;
     }
 
+    private static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String NUMBERS = "0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     public static String getUniqueString(boolean letters, boolean numbers) {
-        return RandomStringUtils.random(48, letters, numbers);
+        StringBuilder pool = new StringBuilder();
+        if (letters) {
+            pool.append(LETTERS);
+        }
+        if (numbers) {
+            pool.append(NUMBERS);
+        }
+        StringBuilder result = new StringBuilder(48);
+        for (int i = 0; i < 48; i++) {
+            result.append(pool.charAt(RANDOM.nextInt(pool.length())));
+        }
+        return result.toString();
     }
 
     /** Gets the directory to store report files */

@@ -1,8 +1,8 @@
 package com.browserstack.automate.ci.common;
 
 import com.browserstack.automate.ci.common.logger.PluginLogger;
-import org.apache.commons.lang.StringUtils;
 
+import hudson.Util;
 import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,7 +50,7 @@ public class AutomateTestCase implements Serializable {
     }
 
     public static String stripTestParams(String testCaseName) {
-        if (StringUtils.isEmpty(testCaseName)) {
+        if (Util.fixEmpty(testCaseName) == null) {
             return null;
         }
 
