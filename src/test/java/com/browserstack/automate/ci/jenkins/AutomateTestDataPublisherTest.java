@@ -21,7 +21,6 @@ import mockit.Deencapsulation;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,6 +31,7 @@ import org.jvnet.hudson.test.TouchBuilder;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import hudson.Util;
 
 /**
  * Created with IntelliJ IDEA.
@@ -105,7 +105,7 @@ public class AutomateTestDataPublisherTest {
             AutomateTestAction automateTestAction = (AutomateTestAction) data.getTestAction(caseResult).get(0);
             Session automateSession = automateTestAction.getSession();
             Assert.assertNotNull("Automate Session should not be null.", automateSession);
-            Assert.assertTrue("Session Id should not be null or empty.", StringUtils.isNotEmpty(automateSession.getId()));
+            Assert.assertTrue("Session Id should not be null or empty.", Util.fixEmpty(automateSession.getId()) != null);
         }
     }
 

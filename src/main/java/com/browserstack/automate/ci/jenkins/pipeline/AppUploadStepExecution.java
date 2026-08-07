@@ -6,7 +6,6 @@ import com.browserstack.automate.ci.common.uploader.AppUploaderHelper;
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
@@ -16,6 +15,7 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Optional;
+import hudson.Util;
 
 public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
@@ -42,7 +42,7 @@ public class AppUploadStepExecution extends SynchronousNonBlockingStepExecution<
 
         String appId = AppUploaderHelper.uploadApp(run, logger, this.appPath, customProxy);
 
-        if (StringUtils.isEmpty(appId)) {
+        if (Util.fixEmpty(appId) == null) {
             PluginLogger.log(logger, "ERROR : App Id empty. ABORTING!!!");
             return null;
         }

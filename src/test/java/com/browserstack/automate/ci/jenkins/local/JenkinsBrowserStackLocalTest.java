@@ -1,9 +1,9 @@
 package com.browserstack.automate.ci.jenkins.local;
 
+import java.util.Arrays;
 import com.pholser.junit.quickcheck.Property;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import hudson.EnvVars;
-import org.apache.commons.lang.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,10 +61,10 @@ public class JenkinsBrowserStackLocalTest {
         JenkinsBrowserStackLocal jenkinsBSLocal = new JenkinsBrowserStackLocal(ACCESS_KEY, localConfig, buildTag, envVars, System.out);
         String[] arguments = jenkinsBSLocal.getArguments();
 
-        Assert.assertTrue("Local arguments should contain $proxy_host ", ArrayUtils.contains(arguments, PROXY_HOST));
-        Assert.assertTrue("Local arguments should contain $proxy_port ", ArrayUtils.contains(arguments, PROXY_PORT));
-        Assert.assertTrue("Local arguments should contain $proxy_user ", ArrayUtils.contains(arguments, PROXY_USER));
-        Assert.assertTrue("Local arguments should contain $proxy_password ", ArrayUtils.contains(arguments, PROXY_PASSWORD));
+        Assert.assertTrue("Local arguments should contain $proxy_host ", Arrays.asList(arguments).contains(PROXY_HOST));
+        Assert.assertTrue("Local arguments should contain $proxy_port ", Arrays.asList(arguments).contains(PROXY_PORT));
+        Assert.assertTrue("Local arguments should contain $proxy_user ", Arrays.asList(arguments).contains(PROXY_USER));
+        Assert.assertTrue("Local arguments should contain $proxy_password ", Arrays.asList(arguments).contains(PROXY_PASSWORD));
     }
 
     @Test
@@ -81,10 +81,10 @@ public class JenkinsBrowserStackLocalTest {
         String[] arguments = jenkinsBSLocal.getArguments();
         String localIdentifier = jenkinsBSLocal.getLocalIdentifier();
 
-        Assert.assertTrue("Local arguments should contain $proxy_host ", ArrayUtils.contains(arguments, PROXY_HOST));
-        Assert.assertTrue("Local arguments should contain $proxy_port ", ArrayUtils.contains(arguments, PROXY_PORT));
-        Assert.assertTrue("Local arguments should contain $proxy_user ", ArrayUtils.contains(arguments, PROXY_USER));
-        Assert.assertTrue("Local arguments should contain $proxy_password ", ArrayUtils.contains(arguments, PROXY_PASSWORD));
+        Assert.assertTrue("Local arguments should contain $proxy_host ", Arrays.asList(arguments).contains(PROXY_HOST));
+        Assert.assertTrue("Local arguments should contain $proxy_port ", Arrays.asList(arguments).contains(PROXY_PORT));
+        Assert.assertTrue("Local arguments should contain $proxy_user ", Arrays.asList(arguments).contains(PROXY_USER));
+        Assert.assertTrue("Local arguments should contain $proxy_password ", Arrays.asList(arguments).contains(PROXY_PASSWORD));
         Assert.assertEquals("Local identifier should be overriden when passed through localOption", LOCAL_IDENTIFIER, localIdentifier);
 
     }
