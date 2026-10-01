@@ -20,7 +20,6 @@ import hudson.tasks.junit.CaseResult;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,6 +28,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TouchBuilder;
 
 import java.io.IOException;
+import hudson.Util;
 
 /**
  * Unit test for {@link AutomateTestAction} class.
@@ -89,7 +89,7 @@ public class AutomateTestActionTest {
         Assert.assertTrue("Exception should be of Type AutomateException",
                 automateTestAction.getLastException() instanceof AutomateException);
         Assert.assertTrue("Exception message MUST not be empty",
-                StringUtils.isNotEmpty(automateTestAction.getLastError()));
+                Util.fixEmpty(automateTestAction.getLastError()) != null);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class AutomateTestActionTest {
         Assert.assertTrue("Exception should be of Type SessionNotFound",
                 automateTestAction.getLastException() instanceof SessionNotFound);
         Assert.assertTrue("Exception message MUST not be empty",
-                StringUtils.isNotEmpty(automateTestAction.getLastError()));
+                Util.fixEmpty(automateTestAction.getLastError()) != null);
     }
 
     public void addBuildStep() throws IOException {

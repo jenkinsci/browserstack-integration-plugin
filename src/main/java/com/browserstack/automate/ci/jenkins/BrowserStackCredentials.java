@@ -30,7 +30,6 @@ import hudson.model.User;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -68,7 +67,7 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
     }
 
     public static FormValidation testAuthentication(final String username, final String accesskey) {
-        if (StringUtils.isBlank(username) || StringUtils.isBlank(accesskey)) {
+        if (Util.fixEmptyAndTrim(username) == null || Util.fixEmptyAndTrim(accesskey) == null) {
             return FormValidation.ok();
         }
 
@@ -124,7 +123,7 @@ public class BrowserStackCredentials extends BaseCredentials implements Standard
     }
 
     public boolean hasUsername() {
-        return StringUtils.isNotBlank(username);
+        return Util.fixEmptyAndTrim(username) != null;
     }
 
     @Exported

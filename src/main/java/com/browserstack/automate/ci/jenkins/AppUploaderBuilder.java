@@ -11,7 +11,6 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -20,6 +19,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import hudson.Util;
 
 public class AppUploaderBuilder extends Builder {
 
@@ -41,7 +41,7 @@ public class AppUploaderBuilder extends Builder {
 
         String appId = AppUploaderHelper.uploadApp(build, logger, this.buildFilePath, null);
 
-        if (StringUtils.isEmpty(appId)) {
+        if (Util.fixEmpty(appId) == null) {
             return false;
         } else {
             addAppIdToEnvironment(build, appId);

@@ -8,13 +8,13 @@ import hudson.Plugin;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import hudson.Util;
 
 /**
  * @author Shirish Kamath
@@ -63,7 +63,7 @@ public class Analytics {
 
             String trackingId = pluginProps.getProperty(GOOGLE_PROPERTIES_KEY);
             LOGGER.fine("Using Google Analytics Tracking ID :: " + trackingId);
-            if (StringUtils.isNotEmpty(trackingId)) {
+            if (Util.fixEmpty(trackingId) != null) {
                 return new GoogleAnalytics(trackingId);
             }
         } catch (IOException ioe) {

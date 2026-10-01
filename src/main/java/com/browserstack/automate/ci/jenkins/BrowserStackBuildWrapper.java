@@ -18,7 +18,6 @@ import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.tasks.BuildWrapper;
 import hudson.util.DescribableList;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -27,6 +26,7 @@ import java.io.PrintStream;
 import java.util.Map;
 
 import static com.browserstack.automate.ci.common.logger.PluginLogger.log;
+import hudson.Util;
 
 
 public class BrowserStackBuildWrapper extends BuildWrapper {
@@ -148,8 +148,8 @@ public class BrowserStackBuildWrapper extends BuildWrapper {
 
     private void recordBuildStats() {
         boolean localEnabled = (localConfig != null);
-        boolean localPathSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalPath());
-        boolean localOptionsSet = localEnabled && StringUtils.isNotBlank(localConfig.getLocalOptions());
+        boolean localPathSet = localEnabled && Util.fixEmptyAndTrim(localConfig.getLocalPath()) != null;
+        boolean localOptionsSet = localEnabled && Util.fixEmptyAndTrim(localConfig.getLocalOptions()) != null;
         Analytics.trackBuildRun(localEnabled, localPathSet, localOptionsSet);
     }
 

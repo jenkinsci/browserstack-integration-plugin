@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
-import io.jenkins.cli.shaded.org.apache.commons.lang.StringUtils;
 import jenkins.model.Jenkins;
 import okhttp3.*;
 import org.apache.commons.io.FileUtils;
@@ -24,6 +23,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.logging.Logger;
+import hudson.Util;
 
 @Extension
 public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
@@ -69,7 +69,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
         
         apiUtil.logToQD(browserStackCredentials, "Final Computed Zip Path for jobName: " + jobName + " and buildNumber: " + buildNumber + " is: " + finalPathToZip);
         
-        if(StringUtils.isNotEmpty(finalPathToZip)) {
+        if(Util.fixEmpty(finalPathToZip) != null) {
             apiUtil.logToQD(browserStackCredentials, "Found artifacts in configured path for jobName: " + jobName + " and buildNumber: " + buildNumber);
             copyDirectoryToParentIfRequired(run, finalPathToZip, browserStackCredentials);
             qdS3Url = zipArtifactsAndUploadToQD(finalPathToZip, browserStackCredentials, jobName, buildNumber);
@@ -87,7 +87,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
                     finalPathToZip = null;
                 }
             }
-            if (StringUtils.isNotEmpty(finalPathToZip) && Files.exists(Paths.get(finalPathToZip))) {
+            if (Util.fixEmpty(finalPathToZip) != null && Files.exists(Paths.get(finalPathToZip))) {
                 apiUtil.logToQD(browserStackCredentials, "Got artifact path for jobName: " + jobName + " and buildNumber: " + buildNumber + " as: " + finalPathToZip);
                 qdS3Url = zipArtifactsAndUploadToQD(finalPathToZip, browserStackCredentials, jobName, buildNumber);
             } else {
@@ -104,7 +104,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
         String finalZipFilePath = packZip(finalPathToZip, jobName, browserStackCredentials);
         apiUtil.logToQD(browserStackCredentials, "Final zip file's path for jobName: " + jobName + " and buildNumber: " + buildNumber + " is:" + finalZipFilePath);
         String qdS3Url = uploadZipToQd(finalZipFilePath, browserStackCredentials, jobName, buildNumber);
-        if(StringUtils.isNotEmpty(finalZipFilePath)) {
+        if(Util.fixEmpty(finalZipFilePath) != null) {
             Files.deleteIfExists(Paths.get(finalZipFilePath));
             apiUtil.logToQD(browserStackCredentials, "Deleted file from server after upload for jobName: " + jobName + " and buildNumber: " + buildNumber);
         } else {
@@ -164,11 +164,11 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
     private String getFinalZipPath(Run<?, ?> run, BrowserStackCredentials browserStackCredentials) throws JsonProcessingException {
         String finalZipPath = null;
         String currentResultDir = getResultDirForPipeline(getUrlForPipeline(run), browserStackCredentials, run.getNumber());
-        if(StringUtils.isNotEmpty(currentResultDir) && checkIfPathIsFound(currentResultDir)) {
+        if(Util.fixEmpty(currentResultDir) != null && checkIfPathIsFound(currentResultDir)) {
             finalZipPath = currentResultDir;
         } else {
             String defaultWorkspaceDir = getDefaultWorkspaceDirectory(run);
-            if(StringUtils.isNotEmpty(defaultWorkspaceDir)) {
+            if(Util.fixEmpty(defaultWorkspaceDir) != null) {
                 String jobName = run.getParent().getName();
                 defaultWorkspaceDir = defaultWorkspaceDir + "/workspace/" + jobName + "/browserstack-artifacts";
                 finalZipPath = checkIfPathIsFound(defaultWorkspaceDir) ? defaultWorkspaceDir : null;
@@ -180,7 +180,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
     private String getDefaultWorkspaceDirectory(Run<?, ?> run) {
         Jenkins jenkins = Jenkins.getInstanceOrNull();
         String workspacePath = jenkins != null && jenkins.getRootDir() != null ? jenkins.getRootDir().getAbsolutePath() : null;
-        return StringUtils.isNotEmpty(workspacePath) ? workspacePath : null;
+        return Util.fixEmpty(workspacePath) != null ? workspacePath : null;
     }
 
     private String getUrlForPipeline(Run<?, ?> build) {
@@ -294,13 +294,13 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
     private void copyDirectoryToParentIfRequired(Run<?, ?> run, String finalParentPathFrom, BrowserStackCredentials browserStackCredentials) throws IOException {
         String finalParentPathTo = null;
         String upStreamProj = UpstreamPipelineResolver.resolveImmediateUpstreamProject(run, browserStackCredentials);
-        if(StringUtils.isNotEmpty(upStreamProj)) {
+        if(Util.fixEmpty(upStreamProj) != null) {
             String parentResultDir = getResultDirForPipeline(upStreamProj, browserStackCredentials, run.getNumber());
-            if(StringUtils.isNotEmpty(parentResultDir) && checkIfPathIsFound(parentResultDir)) {
+            if(Util.fixEmpty(parentResultDir) != null && checkIfPathIsFound(parentResultDir)) {
                 finalParentPathTo = parentResultDir;
             } else {
                 String defaultWorkspaceDir = getDefaultWorkspaceDirectory(run);
-                if(StringUtils.isNotEmpty(defaultWorkspaceDir) && checkIfPathIsFound(defaultWorkspaceDir)) {
+                if(Util.fixEmpty(defaultWorkspaceDir) != null && checkIfPathIsFound(defaultWorkspaceDir)) {
                     defaultWorkspaceDir = defaultWorkspaceDir + "/workspace/" + upStreamProj + "/browserstack-artifacts";
                     boolean pathAlreadyExists = checkIfPathIsFound(defaultWorkspaceDir);
                     if(!pathAlreadyExists) {
@@ -309,7 +309,7 @@ public class QualityDashboardPipelineTracker extends RunListener<Run<?, ?>> {
                     finalParentPathTo = defaultWorkspaceDir;
                 }
             }
-            if(StringUtils.isNotEmpty(finalParentPathTo)) {
+            if(Util.fixEmpty(finalParentPathTo) != null) {
                 FileUtils.copyDirectoryToDirectory(new File(finalParentPathFrom), new File(finalParentPathTo));
                 int buildNum = run.getNumber();
                 File finalParentFromFile = new File(finalParentPathFrom);

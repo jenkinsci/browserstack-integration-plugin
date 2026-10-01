@@ -16,7 +16,6 @@ import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.FileScanner;
 import org.apache.tools.ant.types.FileSet;
 
@@ -63,7 +62,7 @@ public class BrowserStackBuildWrapperOperations {
     public static FormValidation doCheckLocalPath(final AbstractProject project,
                                                   final String localPath) {
         final String path = Util.fixEmptyAndTrim(localPath);
-        if (StringUtils.isBlank(path)) {
+        if (Util.fixEmptyAndTrim(path) == null) {
             return FormValidation.ok();
         }
 
@@ -166,7 +165,7 @@ public class BrowserStackBuildWrapperOperations {
         String localIdentifier =
                 (browserstackLocal != null) ? browserstackLocal.getLocalIdentifier() : "";
 
-        if (StringUtils.isNotBlank(localIdentifier)) {
+        if (Util.fixEmptyAndTrim(localIdentifier) != null) {
             env.put(BrowserStackEnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
             logEnvVar(BrowserStackEnvVars.BROWSERSTACK_LOCAL_IDENTIFIER, localIdentifier);
         }
@@ -174,7 +173,7 @@ public class BrowserStackBuildWrapperOperations {
         String tests =
                 (observabilityConfig != null) ? observabilityConfig.getTests() : "";
 
-        if (StringUtils.isNotBlank(tests)) {
+        if (Util.fixEmptyAndTrim(tests) != null) {
             env.put(BrowserStackEnvVars.BROWSERSTACK_RERUN_TESTS, tests);
             logEnvVar(BrowserStackEnvVars.BROWSERSTACK_RERUN_TESTS, tests);
         }
@@ -182,7 +181,7 @@ public class BrowserStackBuildWrapperOperations {
         String reRun =
                 (observabilityConfig != null) ? observabilityConfig.getReRun() : "";
 
-        if (StringUtils.isNotBlank(reRun)) {
+        if (Util.fixEmptyAndTrim(reRun) != null) {
             env.put(BrowserStackEnvVars.BROWSERSTACK_RERUN, reRun);
             logEnvVar(BrowserStackEnvVars.BROWSERSTACK_RERUN, reRun);
         }

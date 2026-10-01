@@ -5,7 +5,6 @@ import com.browserstack.local.Local;
 import hudson.EnvVars;
 import hudson.Launcher;
 import jenkins.security.MasterToSlaveCallable;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -15,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import hudson.Util;
 
 public class JenkinsBrowserStackLocal extends Local implements Serializable {
     private static final long serialVersionUID = 1830651088511115761L;
@@ -62,7 +62,7 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
                 localIdPos = i;
                 if (i < args.length - 1 && args[i + 1] != null && !args[i + 1].startsWith("-")) {
                     localIdentifier = args[i + 1];
-                    if (StringUtils.isNotBlank(localIdentifier)) {
+                    if (Util.fixEmptyAndTrim(localIdentifier) != null) {
                         localIdentifierOverriden = true;
                     }
 
@@ -133,7 +133,7 @@ public class JenkinsBrowserStackLocal extends Local implements Serializable {
         DaemonAction daemonAction = detectDaemonAction(command);
         if (daemonAction != null) {
             for (String arg : arguments) {
-                if (StringUtils.isNotBlank(arg)) {
+                if (Util.fixEmptyAndTrim(arg) != null) {
                     command.add(arg.trim());
                 }
             }
